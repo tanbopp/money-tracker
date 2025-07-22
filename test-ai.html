@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test AI Chat System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold mb-4">Test AI Chat System</h1>
+        
+        <div class="bg-white rounded-lg shadow p-6 mb-4">
+            <h2 class="text-lg font-semibold mb-3">Test Natural Language Processing</h2>
+            
+            <div class="space-y-3">
+                <button onclick="testMessage('minggu kemarin saya isi bensin 80 ribu')" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                    Test: "minggu kemarin saya isi bensin 80 ribu" (kategori: Transportasi, tanggal: minggu lalu)
+                </button>
+                
+                <button onclick="testMessage('isi bensin 50rb')" class="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">
+                    Test: "isi bensin 50rb" (kategori: Transportasi, tanggal: hari ini)
+                </button>
+                
+                <button onclick="testMessage('beli makanan 25rb')" class="w-full bg-purple-500 text-white p-2 rounded hover:bg-purple-600">
+                    Test: "beli makanan 25rb" (kategori: Makanan, tanggal: hari ini)
+                </button>
+                
+                <button onclick="testMessage('minggu lalu bayar parkir 5rb')" class="w-full bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600">
+                    Test: "minggu lalu bayar parkir 5rb" (kategori: Transportasi, tanggal: minggu lalu)
+                </button>
+                
+                <button onclick="testMessage('gaji 5jt bulan lalu')" class="w-full bg-indigo-500 text-white p-2 rounded hover:bg-indigo-600">
+                    Test: "gaji 5jt bulan lalu" (kategori: Gaji, tanggal: bulan lalu)
+                </button>
+                
+                <button onclick="testMessage('nabung 100rb kemarin')" class="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600">
+                    Test: "nabung 100rb kemarin" (tanggal: kemarin)
+                </button>
+                
+                <button onclick="testMessage('bayar listrik 150rb besok')" class="w-full bg-pink-500 text-white p-2 rounded hover:bg-pink-600">
+                    Test: "bayar listrik 150rb besok" (kategori: Tagihan, tanggal: besok)
+                </button>
+                
+                <button onclick="testMessage('dapat bonus 2jt 3 hari lalu')" class="w-full bg-orange-500 text-white p-2 rounded hover:bg-orange-600">
+                    Test: "dapat bonus 2jt 3 hari lalu" (kategori: Bonus, tanggal: relatif)
+                </button>
+            </div>
+        </div>
+        
+        <div id="test-results" class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold mb-3">Test Results</h3>
+            <div id="results-content" class="space-y-2 text-sm">
+                Click a test button to see results...
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Initialize AI for testing
+        const testAI = new MoneyTrackerAI();
+        
+        function testMessage(message) {
+            const result = testAI.processMessage(message);
+            
+            const resultsDiv = document.getElementById('results-content');
+            resultsDiv.innerHTML = `
+                <div class="border-l-4 border-blue-500 pl-4 py-2 bg-blue-50">
+                    <strong>Input:</strong> "${message}"
+                </div>
+                <div class="border-l-4 border-green-500 pl-4 py-2 bg-green-50">
+                    <strong>Understood:</strong> ${result.understood ? 'Yes' : 'No'}
+                </div>
+                <div class="border-l-4 border-purple-500 pl-4 py-2 bg-purple-50">
+                    <strong>Action:</strong> ${result.action || 'None'}
+                </div>
+                <div class="border-l-4 border-yellow-500 pl-4 py-2 bg-yellow-50">
+                    <strong>Data:</strong> ${result.data ? JSON.stringify(result.data, null, 2) : 'None'}
+                </div>
+                <div class="border-l-4 border-red-500 pl-4 py-2 bg-red-50">
+                    <strong>Response:</strong> "${result.response}"
+                </div>
+                <div class="border-l-4 border-gray-500 pl-4 py-2 bg-gray-50">
+                    <strong>Confidence:</strong> ${(result.confidence * 100).toFixed(1)}%
+                </div>
+            `;
+        }
+        
+        // Helper function for formatting currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+    </script>
+</body>
+</html>

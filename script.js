@@ -1976,31 +1976,31 @@ class MoneyTrackerAI {
         this.patterns = {
             // Transaction patterns
             expense: {
-                keywords: ['beli', 'bayar', 'belanja', 'buat', 'untuk', 'keluar', 'habis', 'spend'],
+                keywords: ['beli', 'bayar', 'belanja', 'buat', 'untuk', 'keluar', 'habis', 'spend', 'buat beli', 'utk', 'byr', 'bli', 'blnja', 'keluarin', 'pake', 'pakai', 'pkai'],
                 categories: {
-                    'Makanan': ['makan', 'nasi', 'bakso', 'soto', 'gudeg', 'ayam', 'ikan', 'sayur', 'buah', 'jajan', 'snack', 'minum', 'kopi', 'teh', 'restoran', 'warung', 'food', 'cafe'],
-                    'Transportasi': ['bensin', 'spbu', 'ojek', 'gojek', 'grab', 'bus', 'taxi', 'motor', 'mobil', 'parkir', 'tol', 'tiket', 'transport'],
-                    'Belanja': ['baju', 'celana', 'sepatu', 'tas', 'kosmetik', 'shopping', 'mall', 'toko', 'online', 'marketplace', 'skincare'],
-                    'Tagihan': ['listrik', 'air', 'internet', 'wifi', 'pulsa', 'token', 'pln', 'pdam', 'telkom', 'indihome', 'tv', 'kabel'],
-                    'Hiburan': ['film', 'bioskop', 'game', 'konser', 'wisata', 'liburan', 'rekreasi', 'netflix', 'spotify', 'youtube'],
-                    'Kesehatan': ['dokter', 'obat', 'apotek', 'rumah sakit', 'rs', 'vitamin', 'medical', 'therapy', 'checkup']
+                    'Makanan': ['makan', 'nasi', 'bakso', 'soto', 'gudeg', 'ayam', 'ikan', 'sayur', 'buah', 'jajan', 'snack', 'minum', 'kopi', 'teh', 'restoran', 'warung', 'food', 'cafe', 'mkn', 'mknan', 'jjn', 'kfe'],
+                    'Transportasi': ['bensin', 'spbu', 'ojek', 'gojek', 'grab', 'bus', 'taxi', 'motor', 'mobil', 'parkir', 'tol', 'tiket', 'transport', 'bnsn', 'ojol', 'grb', 'trnsprt', 'isi bensin', 'isi', 'shell', 'pertamina', 'bbm', 'solar', 'premium', 'pertalite'],
+                    'Belanja': ['baju', 'celana', 'sepatu', 'tas', 'kosmetik', 'shopping', 'mall', 'toko', 'online', 'marketplace', 'skincare', 'bj', 'sptu', 'kosmetk', 'shp', 'ol'],
+                    'Tagihan': ['listrik', 'air', 'internet', 'wifi', 'pulsa', 'token', 'pln', 'pdam', 'telkom', 'indihome', 'tv', 'kabel', 'lstrk', 'intrnt', 'wf', 'plsa', 'tkn'],
+                    'Hiburan': ['film', 'bioskop', 'game', 'konser', 'wisata', 'liburan', 'rekreasi', 'netflix', 'spotify', 'youtube', 'flm', 'bioskp', 'gm', 'wsta', 'lbrn'],
+                    'Kesehatan': ['dokter', 'obat', 'apotek', 'rumah sakit', 'rs', 'vitamin', 'medical', 'therapy', 'checkup', 'dktr', 'obt', 'aptk', 'rs', 'vtmn', 'chckp']
                 }
             },
             income: {
-                keywords: ['gaji', 'gajian', 'terima', 'dapat', 'income', 'masuk', 'bayaran', 'honor', 'bonus', 'untung', 'profit', 'duit', 'uang masuk'],
+                keywords: ['gaji', 'gajian', 'terima', 'dapat', 'income', 'masuk', 'bayaran', 'honor', 'bonus', 'untung', 'profit', 'duit', 'uang masuk', 'gj', 'gjn', 'trma', 'dpt', 'duit masuk', 'uang', 'duwit'],
                 categories: {
-                    'Gaji': ['gaji', 'gajian', 'salary', 'bulanan', 'tetap'],
-                    'Freelance': ['freelance', 'project', 'kerja', 'jasa', 'service'],
-                    'Bonus': ['bonus', 'thr', 'reward', 'hadiah', 'extra'],
-                    'Investasi': ['investasi', 'saham', 'dividen', 'bunga', 'deposito', 'reksadana']
+                    'Gaji': ['gaji', 'gajian', 'salary', 'bulanan', 'tetap', 'gj', 'gjn', 'slry'],
+                    'Freelance': ['freelance', 'project', 'kerja', 'jasa', 'service', 'frelnc', 'prjct', 'krj', 'js', 'srvc'],
+                    'Bonus': ['bonus', 'thr', 'reward', 'hadiah', 'extra', 'bns', 'rwrd', 'hdh', 'xtr'],
+                    'Investasi': ['investasi', 'saham', 'dividen', 'bunga', 'deposito', 'reksadana', 'invst', 'shm', 'dvdn', 'bng', 'dpst']
                 }
             },
             savings: {
-                keywords: ['nabung', 'menabung', 'tabung', 'simpan', 'saving', 'celengan'],
+                keywords: ['nabung', 'menabung', 'tabung', 'simpan', 'saving', 'celengan', 'setor', 'masukin', 'masukkan', 'taruh tabungan'],
                 action: 'save'
             },
             withdraw: {
-                keywords: ['ambil', 'tarik', 'withdraw', 'keluar dari tabungan', 'ambil tabungan'],
+                keywords: ['ambil', 'tarik', 'withdraw', 'keluar dari tabungan', 'ambil tabungan', 'keluarkan', 'cairkan', 'pake tabungan', 'pakai tabungan', 'gunakan tabungan'],
                 action: 'withdraw'
             }
         };
@@ -2019,16 +2019,20 @@ class MoneyTrackerAI {
 
         // Date/time patterns for Indonesian
         this.datePatterns = {
-            today: ['hari ini', 'sekarang', 'tadi', 'hari ini', 'skrg'],
-            yesterday: ['kemarin', 'kemaren', 'kmrn', 'kemarin saya', 'kemaren saya'],
+            today: ['hari ini', 'sekarang', 'tadi', 'skrg'],
+            yesterday: ['kemarin', 'kemaren', 'kmrn'],
             tomorrow: ['besok', 'esok'],
             dayAfterTomorrow: ['lusa', 'tulat'],
             thisWeek: ['minggu ini', 'pekan ini'],
-            lastWeek: ['minggu lalu', 'minggu kemarin', 'pekan lalu', 'seminggu lalu'],
+            lastWeek: ['minggu lalu', 'pekan lalu', 'seminggu lalu'],
+            lastSunday: ['minggu kemarin'], // Hari minggu yang baru lewat
             nextWeek: ['minggu depan', 'minggu besok', 'pekan depan'],
             thisMonth: ['bulan ini'],
             lastMonth: ['bulan lalu', 'bulan kemarin', 'sebulan lalu'],
             nextMonth: ['bulan depan', 'bulan besok'],
+            thisYear: ['tahun ini'],
+            lastYear: ['tahun lalu', 'tahun kemarin', 'setahun lalu'],
+            nextYear: ['tahun depan', 'tahun besok'],
             // Specific days
             monday: ['senin', 'monday'],
             tuesday: ['selasa', 'tuesday'],
@@ -2055,16 +2059,30 @@ class MoneyTrackerAI {
         const normalizedMessage = this.normalizeMessage(message);
         const amount = this.extractAmount(normalizedMessage);
         
+        // Detect action type first
+        const actionType = this.detectActionType(normalizedMessage);
+        
+        // If no amount found, ask for clarification based on action type
         if (!amount || amount <= 0) {
-            result.response = "Maaf, saya tidak bisa mendeteksi jumlah uang yang valid. Coba tulis seperti 'beli bakso 25rb' atau 'nabung 50 ribu'.";
-            return result;
+            if (actionType === 'withdraw') {
+                result.response = "Berapa jumlah yang ingin Anda ambil dari tabungan? Contoh: 'ambil tabungan 50rb' atau 'tarik 100 ribu'.";
+                return result;
+            } else if (actionType === 'savings') {
+                result.response = "Berapa jumlah yang ingin Anda tabung? Contoh: 'nabung 50rb' atau 'simpan 100 ribu'.";
+                return result;
+            } else if (actionType === 'income') {
+                result.response = "Berapa jumlah pemasukan yang ingin dicatat? Contoh: 'gaji 5 juta' atau 'bonus 500rb'.";
+                return result;
+            } else {
+                result.response = "Berapa jumlah pengeluaran yang ingin dicatat? Contoh: 'beli makanan 25rb' atau 'bayar listrik 150 ribu'.";
+                return result;
+            }
         }
 
         // Extract date from message
         const transactionDate = this.extractDate(normalizedMessage);
 
-        // Detect action type
-        const actionType = this.detectActionType(normalizedMessage);
+        // Use the already detected action type
         
         if (actionType === 'expense') {
             const category = this.detectCategory(normalizedMessage, 'expense');
@@ -2250,8 +2268,69 @@ class MoneyTrackerAI {
 
     containsAny(array, keywords) {
         return keywords.some(keyword => 
-            array.some(word => word.includes(keyword) || keyword.includes(word))
+            array.some(word => {
+                // Exact match
+                if (word.includes(keyword) || keyword.includes(word)) {
+                    return true;
+                }
+                
+                // Fuzzy match for typos (Levenshtein distance)
+                if (this.isTypo(word, keyword)) {
+                    return true;
+                }
+                
+                return false;
+            })
         );
+    }
+
+    // Strict exact matching for date keywords only (no fuzzy matching)
+    containsExactDateKeywords(array, keywords) {
+        return keywords.some(keyword => 
+            array.some(word => word === keyword || word.includes(keyword))
+        );
+    }
+
+    // Simple typo detection using Levenshtein distance
+    isTypo(word1, word2) {
+        // Only check for typos if words are similar in length
+        if (Math.abs(word1.length - word2.length) > 2) return false;
+        if (word1.length < 3 || word2.length < 3) return false;
+        
+        const distance = this.levenshteinDistance(word1, word2);
+        const maxLength = Math.max(word1.length, word2.length);
+        
+        // Allow 1-2 character differences for typos
+        return distance <= 2 && distance / maxLength <= 0.4;
+    }
+
+    // Calculate Levenshtein distance between two strings
+    levenshteinDistance(str1, str2) {
+        const matrix = [];
+        
+        for (let i = 0; i <= str2.length; i++) {
+            matrix[i] = [i];
+        }
+        
+        for (let j = 0; j <= str1.length; j++) {
+            matrix[0][j] = j;
+        }
+        
+        for (let i = 1; i <= str2.length; i++) {
+            for (let j = 1; j <= str1.length; j++) {
+                if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                    matrix[i][j] = matrix[i - 1][j - 1];
+                } else {
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j - 1] + 1, // substitution
+                        matrix[i][j - 1] + 1,     // insertion
+                        matrix[i - 1][j] + 1      // deletion
+                    );
+                }
+            }
+        }
+        
+        return matrix[str2.length][str1.length];
     }
 
     isNumber(word) {
@@ -2268,10 +2347,53 @@ class MoneyTrackerAI {
     extractDate(message) {
         const words = message.split(' ');
         const today = new Date();
+        const normalizedMessage = message.toLowerCase();
+        
+        // Check for specific date with month names (e.g., "12 juni", "15 januari 2024")
+        const monthNames = {
+            'januari': 0, 'februari': 1, 'maret': 2, 'april': 3, 'mei': 4, 'juni': 5,
+            'juli': 6, 'agustus': 7, 'september': 8, 'oktober': 9, 'november': 10, 'desember': 11,
+            'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'jun': 5, 'jul': 6,
+            'agu': 7, 'sep': 8, 'okt': 9, 'nov': 10, 'des': 11
+        };
+        
+        const monthDateRegex = /(\d{1,2})\s+(januari|februari|maret|april|mei|juni|juli|agustus|september|oktober|november|desember|jan|feb|mar|apr|jun|jul|agu|sep|okt|nov|des)(?:\s+(\d{2,4}))?/i;
+        const monthMatch = normalizedMessage.match(monthDateRegex);
+        if (monthMatch) {
+            const day = parseInt(monthMatch[1]);
+            const monthName = monthMatch[2].toLowerCase();
+            const year = monthMatch[3] ? 
+                (monthMatch[3].length === 2 ? 2000 + parseInt(monthMatch[3]) : parseInt(monthMatch[3])) : 
+                today.getFullYear();
+            
+            const month = monthNames[monthName];
+            if (month !== undefined) {
+                const specificDate = new Date(year, month, day);
+                if (specificDate instanceof Date && !isNaN(specificDate)) {
+                    console.log(`Detected month date: ${day} ${monthName} ${year} = ${specificDate.toISOString()}`);
+                    return specificDate.toISOString();
+                }
+            }
+        }
+        
+        // Check for "bulan lalu", "tahun lalu" patterns
+        if (normalizedMessage.includes('bulan lalu') || normalizedMessage.includes('bulan kemarin')) {
+            const date = new Date(today);
+            date.setMonth(date.getMonth() - 1);
+            console.log(`Detected: bulan lalu = ${date.toISOString()}`);
+            return date.toISOString();
+        }
+        
+        if (normalizedMessage.includes('tahun lalu') || normalizedMessage.includes('tahun kemarin')) {
+            const date = new Date(today);
+            date.setFullYear(date.getFullYear() - 1);
+            console.log(`Detected: tahun lalu = ${date.toISOString()}`);
+            return date.toISOString();
+        }
         
         // Check for relative time patterns like "3 hari lalu", "2 minggu lalu", etc.
         const relativeTimeRegex = /(\d+)\s*(hari|minggu|bulan|tahun)\s*(lalu|yang lalu|kemarin)/i;
-        const relativeMatch = message.match(relativeTimeRegex);
+        const relativeMatch = normalizedMessage.match(relativeTimeRegex);
         if (relativeMatch) {
             const number = parseInt(relativeMatch[1]);
             const unit = relativeMatch[2].toLowerCase();
@@ -2298,9 +2420,10 @@ class MoneyTrackerAI {
             }
         }
         
-        // Check for date patterns
+        // Check for simple date patterns (kemarin, besok, etc.) - EXACT MATCH ONLY
         for (const [timeframe, keywords] of Object.entries(this.datePatterns)) {
-            if (this.containsAny(words, keywords)) {
+            // Use strict keyword matching without fuzzy logic for date detection
+            if (this.containsExactDateKeywords(words, keywords)) {
                 const calculatedDate = this.calculateDate(timeframe, today);
                 console.log(`Detected date pattern: ${timeframe} = ${calculatedDate}`);
                 return calculatedDate;
@@ -2309,7 +2432,7 @@ class MoneyTrackerAI {
         
         // Check for specific date formats (DD/MM, DD-MM, DD MM)
         const dateRegex = /(\d{1,2})[\/\-\s](\d{1,2})(?:[\/\-\s](\d{2,4}))?/;
-        const dateMatch = message.match(dateRegex);
+        const dateMatch = normalizedMessage.match(dateRegex);
         if (dateMatch) {
             const day = parseInt(dateMatch[1]);
             const month = parseInt(dateMatch[2]) - 1; // JavaScript months are 0-indexed
@@ -2319,13 +2442,13 @@ class MoneyTrackerAI {
                 
             const specificDate = new Date(year, month, day);
             if (specificDate instanceof Date && !isNaN(specificDate)) {
-                console.log(`Detected specific date: ${specificDate.toISOString()}`);
+                console.log(`Detected numeric date: ${specificDate.toISOString()}`);
                 return specificDate.toISOString();
             }
         }
         
-        // Default to today
-        console.log(`Using default date: ${new Date().toISOString()}`);
+        // IMPORTANT: Default to today if no time indicators found
+        console.log(`No date indicators found, using today: ${new Date().toISOString()}`);
         return new Date().toISOString();
     }
 
@@ -2352,6 +2475,18 @@ class MoneyTrackerAI {
                 date.setDate(date.getDate() - 7);
                 return date.toISOString();
                 
+            case 'lastSunday':
+                // Find the most recent Sunday (hari minggu yang baru lewat)
+                const currentDay = date.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+                let daysToSubtract;
+                if (currentDay === 0) { // Today is Sunday
+                    daysToSubtract = 7; // Last Sunday (a week ago)
+                } else {
+                    daysToSubtract = currentDay; // Days since last Sunday
+                }
+                date.setDate(date.getDate() - daysToSubtract);
+                return date.toISOString();
+                
             case 'nextWeek':
                 date.setDate(date.getDate() + 7);
                 return date.toISOString();
@@ -2362,6 +2497,17 @@ class MoneyTrackerAI {
                 
             case 'nextMonth':
                 date.setMonth(date.getMonth() + 1);
+                return date.toISOString();
+                
+            case 'thisYear':
+                return date.toISOString();
+                
+            case 'lastYear':
+                date.setFullYear(date.getFullYear() - 1);
+                return date.toISOString();
+                
+            case 'nextYear':
+                date.setFullYear(date.getFullYear() + 1);
                 return date.toISOString();
                 
             // For specific days of week, find the most recent or next occurrence
