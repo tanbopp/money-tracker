@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money Tracker - Demo & Features</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#06B6D4'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-full mb-4">
+                <i class="fas fa-wallet text-white text-3xl"></i>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Money Tracker</h1>
+            <p class="text-xl text-gray-600 mb-6">Aplikasi Pelacak Keuangan dengan AI Assistant</p>
+            <div class="flex justify-center space-x-4">
+                <a href="index.html" class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition duration-200">
+                    <i class="fas fa-play mr-2"></i>Buka Aplikasi
+                </a>
+                <a href="test.html" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition duration-200">
+                    <i class="fas fa-flask mr-2"></i>Test Features
+                </a>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <!-- Dashboard -->
+            <div class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition duration-300">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-tachometer-alt text-blue-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Dashboard Real-time</h3>
+                <p class="text-gray-600 text-sm mb-4">Monitor saldo, pemasukan, dan pengeluaran secara real-time dengan interface yang intuitif.</p>
+                <ul class="text-sm text-gray-500 space-y-1">
+                    <li>• Saldo otomatis</li>
+                    <li>• Format IDR</li>
+                    <li>• Transaksi terbaru</li>
+                </ul>
+            </div>
+
+            <!-- AI Chat -->
+            <div class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition duration-300 border-2 border-primary">
+                <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-robot text-primary text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-primary mb-2">AI Chat Assistant</h3>
+                <p class="text-gray-600 text-sm mb-4">Input transaksi dengan bahasa natural! Katakan "beli bakso 25rb" dan AI akan memproses otomatis.</p>
+                <ul class="text-sm text-gray-500 space-y-1">
+                    <li>• Natural Language</li>
+                    <li>• Auto Detection</li>
+                    <li>• Smart Parsing</li>
+                </ul>
+            </div>
+
+            <!-- Transactions -->
+            <div class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition duration-300">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-exchange-alt text-green-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Manajemen Transaksi</h3>
+                <p class="text-gray-600 text-sm mb-4">Kelola pemasukan dan pengeluaran dengan kategori yang dapat disesuaikan.</p>
+                <ul class="text-sm text-gray-500 space-y-1">
+                    <li>• Filter & Search</li>
+                    <li>• Kategori Custom</li>
+                    <li>• Riwayat Lengkap</li>
+                </ul>
+            </div>
+
+            <!-- Statistics -->
+            <div class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition duration-300">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-chart-pie text-purple-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Statistik Komprehensif</h3>
+                <p class="text-gray-600 text-sm mb-4">Analisis mendalam dengan berbagai chart dan insights keuangan.</p>
+                <ul class="text-sm text-gray-500 space-y-1">
+                    <li>• Multiple Charts</li>
+                    <li>• Trend Analysis</li>
+                    <li>• Financial Health</li>
+                </ul>
+            </div>
+
+            <!-- Daily Limit -->
+            <div class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition duration-300">
+                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Daily Spending Limit</h3>
+                <p class="text-gray-600 text-sm mb-4">Atur batas pengeluaran harian dengan peringatan otomatis.</p>
+                <ul class="text-sm text-gray-500 space-y-1">
+                    <li>• Custom Limits</li>
+                    <li>• Smart Alerts</li>
+                    <li>• Progress Tracking</li>
+                </ul>
+            </div>
+
+            <!-- Goals & Savings -->
+            <div class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition duration-300">
+                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-bullseye text-indigo-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Target & Tabungan</h3>
+                <p class="text-gray-600 text-sm mb-4">Buat target keuangan dan kelola tabungan dengan tracking progress.</p>
+                <ul class="text-sm text-gray-500 space-y-1">
+                    <li>• Goal Tracking</li>
+                    <li>• Savings Management</li>
+                    <li>• Progress Visualization</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- AI Demo Section -->
+        <div class="bg-white rounded-xl p-8 shadow-lg mb-12">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Demo AI Chat Assistant</h2>
+                <p class="text-gray-600">Lihat bagaimana AI memahami bahasa natural dan mengkonversi ke transaksi</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Input Examples -->
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Contoh Input</h3>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-user text-gray-600 text-sm"></i>
+                                </div>
+                                <span class="text-sm text-gray-600">User berkata:</span>
+                            </div>
+                            <p class="text-gray-900 font-medium">"Saya beli bakso 25rb"</p>
+                        </div>
+
+                        <div class="p-4 bg-blue-50 rounded-lg">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-robot text-white text-sm"></i>
+                                </div>
+                                <span class="text-sm text-primary">AI memproses:</span>
+                            </div>
+                            <ul class="text-sm text-gray-700 space-y-1">
+                                <li>• <strong>Jenis:</strong> Pengeluaran</li>
+                                <li>• <strong>Jumlah:</strong> Rp. 25.000</li>
+                                <li>• <strong>Kategori:</strong> Makanan</li>
+                                <li>• <strong>Deskripsi:</strong> beli bakso</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- More Examples -->
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Format yang Didukung</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between p-3 bg-gray-50 rounded">
+                            <span>"mau nabung 50rb"</span>
+                            <span class="text-green-600">→ Tabungan Rp. 50.000</span>
+                        </div>
+                        <div class="flex justify-between p-3 bg-gray-50 rounded">
+                            <span>"dapat gaji 5 juta"</span>
+                            <span class="text-green-600">→ Pemasukan Rp. 5.000.000</span>
+                        </div>
+                        <div class="flex justify-between p-3 bg-gray-50 rounded">
+                            <span>"bayar listrik 150 ribu"</span>
+                            <span class="text-red-600">→ Pengeluaran Rp. 150.000</span>
+                        </div>
+                        <div class="flex justify-between p-3 bg-gray-50 rounded">
+                            <span>"beli nasi gudeg 15rb"</span>
+                            <span class="text-red-600">→ Pengeluaran Rp. 15.000</span>
+                        </div>
+                        <div class="flex justify-between p-3 bg-gray-50 rounded">
+                            <span>"ambil tabungan 100000"</span>
+                            <span class="text-blue-600">→ Penarikan Rp. 100.000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technology Stack -->
+        <div class="bg-white rounded-xl p-8 shadow-lg mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 text-center mb-8">Technology Stack</h2>
+            <div class="grid md:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                        <i class="fab fa-html5 text-orange-600 text-2xl"></i>
+                    </div>
+                    <h3 class="font-semibold">HTML5</h3>
+                    <p class="text-sm text-gray-600">Struktur Semantik</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                        <i class="fab fa-css3-alt text-blue-600 text-2xl"></i>
+                    </div>
+                    <h3 class="font-semibold">Tailwind CSS</h3>
+                    <p class="text-sm text-gray-600">Modern Styling</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                        <i class="fab fa-js-square text-yellow-600 text-2xl"></i>
+                    </div>
+                    <h3 class="font-semibold">JavaScript ES6+</h3>
+                    <p class="text-sm text-gray-600">Logic & NLP Engine</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-chart-line text-green-600 text-2xl"></i>
+                    </div>
+                    <h3 class="font-semibold">Chart.js</h3>
+                    <p class="text-sm text-gray-600">Data Visualization</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-gray-600">
+            <p class="mb-4">© 2024 Money Tracker - Aplikasi Pelacak Keuangan dengan AI Assistant</p>
+            <div class="flex justify-center space-x-6">
+                <a href="index.html" class="hover:text-primary transition duration-200">
+                    <i class="fas fa-home mr-1"></i>Dashboard
+                </a>
+                <a href="test.html" class="hover:text-primary transition duration-200">
+                    <i class="fas fa-flask mr-1"></i>Testing
+                </a>
+                <a href="#" class="hover:text-primary transition duration-200">
+                    <i class="fas fa-book mr-1"></i>Documentation
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

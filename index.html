@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money Tracker - Kelola Keuangan Anda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
+    <link href="styles.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#06B6D4',
+                        success: '#10B981',
+                        danger: '#EF4444',
+                        warning: '#F59E0B'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-wallet text-primary text-2xl mr-3"></i>
+                    <h1 class="text-xl font-bold text-gray-900">Money Tracker</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="flex items-center space-x-4">
+                        <button onclick="showSection('dashboard')" class="nav-btn text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Dashboard</button>
+                        <button onclick="showSection('transactions')" class="nav-btn text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Transaksi</button>
+                        <button onclick="showSection('statistics')" class="nav-btn text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Statistik</button>
+                        <button onclick="showSection('goals')" class="nav-btn text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Target</button>
+                        <button onclick="showSection('savings')" class="nav-btn text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Tabungan</button>
+                        <button onclick="showSection('settings')" class="nav-btn text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Pengaturan</button>
+                        <button onclick="showSection('chat')" class="nav-btn text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">AI Chat</button>
+                    </div>
+                </div>
+                <button class="md:hidden" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars text-gray-700"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="hidden md:hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
+                <button onclick="showSection('dashboard')" class="nav-btn-mobile block w-full text-left px-3 py-2 text-gray-700 hover:text-primary">Dashboard</button>
+                <button onclick="showSection('transactions')" class="nav-btn-mobile block w-full text-left px-3 py-2 text-gray-700 hover:text-primary">Transaksi</button>
+                <button onclick="showSection('statistics')" class="nav-btn-mobile block w-full text-left px-3 py-2 text-gray-700 hover:text-primary">Statistik</button>
+                <button onclick="showSection('goals')" class="nav-btn-mobile block w-full text-left px-3 py-2 text-gray-700 hover:text-primary">Target</button>
+                <button onclick="showSection('savings')" class="nav-btn-mobile block w-full text-left px-3 py-2 text-gray-700 hover:text-primary">Tabungan</button>
+                <button onclick="showSection('settings')" class="nav-btn-mobile block w-full text-left px-3 py-2 text-gray-700 hover:text-primary">Pengaturan</button>
+                <button onclick="showSection('chat')" class="nav-btn-mobile block w-full text-left px-3 py-2 text-gray-700 hover:text-primary">AI Chat</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="section">
+            <!-- Daily Limit Alert -->
+            <div id="daily-limit-alert" class="hidden mb-6 p-4 rounded-lg border-l-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i id="limit-alert-icon" class="fas fa-exclamation-triangle text-xl"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p id="limit-alert-text" class="text-sm font-medium"></p>
+                        <p id="limit-alert-subtext" class="text-xs mt-1"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Spending Progress -->
+            <div id="daily-spending-card" class="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-6 hidden">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Pengeluaran Hari Ini</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Telah digunakan</span>
+                        <span id="daily-spent-amount" class="font-medium">Rp. 0,00</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Batas harian</span>
+                        <span id="daily-limit-amount" class="font-medium">Rp. 0,00</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Sisa limit</span>
+                        <span id="daily-remaining-amount" class="font-medium text-green-600">Rp. 0,00</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div id="daily-progress-bar" class="h-3 rounded-full transition-all duration-300 bg-blue-500" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500">
+                        <span>0%</span>
+                        <span id="daily-progress-percentage">0%</span>
+                        <span>100%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Balance Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-blue-100 rounded-lg">
+                            <i class="fas fa-wallet text-blue-600"></i>
+                        </div>  
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Total Saldo</p>
+                            <p id="total-balance" class="text-2xl font-bold text-gray-900">Rp. 0,00</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-green-100 rounded-lg">
+                            <i class="fas fa-arrow-up text-green-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Total Pemasukan</p>
+                            <p id="total-income" class="text-2xl font-bold text-green-600">Rp. 0,00</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-red-100 rounded-lg">
+                            <i class="fas fa-arrow-down text-red-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Total Pengeluaran</p>
+                            <p id="total-expense" class="text-2xl font-bold text-red-600">Rp. 0,00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Tambah Pemasukan</h2>
+                    <form onsubmit="addIncome(event)">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah</label>
+                                <input type="number" id="income-amount" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="0">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                                <select id="income-category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <option value="Gaji">Gaji</option>
+                                    <option value="Freelance">Freelance</option>
+                                    <option value="Investasi">Investasi</option>
+                                    <option value="Bonus">Bonus</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
+                                <input type="text" id="income-description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Keterangan (opsional)">
+                            </div>
+                            <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-200">
+                                <i class="fas fa-plus mr-2"></i>Tambah Pemasukan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Tambah Pengeluaran</h2>
+                    <form onsubmit="addExpense(event)">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah</label>
+                                <input type="number" id="expense-amount" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="0">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                                <select id="expense-category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <option value="Makanan">Makanan</option>
+                                    <option value="Transportasi">Transportasi</option>
+                                    <option value="Belanja">Belanja</option>
+                                    <option value="Tagihan">Tagihan</option>
+                                    <option value="Hiburan">Hiburan</option>
+                                    <option value="Kesehatan">Kesehatan</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
+                                <input type="text" id="expense-description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Keterangan (opsional)">
+                            </div>
+                            <button type="submit" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200">
+                                <i class="fas fa-minus mr-2"></i>Tambah Pengeluaran
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900">Transaksi Terbaru</h2>
+                    <button onclick="showSection('transactions')" class="text-primary hover:text-primary/80 text-sm font-medium">Lihat Semua</button>
+                </div>
+                <div id="recent-transactions" class="space-y-3">
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-receipt text-4xl mb-2"></i>
+                        <p>Belum ada transaksi</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions Section -->
+        <div id="transactions-section" class="section hidden">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4 sm:mb-0">Riwayat Transaksi</h2>
+                        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                            <select id="filter-type" onchange="filterTransactions()" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="all">Semua Transaksi</option>
+                                <option value="income">Pemasukan</option>
+                                <option value="expense">Pengeluaran</option>
+                            </select>
+                            <select id="filter-category" onchange="filterTransactions()" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="all">Semua Kategori</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div id="transactions-list" class="space-y-3">
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-receipt text-4xl mb-2"></i>
+                            <p>Belum ada transaksi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Section -->
+        <div id="statistics-section" class="section hidden">
+            <!-- Statistics Header -->
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4 sm:mb-0">Statistik Keuangan</h2>
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                        <select id="stats-period" onchange="updateStatistics()" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="daily">Harian</option>
+                            <option value="monthly" selected>Bulanan</option>
+                            <option value="yearly">Tahunan</option>
+                        </select>
+                        <select id="stats-year" onchange="updateStatistics()" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </select>
+                        <select id="stats-month" onchange="updateStatistics()" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-blue-100 rounded-lg">
+                            <i class="fas fa-chart-line text-blue-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Rata-rata Harian</p>
+                            <p id="avg-daily" class="text-xl font-bold text-blue-600">Rp. 0,00</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-green-100 rounded-lg">
+                            <i class="fas fa-trending-up text-green-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Transaksi Terbanyak</p>
+                            <p id="most-transactions" class="text-xl font-bold text-green-600">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-yellow-100 rounded-lg">
+                            <i class="fas fa-coins text-yellow-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Pengeluaran Terbesar</p>
+                            <p id="highest-expense" class="text-xl font-bold text-yellow-600">Rp. 0,00</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-purple-100 rounded-lg">
+                            <i class="fas fa-percentage text-purple-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Rasio Tabungan</p>
+                            <p id="savings-ratio" class="text-xl font-bold text-purple-600">0%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 1 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Income vs Expense Line Chart -->
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Trend Pemasukan vs Pengeluaran</h3>
+                    <div class="relative h-80">
+                        <canvas id="incomeExpenseChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Balance Trend Chart -->
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Trend Saldo</h3>
+                    <div class="relative h-80">
+                        <canvas id="balanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 2 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Category Pie Chart -->
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Pengeluaran per Kategori</h3>
+                    <div class="relative h-80">
+                        <canvas id="categoryPieChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Monthly Comparison Bar Chart -->
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Perbandingan Bulanan</h3>
+                    <div class="relative h-80">
+                        <canvas id="monthlyComparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Analytics -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <!-- Top Categories -->
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Kategori Pengeluaran Teratas</h3>
+                    <div id="top-categories" class="space-y-3">
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-chart-bar text-4xl mb-2"></i>
+                            <p>Belum ada data</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spending Patterns -->
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Pola Pengeluaran</h3>
+                    <div id="spending-patterns" class="space-y-3">
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-clock text-4xl mb-2"></i>
+                            <p>Belum ada data</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Goals Progress -->
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Progress Target</h3>
+                    <div id="goals-progress" class="space-y-3">
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-bullseye text-4xl mb-2"></i>
+                            <p>Belum ada target</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Heatmap and Calendar View -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Spending Heatmap -->
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Heatmap Pengeluaran</h3>
+                    <div id="spending-heatmap" class="overflow-x-auto">
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-calendar-alt text-4xl mb-2"></i>
+                            <p>Belum ada data</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily Activity -->
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Aktivitas Harian</h3>
+                    <div class="relative h-80">
+                        <canvas id="dailyActivityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Financial Health Score -->
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Skor Kesehatan Keuangan</h3>
+                    <div class="text-center">
+                        <div class="relative inline-flex items-center justify-center w-32 h-32 mb-4">
+                            <svg class="w-32 h-32 transform -rotate-90">
+                                <circle cx="64" cy="64" r="56" stroke="#E5E7EB" stroke-width="8" fill="transparent"/>
+                                <circle id="health-score-circle" cx="64" cy="64" r="56" stroke="#10B981" stroke-width="8" fill="transparent" stroke-dasharray="351.86" stroke-dashoffset="351.86"/>
+                            </svg>
+                            <span id="health-score-text" class="absolute text-2xl font-bold text-gray-900">0%</span>
+                        </div>
+                        <p id="health-score-description" class="text-sm text-gray-600">Mulai menabung untuk meningkatkan skor</p>
+                    </div>
+                </div>
+
+                <!-- Monthly Forecast -->
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Prediksi Bulan Depan</h3>
+                    <div id="monthly-forecast" class="space-y-4">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Prediksi Pemasukan</span>
+                            <span id="forecast-income" class="font-medium text-green-600">Rp. 0,00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Prediksi Pengeluaran</span>
+                            <span id="forecast-expense" class="font-medium text-red-600">Rp. 0,00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Prediksi Saldo</span>
+                            <span id="forecast-balance" class="font-medium text-blue-600">Rp. 0,00</span>
+                        </div>
+                        <div class="pt-2 border-t">
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-900">Rekomendasi Tabungan</span>
+                                <span id="recommended-savings" class="font-bold text-purple-600">Rp. 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insights -->
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Insight Keuangan</h3>
+                    <div id="financial-insights" class="space-y-3">
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-lightbulb text-4xl mb-2"></i>
+                            <p>Belum ada insight</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Goals Section -->
+        <div id="goals-section" class="section hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Target Keuangan</h2>
+                        <div id="goals-list" class="space-y-4">
+                            <div class="text-center text-gray-500 py-8">
+                                <i class="fas fa-bullseye text-4xl mb-2"></i>
+                                <p>Belum ada target yang dibuat</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Tambah Target Baru</h2>
+                        <form onsubmit="addGoal(event)">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Target</label>
+                                    <input type="text" id="goal-name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Contoh: iPhone Baru">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Target Jumlah</label>
+                                    <input type="number" id="goal-amount" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="0">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Target Tanggal</label>
+                                    <input type="date" id="goal-date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
+                                    <textarea id="goal-description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Keterangan (opsional)"></textarea>
+                                </div>
+                                <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary/90 transition duration-200">
+                                    <i class="fas fa-plus mr-2"></i>Tambah Target
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Savings Section -->
+        <div id="savings-section" class="section hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Total Tabungan</h2>
+                        <div class="text-center">
+                            <p id="total-savings" class="text-4xl font-bold text-primary mb-2">Rp. 0,00</p>
+                            <p class="text-gray-600">Jumlah yang Anda tabung</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Riwayat Tabungan</h2>
+                        <div id="savings-history" class="space-y-3">
+                            <div class="text-center text-gray-500 py-8">
+                                <i class="fas fa-piggy-bank text-4xl mb-2"></i>
+                                <p>Belum ada riwayat tabungan</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Tambah ke Tabungan</h2>
+                        <form onsubmit="addSavings(event)">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah</label>
+                                    <input type="number" id="savings-amount" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="0">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
+                                    <input type="text" id="savings-description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Keterangan (opsional)">
+                                </div>
+                                <button type="submit" class="w-full bg-secondary text-white py-2 px-4 rounded-md hover:bg-secondary/90 transition duration-200">
+                                    <i class="fas fa-piggy-bank mr-2"></i>Tambah ke Tabungan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Ambil dari Tabungan</h2>
+                        <form onsubmit="withdrawSavings(event)">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah</label>
+                                    <input type="number" id="withdraw-amount" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="0">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
+                                    <input type="text" id="withdraw-description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Keterangan (opsional)">
+                                </div>
+                                <button type="submit" class="w-full bg-warning text-white py-2 px-4 rounded-md hover:bg-warning/90 transition duration-200">
+                                    <i class="fas fa-money-bill-wave mr-2"></i>Ambil dari Tabungan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Chat Section -->
+        <div id="chat-section" class="section hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Chat Interface -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col h-[600px]">
+                        <!-- Chat Header -->
+                        <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-primary to-secondary text-white rounded-t-lg">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-robot text-white"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-semibold">AI Assistant</h2>
+                                    <p class="text-sm opacity-90">Asisten keuangan pintar Anda</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Messages -->
+                        <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                                    <i class="fas fa-robot text-white text-sm"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="bg-gray-100 rounded-lg p-3">
+                                        <p class="text-sm text-gray-800">
+                                            Halo! Saya adalah asisten keuangan AI Anda. Anda bisa mengatakan hal seperti:
+                                        </p>
+                                        <ul class="text-sm text-gray-600 mt-2 space-y-1">
+                                            <li>• "Saya beli bakso 25 ribu"</li>
+                                            <li>• "Mau nabung 50rb"</li>
+                                            <li>• "Dapat gaji 5 juta"</li>
+                                            <li>• "Bayar listrik 150 ribu"</li>
+                                        </ul>
+                                    </div>
+                                    <span class="text-xs text-gray-500 mt-1 block">Sekarang</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Input -->
+                        <div class="p-4 border-t border-gray-200">
+                            <form onsubmit="sendChatMessage(event)" class="flex space-x-2">
+                                <input 
+                                    type="text" 
+                                    id="chat-input" 
+                                    placeholder="Ketik pesan Anda disini... (contoh: beli nasi gudeg 15rb)"
+                                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    autocomplete="off"
+                                >
+                                <button 
+                                    type="submit" 
+                                    class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition duration-200"
+                                >
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Stats & Tips -->
+                <div class="space-y-6">
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Aksi Cepat</h3>
+                        <div class="space-y-2">
+                            <button onclick="sendQuickMessage('Saya beli makan siang 25000')" class="w-full text-left p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition duration-200">
+                                <div class="flex items-center">
+                                    <i class="fas fa-utensils text-orange-500 mr-3"></i>
+                                    <span class="text-sm">Makan siang 25rb</span>
+                                </div>
+                            </button>
+                            <button onclick="sendQuickMessage('Mau nabung 50000')" class="w-full text-left p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition duration-200">
+                                <div class="flex items-center">
+                                    <i class="fas fa-piggy-bank text-blue-500 mr-3"></i>
+                                    <span class="text-sm">Nabung 50rb</span>
+                                </div>
+                            </button>
+                            <button onclick="sendQuickMessage('Dapat gaji 5000000')" class="w-full text-left p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition duration-200">
+                                <div class="flex items-center">
+                                    <i class="fas fa-money-bill-wave text-green-500 mr-3"></i>
+                                    <span class="text-sm">Dapat gaji 5jt</span>
+                                </div>
+                            </button>
+                            <button onclick="sendQuickMessage('Bayar listrik 150000')" class="w-full text-left p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition duration-200">
+                                <div class="flex items-center">
+                                    <i class="fas fa-bolt text-yellow-500 mr-3"></i>
+                                    <span class="text-sm">Bayar listrik 150rb</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- AI Stats -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Statistik AI</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Transaksi Diproses</span>
+                                <span id="ai-processed-count" class="font-medium">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Tingkat Akurasi</span>
+                                <span id="ai-accuracy" class="font-medium text-green-600">98%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Pesan Hari Ini</span>
+                                <span id="ai-messages-today" class="font-medium">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tips -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Tips Penggunaan</h3>
+                        <div class="space-y-3 text-sm text-gray-600">
+                            <div class="flex items-start">
+                                <i class="fas fa-lightbulb text-yellow-500 mr-2 mt-0.5"></i>
+                                <span>Gunakan bahasa natural seperti "beli nasi 15rb" atau "bayar internet 300 ribu"</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-lightbulb text-yellow-500 mr-2 mt-0.5"></i>
+                                <span>AI dapat mendeteksi kategori otomatis berdasarkan kata kunci</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-lightbulb text-yellow-500 mr-2 mt-0.5"></i>
+                                <span>Tulis "nabung" atau "menabung" untuk otomatis masuk ke tabungan</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settings-section" class="section hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Batas Pengeluaran Harian</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div>
+                                <p class="font-medium text-gray-900">Status Batas Harian</p>
+                                <p class="text-sm text-gray-600">Aktifkan untuk membatasi pengeluaran harian</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="daily-limit-toggle" class="sr-only peer" onchange="toggleDailyLimit()">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+                        
+                        <div id="daily-limit-settings" class="space-y-4 hidden">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Batas Pengeluaran Harian</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2 text-gray-500">Rp.</span>
+                                    <input type="number" id="daily-limit-input" class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="50000" min="1000" step="1000">
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Minimum Rp. 1.000</p>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-700">Reset Otomatis</label>
+                                <div class="flex items-center space-x-2">
+                                    <input type="radio" id="reset-midnight" name="reset-time" value="midnight" checked class="text-primary focus:ring-primary">
+                                    <label for="reset-midnight" class="text-sm text-gray-700">Setiap tengah malam (00:00)</label>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <input type="radio" id="reset-custom" name="reset-time" value="custom" class="text-primary focus:ring-primary">
+                                    <label for="reset-custom" class="text-sm text-gray-700">Waktu khusus</label>
+                                    <input type="time" id="custom-reset-time" class="ml-2 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" disabled>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-700">Pengaturan Peringatan</label>
+                                <div class="space-y-2">
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" id="warning-50" class="text-primary focus:ring-primary" checked>
+                                        <label for="warning-50" class="text-sm text-gray-700">Peringatan saat 50% limit terpakai</label>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" id="warning-75" class="text-primary focus:ring-primary" checked>
+                                        <label for="warning-75" class="text-sm text-gray-700">Peringatan saat 75% limit terpakai</label>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" id="warning-90" class="text-primary focus:ring-primary" checked>
+                                        <label for="warning-90" class="text-sm text-gray-700">Peringatan saat 90% limit terpakai</label>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" id="block-exceed" class="text-primary focus:ring-primary" checked>
+                                        <label for="block-exceed" class="text-sm text-gray-700">Blokir pengeluaran yang melebihi limit</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button onclick="saveDailyLimitSettings()" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary/90 transition duration-200">
+                                <i class="fas fa-save mr-2"></i>Simpan Pengaturan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Statistik Pengeluaran Harian</h2>
+                    <div id="daily-stats" class="space-y-4">
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-chart-line text-4xl mb-2"></i>
+                            <p>Aktifkan batas harian untuk melihat statistik</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="fixed top-4 right-4 z-50 hidden">
+        <div class="bg-white border border-gray-200 rounded-lg shadow-lg p-4 max-w-sm">
+            <div class="flex items-center">
+                <div id="notification-icon" class="flex-shrink-0 mr-3"></div>
+                <div class="flex-1">
+                    <p id="notification-text" class="text-sm font-medium text-gray-900"></p>
+                </div>
+                <button onclick="hideNotification()" class="ml-2 text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
