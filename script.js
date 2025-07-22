@@ -90,13 +90,27 @@ function formatCurrency(amount) {
 
 // Date formatting
 function formatDate(dateString) {
-    const options = { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric',
-        timeZone: 'Asia/Jakarta'
-    };
-    return new Date(dateString).toLocaleDateString('id-ID', options);
+    // Handle undefined, null, or invalid dates
+    if (!dateString) {
+        return 'Tanggal tidak valid';
+    }
+    
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            return 'Tanggal tidak valid';
+        }
+        
+        const options = { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            timeZone: 'Asia/Jakarta'
+        };
+        return date.toLocaleDateString('id-ID', options);
+    } catch (error) {
+        return 'Tanggal tidak valid';
+    }
 }
 
 // Show notification
@@ -306,6 +320,31 @@ function deleteTransaction(id) {
     }
 }
 
+// Calculate total balance
+function calculateBalance() {
+    const totalIncome = transactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    const totalExpense = transactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    return totalIncome - totalExpense;
+}
+
+// Calculate savings balance
+function calculateSavingsBalance() {
+    return savings.reduce((sum, s) => {
+        if (s.type === 'deposit') {
+            return sum + s.amount;
+        } else if (s.type === 'withdraw') {
+            return sum - s.amount;
+        }
+        return sum;
+    }, 0);
+}
+
 // Update dashboard
 function updateDashboard() {
     const totalIncome = transactions
@@ -350,7 +389,7 @@ function updateRecentTransactions() {
                 <div>
                     <p class="font-medium text-gray-900">${transaction.category}</p>
                     <p class="text-sm text-gray-600">${transaction.description || '-'}</p>
-                    <p class="text-xs text-gray-500">${transaction.formattedDate}</p>
+                    <p class="text-xs text-gray-500">${formatDate(transaction.date)}</p>
                 </div>
             </div>
             <div class="text-right">
@@ -399,7 +438,7 @@ function updateTransactionsList() {
                         <div>
                             <p class="font-medium text-gray-900">${transaction.category}</p>
                             <p class="text-sm text-gray-600">${transaction.description || '-'}</p>
-                            <p class="text-xs text-gray-500">${transaction.formattedDate}</p>
+                            <p class="text-xs text-gray-500">${formatDate(transaction.date)}</p>
                         </div>
                         <div class="flex items-center mt-2 sm:mt-0">
                             <p class="font-semibold ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'} mr-3">
@@ -1926,6 +1965,14 @@ function formatCurrencyShort(amount) {
 // AI Natural Language Processing Engine
 class MoneyTrackerAI {
     constructor() {
+        // Initialize AI stats
+        this.aiStats = {
+            processedCount: 0,
+            messagesTotal: 0,
+            messagesToday: 0,
+            lastMessageDate: null
+        };
+
         this.patterns = {
             // Transaction patterns
             expense: {
@@ -1940,9 +1987,9 @@ class MoneyTrackerAI {
                 }
             },
             income: {
-                keywords: ['gaji', 'terima', 'dapat', 'income', 'masuk', 'bayaran', 'honor', 'bonus', 'untung', 'profit'],
+                keywords: ['gaji', 'gajian', 'terima', 'dapat', 'income', 'masuk', 'bayaran', 'honor', 'bonus', 'untung', 'profit', 'duit', 'uang masuk'],
                 categories: {
-                    'Gaji': ['gaji', 'salary', 'bulanan', 'tetap'],
+                    'Gaji': ['gaji', 'gajian', 'salary', 'bulanan', 'tetap'],
                     'Freelance': ['freelance', 'project', 'kerja', 'jasa', 'service'],
                     'Bonus': ['bonus', 'thr', 'reward', 'hadiah', 'extra'],
                     'Investasi': ['investasi', 'saham', 'dividen', 'bunga', 'deposito', 'reksadana']
@@ -1972,15 +2019,15 @@ class MoneyTrackerAI {
 
         // Date/time patterns for Indonesian
         this.datePatterns = {
-            today: ['hari ini', 'sekarang', 'tadi'],
-            yesterday: ['kemarin', 'kemaren', 'kmrn'],
+            today: ['hari ini', 'sekarang', 'tadi', 'hari ini', 'skrg'],
+            yesterday: ['kemarin', 'kemaren', 'kmrn', 'kemarin saya', 'kemaren saya'],
             tomorrow: ['besok', 'esok'],
             dayAfterTomorrow: ['lusa', 'tulat'],
             thisWeek: ['minggu ini', 'pekan ini'],
-            lastWeek: ['minggu lalu', 'minggu kemarin', 'pekan lalu'],
+            lastWeek: ['minggu lalu', 'minggu kemarin', 'pekan lalu', 'seminggu lalu'],
             nextWeek: ['minggu depan', 'minggu besok', 'pekan depan'],
             thisMonth: ['bulan ini'],
-            lastMonth: ['bulan lalu', 'bulan kemarin'],
+            lastMonth: ['bulan lalu', 'bulan kemarin', 'sebulan lalu'],
             nextMonth: ['bulan depan', 'bulan besok'],
             // Specific days
             monday: ['senin', 'monday'],
@@ -2222,10 +2269,41 @@ class MoneyTrackerAI {
         const words = message.split(' ');
         const today = new Date();
         
+        // Check for relative time patterns like "3 hari lalu", "2 minggu lalu", etc.
+        const relativeTimeRegex = /(\d+)\s*(hari|minggu|bulan|tahun)\s*(lalu|yang lalu|kemarin)/i;
+        const relativeMatch = message.match(relativeTimeRegex);
+        if (relativeMatch) {
+            const number = parseInt(relativeMatch[1]);
+            const unit = relativeMatch[2].toLowerCase();
+            const direction = relativeMatch[3].toLowerCase();
+            
+            const date = new Date(today);
+            if (direction.includes('lalu') || direction.includes('kemarin')) {
+                switch (unit) {
+                    case 'hari':
+                        date.setDate(date.getDate() - number);
+                        break;
+                    case 'minggu':
+                        date.setDate(date.getDate() - (number * 7));
+                        break;
+                    case 'bulan':
+                        date.setMonth(date.getMonth() - number);
+                        break;
+                    case 'tahun':
+                        date.setFullYear(date.getFullYear() - number);
+                        break;
+                }
+                console.log(`Detected relative date: ${number} ${unit} ${direction} = ${date.toISOString()}`);
+                return date.toISOString();
+            }
+        }
+        
         // Check for date patterns
         for (const [timeframe, keywords] of Object.entries(this.datePatterns)) {
             if (this.containsAny(words, keywords)) {
-                return this.calculateDate(timeframe, today);
+                const calculatedDate = this.calculateDate(timeframe, today);
+                console.log(`Detected date pattern: ${timeframe} = ${calculatedDate}`);
+                return calculatedDate;
             }
         }
         
@@ -2241,11 +2319,13 @@ class MoneyTrackerAI {
                 
             const specificDate = new Date(year, month, day);
             if (specificDate instanceof Date && !isNaN(specificDate)) {
+                console.log(`Detected specific date: ${specificDate.toISOString()}`);
                 return specificDate.toISOString();
             }
         }
         
         // Default to today
+        console.log(`Using default date: ${new Date().toISOString()}`);
         return new Date().toISOString();
     }
 
@@ -2423,18 +2503,24 @@ function processAIMessage(message) {
     if (result.understood) {
         // Execute the action
         try {
+            let successMessage = '';
+            
             switch (result.action) {
                 case 'expense':
                     addTransactionFromAI('expense', result.data.amount, result.data.category, result.data.description, result.data.date);
+                    successMessage = `✅ Berhasil mencatat pengeluaran ${formatCurrency(result.data.amount)} untuk kategori ${result.data.category}!`;
                     break;
                 case 'income':
                     addTransactionFromAI('income', result.data.amount, result.data.category, result.data.description, result.data.date);
+                    successMessage = `✅ Berhasil mencatat pemasukan ${formatCurrency(result.data.amount)} untuk kategori ${result.data.category}!`;
                     break;
                 case 'savings':
                     addToSavingsFromAI(result.data.amount, result.data.description, result.data.date);
+                    successMessage = `✅ Berhasil menambahkan ${formatCurrency(result.data.amount)} ke tabungan!`;
                     break;
                 case 'withdraw':
                     withdrawFromSavingsFromAI(result.data.amount, result.data.description, result.data.date);
+                    successMessage = `✅ Berhasil menarik ${formatCurrency(result.data.amount)} dari tabungan!`;
                     break;
             }
             
@@ -2443,7 +2529,7 @@ function processAIMessage(message) {
             updateAIStats();
             
             // Add success message
-            addChatMessage(result.response + " ✅ Berhasil diproses!", 'ai');
+            addChatMessage(successMessage, 'ai');
             
         } catch (error) {
             addChatMessage("Maaf, terjadi kesalahan saat memproses transaksi: " + error.message, 'ai');
