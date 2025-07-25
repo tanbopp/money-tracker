@@ -3,7 +3,10 @@ const STORAGE_KEYS = {
     TRANSACTIONS: 'moneyTracker_transactions',
     GOALS: 'moneyTracker_goals',
     SAVINGS: 'moneyTracker_savings',
-    DAILY_LIMIT: 'moneyTracker_dailyLimit'
+    DAILY_LIMIT: 'moneyTracker_dailyLimit',
+    CATEGORIES: 'moneyTracker_categories',
+    STATISTICS_CONFIG: 'moneyTracker_statisticsConfig',
+    WALLETS: 'moneyTracker_wallets'
 };
 
 // Global variables
@@ -21,8 +24,40 @@ let dailyLimitSettings = {
         ninety: true
     },
     blockExceed: true,
-    lastResetDate: null
+    lastResetDate: null,
+    excludeSavings: true, // Exclude savings from daily limit
+    excludeGoals: true // Exclude goal contributions from daily limit
 };
+
+// Custom categories
+let customCategories = {
+    income: ['Gaji', 'Freelance', 'Bonus', 'Investasi', 'Lainnya'],
+    expense: ['Makanan', 'Transportasi', 'Belanja', 'Tagihan', 'Hiburan', 'Kesehatan', 'Lainnya']
+};
+
+// Statistics display configuration
+let statisticsConfig = {
+    keyMetrics: true,
+    incomeExpenseChart: true,
+    balanceChart: true,
+    categoryPieChart: true,
+    monthlyComparisonChart: true,
+    dailyActivityChart: true,
+    topCategories: true,
+    spendingPatterns: true,
+    goalsProgress: true,
+    spendingHeatmap: true,
+    financialHealth: true,
+    monthlyForecast: true,
+    financialInsights: true
+};
+
+// Wallet system
+let wallets = [
+    { id: 'bank', name: 'Bank', balance: 0, color: '#3B82F6' },
+    { id: 'cash', name: 'Cash', balance: 0, color: '#10B981' },
+    { id: 'ewallet', name: 'E-Wallet', balance: 0, color: '#8B5CF6' }
+];
 
 // AI Chat variables
 let aiStats = {
@@ -50,6 +85,8 @@ document.addEventListener('DOMContentLoaded', function() {
     updateGoalsList();
     updateSavingsDisplay();
     updateFilterCategories();
+    updateCategoryDropdowns();
+    updateWalletDisplay();
     updateDailyLimitDisplay();
     loadDailyLimitSettings();
     setupEventListeners();
@@ -68,6 +105,21 @@ function loadData() {
     if (savedDailyLimit) {
         dailyLimitSettings = { ...dailyLimitSettings, ...JSON.parse(savedDailyLimit) };
     }
+    
+    const savedCategories = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
+    if (savedCategories) {
+        customCategories = { ...customCategories, ...JSON.parse(savedCategories) };
+    }
+    
+    const savedStatisticsConfig = localStorage.getItem(STORAGE_KEYS.STATISTICS_CONFIG);
+    if (savedStatisticsConfig) {
+        statisticsConfig = { ...statisticsConfig, ...JSON.parse(savedStatisticsConfig) };
+    }
+    
+    const savedWallets = localStorage.getItem(STORAGE_KEYS.WALLETS);
+    if (savedWallets) {
+        wallets = JSON.parse(savedWallets);
+    }
 }
 
 // Save data to localStorage
@@ -76,6 +128,9 @@ function saveData() {
     localStorage.setItem(STORAGE_KEYS.GOALS, JSON.stringify(goals));
     localStorage.setItem(STORAGE_KEYS.SAVINGS, JSON.stringify(savings));
     localStorage.setItem(STORAGE_KEYS.DAILY_LIMIT, JSON.stringify(dailyLimitSettings));
+    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(customCategories));
+    localStorage.setItem(STORAGE_KEYS.STATISTICS_CONFIG, JSON.stringify(statisticsConfig));
+    localStorage.setItem(STORAGE_KEYS.WALLETS, JSON.stringify(wallets));
 }
 
 // Currency formatting
@@ -202,6 +257,7 @@ function addIncome(event) {
     const amount = parseFloat(document.getElementById('income-amount').value);
     const category = document.getElementById('income-category').value;
     const description = document.getElementById('income-description').value;
+    const wallet = document.getElementById('income-wallet') ? document.getElementById('income-wallet').value : 'bank';
     
     if (amount <= 0) {
         showNotification('Jumlah harus lebih dari 0', 'error');
@@ -214,11 +270,13 @@ function addIncome(event) {
         amount: amount,
         category: category,
         description: description || '',
+        wallet: wallet,
         date: new Date().toISOString(),
         formattedDate: new Date().toLocaleDateString('id-ID')
     };
     
     transactions.unshift(transaction);
+    updateWalletBalances();
     saveData();
     updateDashboard();
     updateTransactionsList();
@@ -242,40 +300,46 @@ function addExpense(event) {
     const amount = parseFloat(document.getElementById('expense-amount').value);
     const category = document.getElementById('expense-category').value;
     const description = document.getElementById('expense-description').value;
+    const wallet = document.getElementById('expense-wallet') ? document.getElementById('expense-wallet').value : 'bank';
     
     if (amount <= 0) {
         showNotification('Jumlah harus lebih dari 0', 'error');
         return;
     }
     
-    // Check daily limit before adding expense
+    // Check daily limit before adding expense (excluding savings and goals if configured)
     if (dailyLimitSettings.enabled) {
-        const dailySpent = getTodayExpenses();
-        const newTotal = dailySpent + amount;
+        const shouldCheckLimit = !(dailyLimitSettings.excludeSavings && category === 'Tabungan') && 
+                                !(dailyLimitSettings.excludeGoals && category === 'Target/Goal');
         
-        if (newTotal > dailyLimitSettings.amount) {
-            if (dailyLimitSettings.blockExceed) {
-                const remaining = dailyLimitSettings.amount - dailySpent;
-                showNotification(
-                    `Pengeluaran melebihi batas harian! Sisa limit: ${formatCurrency(Math.max(0, remaining))}`, 
-                    'error'
-                );
-                return;
-            } else {
-                if (!confirm(`Pengeluaran akan melebihi batas harian Anda (${formatCurrency(dailyLimitSettings.amount)}). Lanjutkan?`)) {
+        if (shouldCheckLimit) {
+            const dailySpent = getTodayExpenses();
+            const newTotal = dailySpent + amount;
+            
+            if (newTotal > dailyLimitSettings.amount) {
+                if (dailyLimitSettings.blockExceed) {
+                    const remaining = dailyLimitSettings.amount - dailySpent;
+                    showNotification(
+                        `Pengeluaran melebihi batas harian! Sisa limit: ${formatCurrency(Math.max(0, remaining))}`, 
+                        'error'
+                    );
                     return;
+                } else {
+                    if (!confirm(`Pengeluaran akan melebihi batas harian Anda (${formatCurrency(dailyLimitSettings.amount)}). Lanjutkan?`)) {
+                        return;
+                    }
                 }
             }
-        }
-        
-        // Check for warnings
-        const percentage = (newTotal / dailyLimitSettings.amount) * 100;
-        if (percentage >= 90 && dailyLimitSettings.warnings.ninety && dailySpent < dailyLimitSettings.amount * 0.9) {
-            showNotification('Peringatan: 90% dari batas harian telah tercapai!', 'warning');
-        } else if (percentage >= 75 && dailyLimitSettings.warnings.seventyFive && dailySpent < dailyLimitSettings.amount * 0.75) {
-            showNotification('Peringatan: 75% dari batas harian telah tercapai!', 'warning');
-        } else if (percentage >= 50 && dailyLimitSettings.warnings.fifty && dailySpent < dailyLimitSettings.amount * 0.5) {
-            showNotification('Peringatan: 50% dari batas harian telah tercapai!', 'warning');
+            
+            // Check for warnings
+            const percentage = (newTotal / dailyLimitSettings.amount) * 100;
+            if (percentage >= 90 && dailyLimitSettings.warnings.ninety && dailySpent < dailyLimitSettings.amount * 0.9) {
+                showNotification('Peringatan: 90% dari batas harian telah tercapai!', 'warning');
+            } else if (percentage >= 75 && dailyLimitSettings.warnings.seventyFive && dailySpent < dailyLimitSettings.amount * 0.75) {
+                showNotification('Peringatan: 75% dari batas harian telah tercapai!', 'warning');
+            } else if (percentage >= 50 && dailyLimitSettings.warnings.fifty && dailySpent < dailyLimitSettings.amount * 0.5) {
+                showNotification('Peringatan: 50% dari batas harian telah tercapai!', 'warning');
+            }
         }
     }
     
@@ -285,11 +349,13 @@ function addExpense(event) {
         amount: amount,
         category: category,
         description: description || '',
+        wallet: wallet,
         date: new Date().toISOString(),
         formattedDate: new Date().toLocaleDateString('id-ID')
     };
     
     transactions.unshift(transaction);
+    updateWalletBalances();
     saveData();
     updateDashboard();
     updateTransactionsList();
@@ -309,14 +375,86 @@ function addExpense(event) {
 }
 
 function deleteTransaction(id) {
-    if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
-        transactions = transactions.filter(t => t.id !== id);
+    // Transactions cannot be deleted - history protection
+    showNotification('Transaksi tidak dapat dihapus untuk melindungi riwayat keuangan. Gunakan Reset Aplikasi di pengaturan untuk memulai dari awal.', 'error');
+}
+
+// Reset application function
+function resetApplication() {
+    const confirmText = 'RESET';
+    const userInput = prompt(`PERINGATAN: Ini akan menghapus SEMUA data aplikasi termasuk transaksi, target, tabungan, dan pengaturan.\n\nKetik "${confirmText}" untuk melanjutkan:`);
+    
+    if (userInput === confirmText) {
+        // Clear all data
+        transactions = [];
+        goals = [];
+        savings = [];
+        dailyLimitSettings = {
+            enabled: false,
+            amount: 50000,
+            resetTime: 'midnight',
+            customResetTime: '00:00',
+            warnings: {
+                fifty: true,
+                seventyFive: true,
+                ninety: true
+            },
+            blockExceed: true,
+            lastResetDate: null,
+            excludeSavings: true,
+            excludeGoals: true
+        };
+        customCategories = {
+            income: ['Gaji', 'Freelance', 'Bonus', 'Investasi', 'Lainnya'],
+            expense: ['Makanan', 'Transportasi', 'Belanja', 'Tagihan', 'Hiburan', 'Kesehatan', 'Lainnya']
+        };
+        statisticsConfig = {
+            keyMetrics: true,
+            incomeExpenseChart: true,
+            balanceChart: true,
+            categoryPieChart: true,
+            monthlyComparisonChart: true,
+            dailyActivityChart: true,
+            topCategories: true,
+            spendingPatterns: true,
+            goalsProgress: true,
+            spendingHeatmap: true,
+            financialHealth: true,
+            monthlyForecast: true,
+            financialInsights: true
+        };
+        wallets = [
+            { id: 'bank', name: 'Bank', balance: 0, color: '#3B82F6' },
+            { id: 'cash', name: 'Cash', balance: 0, color: '#10B981' },
+            { id: 'ewallet', name: 'E-Wallet', balance: 0, color: '#8B5CF6' }
+        ];
+        
+        // Clear localStorage
+        Object.values(STORAGE_KEYS).forEach(key => {
+            localStorage.removeItem(key);
+        });
+        
+        // Reset AI stats
+        localStorage.removeItem('moneyTracker_aiStats');
+        
+        // Save default data
         saveData();
+        
+        // Update UI
         updateDashboard();
         updateTransactionsList();
+        updateGoalsList();
+        updateSavingsDisplay();
         updateFilterCategories();
+        updateCategoryDropdowns();
         updateDailyLimitDisplay();
-        showNotification('Transaksi berhasil dihapus!', 'success');
+        
+        // Show dashboard section
+        showSection('dashboard');
+        
+        showNotification('Aplikasi berhasil direset! Semua data telah dihapus.', 'success');
+    } else if (userInput !== null) {
+        showNotification('Reset dibatalkan. Ketik "RESET" dengan huruf kapital untuk melanjutkan.', 'error');
     }
 }
 
@@ -347,6 +485,9 @@ function calculateSavingsBalance() {
 
 // Update dashboard
 function updateDashboard() {
+    // Update wallet balances first
+    updateWalletBalances();
+    
     const totalIncome = transactions
         .filter(t => t.type === 'income')
         .reduce((sum, t) => sum + t.amount, 0);
@@ -361,6 +502,9 @@ function updateDashboard() {
     document.getElementById('total-balance').textContent = formatCurrency(balance);
     document.getElementById('total-income').textContent = formatCurrency(totalIncome);
     document.getElementById('total-expense').textContent = formatCurrency(totalExpense);
+    
+    // Update wallet display
+    updateWalletDisplay();
     
     // Update recent transactions
     updateRecentTransactions();
@@ -479,6 +623,75 @@ function updateFilterCategories() {
         categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
 }
 
+// Update category dropdowns in forms
+function updateCategoryDropdowns() {
+    const incomeSelect = document.getElementById('income-category');
+    const expenseSelect = document.getElementById('expense-category');
+    const incomeWallet = document.getElementById('income-wallet');
+    const expenseWallet = document.getElementById('expense-wallet');
+    
+    if (incomeSelect) {
+        incomeSelect.innerHTML = customCategories.income.map(cat => 
+            `<option value="${cat}">${cat}</option>`
+        ).join('');
+    }
+    
+    if (expenseSelect) {
+        expenseSelect.innerHTML = customCategories.expense.map(cat => 
+            `<option value="${cat}">${cat}</option>`
+        ).join('');
+    }
+    
+    // Update wallet dropdowns
+    const walletOptions = wallets.map(wallet => 
+        `<option value="${wallet.id}">${wallet.name}</option>`
+    ).join('');
+    
+    if (incomeWallet) {
+        incomeWallet.innerHTML = walletOptions;
+    }
+    
+    if (expenseWallet) {
+        expenseWallet.innerHTML = walletOptions;
+    }
+}
+
+// Custom category management
+function addCustomCategory(type) {
+    const categoryName = prompt(`Masukkan nama kategori ${type === 'income' ? 'pemasukan' : 'pengeluaran'} baru:`);
+    if (categoryName && categoryName.trim()) {
+        const trimmedName = categoryName.trim();
+        if (!customCategories[type].includes(trimmedName)) {
+            customCategories[type].push(trimmedName);
+            saveData();
+            updateCategoryDropdowns();
+            showNotification(`Kategori "${trimmedName}" berhasil ditambahkan!`, 'success');
+        } else {
+            showNotification('Kategori sudah ada!', 'error');
+        }
+    }
+}
+
+function removeCustomCategory(type, categoryName) {
+    if (confirm(`Hapus kategori "${categoryName}"? Transaksi dengan kategori ini tidak akan terhapus.`)) {
+        customCategories[type] = customCategories[type].filter(cat => cat !== categoryName);
+        saveData();
+        updateCategoryDropdowns();
+        showNotification(`Kategori "${categoryName}" berhasil dihapus!`, 'success');
+    }
+}
+
+// Wallet management functions
+function updateWalletBalances() {
+    wallets.forEach(wallet => {
+        const walletTransactions = transactions.filter(t => t.wallet === wallet.id);
+        const income = walletTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+        const expense = walletTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+        wallet.balance = income - expense;
+    });
+    saveData();
+}
+
 // Goals functions
 function addGoal(event) {
     event.preventDefault();
@@ -572,12 +785,28 @@ function updateGoalsList() {
                                 class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition duration-200 text-sm">
                             <i class="fas fa-plus mr-1"></i>Kontribusi
                         </button>
+                        ${goal.savedAmount > 0 ? `
+                            <button onclick="withdrawFromGoal('${goal.id}')" 
+                                    class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition duration-200 text-sm">
+                                <i class="fas fa-minus mr-1"></i>Tarik
+                            </button>
+                        ` : ''}
                     </div>
                 ` : `
                     <div class="text-center py-2">
-                        <p class="text-green-600 font-semibold">
+                        <p class="text-green-600 font-semibold mb-2">
                             <i class="fas fa-check-circle mr-2"></i>Target tercapai!
                         </p>
+                        <div class="flex justify-center space-x-2">
+                            <button onclick="withdrawFromGoal('${goal.id}')" 
+                                    class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-200 text-sm">
+                                <i class="fas fa-hand-holding-usd mr-1"></i>Kembalikan ke Saldo
+                            </button>
+                            <button onclick="partialWithdrawFromGoal('${goal.id}')" 
+                                    class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-200 text-sm">
+                                <i class="fas fa-minus mr-1"></i>Tarik Sebagian
+                            </button>
+                        </div>
                     </div>
                 `}
             </div>
@@ -614,7 +843,7 @@ function contributeToGoal(goalId) {
             id: Date.now().toString(),
             type: 'expense',
             amount: amount,
-            category: 'Target',
+            category: 'Target/Goal',
             description: `Kontribusi untuk ${goal.name}`,
             date: new Date().toISOString(),
             formattedDate: new Date().toLocaleDateString('id-ID')
@@ -634,6 +863,85 @@ function contributeToGoal(goalId) {
             showNotification('Kontribusi berhasil ditambahkan!', 'success');
         }
     }
+}
+
+function withdrawFromGoal(goalId) {
+    const goal = goals.find(g => g.id === goalId);
+    if (!goal || goal.savedAmount <= 0) {
+        showNotification('Tidak ada dana yang bisa ditarik dari target ini', 'error');
+        return;
+    }
+    
+    const isCompleted = goal.savedAmount >= goal.amount;
+    const message = isCompleted ? 
+        `Kembalikan semua dana (${formatCurrency(goal.savedAmount)}) dari target "${goal.name}" ke saldo?` :
+        `Tarik semua dana (${formatCurrency(goal.savedAmount)}) dari target "${goal.name}"?`;
+    
+    if (confirm(message)) {
+        const withdrawAmount = goal.savedAmount;
+        
+        // Add as income transaction (money back to balance)
+        const transaction = {
+            id: Date.now().toString(),
+            type: 'income',
+            amount: withdrawAmount,
+            category: 'Penarikan Target',
+            description: `Penarikan dari ${goal.name}`,
+            date: new Date().toISOString(),
+            formattedDate: new Date().toLocaleDateString('id-ID')
+        };
+        
+        transactions.unshift(transaction);
+        goal.savedAmount = 0;
+        
+        saveData();
+        updateGoalsList();
+        updateDashboard();
+        updateTransactionsList();
+        
+        showNotification(`${formatCurrency(withdrawAmount)} berhasil dikembalikan ke saldo!`, 'success');
+    }
+}
+
+function partialWithdrawFromGoal(goalId) {
+    const goal = goals.find(g => g.id === goalId);
+    if (!goal || goal.savedAmount <= 0) {
+        showNotification('Tidak ada dana yang bisa ditarik dari target ini', 'error');
+        return;
+    }
+    
+    const withdrawAmount = parseFloat(prompt(`Masukkan jumlah yang ingin ditarik (Maksimal: ${formatCurrency(goal.savedAmount)}):`));
+    
+    if (!withdrawAmount || withdrawAmount <= 0) {
+        showNotification('Jumlah penarikan tidak valid', 'error');
+        return;
+    }
+    
+    if (withdrawAmount > goal.savedAmount) {
+        showNotification('Jumlah penarikan melebihi dana yang tersedia', 'error');
+        return;
+    }
+    
+    // Add as income transaction (money back to balance)
+    const transaction = {
+        id: Date.now().toString(),
+        type: 'income',
+        amount: withdrawAmount,
+        category: 'Penarikan Target',
+        description: `Penarikan sebagian dari ${goal.name}`,
+        date: new Date().toISOString(),
+        formattedDate: new Date().toLocaleDateString('id-ID')
+    };
+    
+    transactions.unshift(transaction);
+    goal.savedAmount -= withdrawAmount;
+    
+    saveData();
+    updateGoalsList();
+    updateDashboard();
+    updateTransactionsList();
+    
+    showNotification(`${formatCurrency(withdrawAmount)} berhasil ditarik dari target!`, 'success');
 }
 
 function deleteGoal(id) {
@@ -786,7 +1094,17 @@ function deleteSaving(id) {
 function getTodayExpenses() {
     const today = new Date().toLocaleDateString('id-ID');
     return transactions
-        .filter(t => t.type === 'expense' && t.formattedDate === today)
+        .filter(t => {
+            if (t.type !== 'expense' || t.formattedDate !== today) return false;
+            
+            // Exclude savings from daily limit if setting is enabled
+            if (dailyLimitSettings.excludeSavings && t.category === 'Tabungan') return false;
+            
+            // Exclude goal contributions from daily limit if setting is enabled
+            if (dailyLimitSettings.excludeGoals && t.category === 'Target/Goal') return false;
+            
+            return true;
+        })
         .reduce((sum, t) => sum + t.amount, 0);
 }
 
@@ -913,6 +1231,8 @@ function saveDailyLimitSettings() {
     const warning75 = document.getElementById('warning-75');
     const warning90 = document.getElementById('warning-90');
     const blockExceed = document.getElementById('block-exceed');
+    const excludeSavings = document.getElementById('exclude-savings');
+    const excludeGoals = document.getElementById('exclude-goals');
     
     const amount = parseFloat(limitInput.value);
     
@@ -928,6 +1248,8 @@ function saveDailyLimitSettings() {
     dailyLimitSettings.warnings.seventyFive = warning75.checked;
     dailyLimitSettings.warnings.ninety = warning90.checked;
     dailyLimitSettings.blockExceed = blockExceed.checked;
+    dailyLimitSettings.excludeSavings = excludeSavings.checked;
+    dailyLimitSettings.excludeGoals = excludeGoals.checked;
     
     saveData();
     updateDailyLimitDisplay();
@@ -945,27 +1267,31 @@ function loadDailyLimitSettings() {
     const warning75 = document.getElementById('warning-75');
     const warning90 = document.getElementById('warning-90');
     const blockExceed = document.getElementById('block-exceed');
+    const excludeSavings = document.getElementById('exclude-savings');
+    const excludeGoals = document.getElementById('exclude-goals');
     
-    toggle.checked = dailyLimitSettings.enabled;
-    limitInput.value = dailyLimitSettings.amount;
+    if (toggle) toggle.checked = dailyLimitSettings.enabled;
+    if (limitInput) limitInput.value = dailyLimitSettings.amount;
     
     if (dailyLimitSettings.resetTime === 'midnight') {
-        resetMidnight.checked = true;
-        customResetTime.disabled = true;
+        if (resetMidnight) resetMidnight.checked = true;
+        if (customResetTime) customResetTime.disabled = true;
     } else {
-        resetCustom.checked = true;
-        customResetTime.disabled = false;
+        if (resetCustom) resetCustom.checked = true;
+        if (customResetTime) customResetTime.disabled = false;
     }
     
-    customResetTime.value = dailyLimitSettings.customResetTime;
-    warning50.checked = dailyLimitSettings.warnings.fifty;
-    warning75.checked = dailyLimitSettings.warnings.seventyFive;
-    warning90.checked = dailyLimitSettings.warnings.ninety;
-    blockExceed.checked = dailyLimitSettings.blockExceed;
+    if (customResetTime) customResetTime.value = dailyLimitSettings.customResetTime;
+    if (warning50) warning50.checked = dailyLimitSettings.warnings.fifty;
+    if (warning75) warning75.checked = dailyLimitSettings.warnings.seventyFive;
+    if (warning90) warning90.checked = dailyLimitSettings.warnings.ninety;
+    if (blockExceed) blockExceed.checked = dailyLimitSettings.blockExceed;
+    if (excludeSavings) excludeSavings.checked = dailyLimitSettings.excludeSavings;
+    if (excludeGoals) excludeGoals.checked = dailyLimitSettings.excludeGoals;
     
     // Show/hide settings based on enabled state
     const settings = document.getElementById('daily-limit-settings');
-    if (dailyLimitSettings.enabled) {
+    if (settings && dailyLimitSettings.enabled) {
         settings.classList.remove('hidden');
         updateDailyStats();
     }
@@ -1044,19 +1370,28 @@ function updateDailyStats() {
                     ${daysOverLimit} dari 7 hari melampaui batas
                 </p>
             </div>
-        </div>
+        </div>  
     `;
 }
 
 function setupEventListeners() {
     // Custom reset time toggle
-    document.getElementById('reset-midnight').addEventListener('change', function() {
-        document.getElementById('custom-reset-time').disabled = true;
-    });
+    const resetMidnight = document.getElementById('reset-midnight');
+    const resetCustom = document.getElementById('reset-custom');
+    const customResetTime = document.getElementById('custom-reset-time');
     
-    document.getElementById('reset-custom').addEventListener('change', function() {
-        document.getElementById('custom-reset-time').disabled = false;
-    });
+    if (resetMidnight && resetCustom && customResetTime) {
+        resetMidnight.addEventListener('change', function() {
+            customResetTime.disabled = true;
+        });
+        
+        resetCustom.addEventListener('change', function() {
+            customResetTime.disabled = false;
+        });
+    }
+    
+    // Initialize category dropdowns
+    updateCategoryDropdowns();
 }
 
 // Statistics Functions
@@ -1103,13 +1438,37 @@ function updateStatistics() {
         monthSelect.style.display = 'block';
     }
     
-    // Update all statistics components
-    updateKeyMetrics(period, year, month);
+    // Update statistics components based on configuration
+    if (statisticsConfig.keyMetrics) {
+        updateKeyMetrics(period, year, month);
+        document.getElementById('key-metrics-container').style.display = 'block';
+    } else {
+        document.getElementById('key-metrics-container').style.display = 'none';
+    }
+    
     updateCharts(period, year, month);
     updateDetailedAnalytics(period, year, month);
-    updateFinancialHealth();
-    updateMonthlyForecast();
-    updateFinancialInsights();
+    
+    if (statisticsConfig.financialHealth) {
+        updateFinancialHealth();
+        document.getElementById('financial-health-container').style.display = 'block';
+    } else {
+        document.getElementById('financial-health-container').style.display = 'none';
+    }
+    
+    if (statisticsConfig.monthlyForecast) {
+        updateMonthlyForecast();
+        document.getElementById('monthly-forecast-container').style.display = 'block';
+    } else {
+        document.getElementById('monthly-forecast-container').style.display = 'none';
+    }
+    
+    if (statisticsConfig.financialInsights) {
+        updateFinancialInsights();
+        document.getElementById('financial-insights-container').style.display = 'block';
+    } else {
+        document.getElementById('financial-insights-container').style.display = 'none';
+    }
 }
 
 function updateKeyMetrics(period, year, month) {
@@ -1141,11 +1500,40 @@ function updateKeyMetrics(period, year, month) {
 }
 
 function updateCharts(period, year, month) {
-    updateIncomeExpenseChart(period, year, month);
-    updateBalanceChart(period, year, month);
-    updateCategoryPieChart(period, year, month);
-    updateMonthlyComparisonChart(period, year, month);
-    updateDailyActivityChart(period, year, month);
+    if (statisticsConfig.incomeExpenseChart) {
+        updateIncomeExpenseChart(period, year, month);
+        document.getElementById('income-expense-chart-container').style.display = 'block';
+    } else {
+        document.getElementById('income-expense-chart-container').style.display = 'none';
+    }
+    
+    if (statisticsConfig.balanceChart) {
+        updateBalanceChart(period, year, month);
+        document.getElementById('balance-chart-container').style.display = 'block';
+    } else {
+        document.getElementById('balance-chart-container').style.display = 'none';
+    }
+    
+    if (statisticsConfig.categoryPieChart) {
+        updateCategoryPieChart(period, year, month);
+        document.getElementById('category-pie-chart-container').style.display = 'block';
+    } else {
+        document.getElementById('category-pie-chart-container').style.display = 'none';
+    }
+    
+    if (statisticsConfig.monthlyComparisonChart) {
+        updateMonthlyComparisonChart(period, year, month);
+        document.getElementById('monthly-comparison-chart-container').style.display = 'block';
+    } else {
+        document.getElementById('monthly-comparison-chart-container').style.display = 'none';
+    }
+    
+    if (statisticsConfig.dailyActivityChart) {
+        updateDailyActivityChart(period, year, month);
+        document.getElementById('daily-activity-chart-container').style.display = 'block';
+    } else {
+        document.getElementById('daily-activity-chart-container').style.display = 'none';
+    }
 }
 
 function updateIncomeExpenseChart(period, year, month) {
@@ -1410,10 +1798,33 @@ function updateDailyActivityChart(period, year, month) {
 }
 
 function updateDetailedAnalytics(period, year, month) {
-    updateTopCategories(period, year, month);
-    updateSpendingPatterns(period, year, month);
-    updateGoalsProgress();
-    updateSpendingHeatmap(period, year, month);
+    if (statisticsConfig.topCategories) {
+        updateTopCategories(period, year, month);
+        document.getElementById('top-categories-container').style.display = 'block';
+    } else {
+        document.getElementById('top-categories-container').style.display = 'none';
+    }
+    
+    if (statisticsConfig.spendingPatterns) {
+        updateSpendingPatterns(period, year, month);
+        document.getElementById('spending-patterns-container').style.display = 'block';
+    } else {
+        document.getElementById('spending-patterns-container').style.display = 'none';
+    }
+    
+    if (statisticsConfig.goalsProgress) {
+        updateGoalsProgress();
+        document.getElementById('goals-progress-container').style.display = 'block';
+    } else {
+        document.getElementById('goals-progress-container').style.display = 'none';
+    }
+    
+    if (statisticsConfig.spendingHeatmap) {
+        updateSpendingHeatmap(period, year, month);
+        document.getElementById('spending-heatmap-container').style.display = 'block';
+    } else {
+        document.getElementById('spending-heatmap-container').style.display = 'none';
+    }
 }
 
 function updateTopCategories(period, year, month) {
@@ -2734,10 +3145,13 @@ function addTransactionFromAI(type, amount, category, description, date = null) 
         amount: amount,
         category: category,
         description: description,
-        date: date || new Date().toISOString()
+        wallet: 'bank', // Default wallet for AI transactions
+        date: date || new Date().toISOString(),
+        formattedDate: new Date(date || new Date().toISOString()).toLocaleDateString('id-ID')
     };
     
     transactions.unshift(transaction);
+    updateWalletBalances();
     saveData();
     updateDashboard();
     updateTransactionsList();
@@ -2772,7 +3186,9 @@ function addToSavingsFromAI(amount, description, date = null) {
         amount: amount,
         category: 'Tabungan',
         description: description || 'Menabung via AI Chat',
-        date: transactionDate
+        wallet: 'bank', // Default wallet for AI transactions
+        date: transactionDate,
+        formattedDate: new Date(transactionDate).toLocaleDateString('id-ID')
     };
     
     transactions.unshift(transaction);
@@ -2788,6 +3204,7 @@ function addToSavingsFromAI(amount, description, date = null) {
     
     savings.unshift(savingEntry);
     
+    updateWalletBalances();
     saveData();
     updateDashboard();
     updateTransactionsList();
@@ -2810,7 +3227,9 @@ function withdrawFromSavingsFromAI(amount, description, date = null) {
         amount: amount,
         category: 'Penarikan Tabungan',
         description: description || 'Penarikan tabungan via AI Chat',
-        date: transactionDate
+        wallet: 'bank', // Default wallet for AI transactions
+        date: transactionDate,
+        formattedDate: new Date(transactionDate).toLocaleDateString('id-ID')
     };
     
     transactions.unshift(transaction);
@@ -2826,6 +3245,7 @@ function withdrawFromSavingsFromAI(amount, description, date = null) {
     
     savings.unshift(withdrawEntry);
     
+    updateWalletBalances();
     saveData();
     updateDashboard();
     updateTransactionsList();
@@ -2903,4 +3323,277 @@ function showDailyLimitAlert(type, message, subMessage) {
     setTimeout(() => {
         alert.classList.add('hidden');
     }, 5000);
+}
+
+// ========================================
+// EXTENDED FEATURES
+// ========================================
+
+// Statistics Configuration Functions
+function toggleStatisticsConfig(configKey) {
+    statisticsConfig[configKey] = !statisticsConfig[configKey];
+    saveData();
+    updateStatistics();
+    showNotification(`Tampilan ${configKey} ${statisticsConfig[configKey] ? 'diaktifkan' : 'dinonaktifkan'}`, 'success');
+}
+
+function loadStatisticsConfig() {
+    Object.keys(statisticsConfig).forEach(key => {
+        const checkbox = document.getElementById(`stats-${key}`);
+        if (checkbox) {
+            checkbox.checked = statisticsConfig[key];
+        }
+    });
+}
+
+// Wallet Management Functions
+function updateWalletDisplay() {
+    const walletContainer = document.getElementById('wallet-cards');
+    if (!walletContainer) return;
+    
+    walletContainer.innerHTML = wallets.map(wallet => `
+        <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                    <div class="w-4 h-4 rounded-full mr-3" style="background-color: ${wallet.color}"></div>
+                    <h3 class="font-semibold text-gray-900">${wallet.name}</h3>
+                </div>
+                <button onclick="editWallet('${wallet.id}')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-edit"></i>
+                </button>
+            </div>
+            <p class="text-2xl font-bold text-gray-900">${formatCurrency(wallet.balance)}</p>
+            <div class="mt-4 flex space-x-2">
+                <button onclick="transferBetweenWallets('${wallet.id}')" 
+                        class="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200">
+                    Transfer
+                </button>
+                <button onclick="viewWalletTransactions('${wallet.id}')" 
+                        class="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200">
+                    Riwayat
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function editWallet(walletId) {
+    const wallet = wallets.find(w => w.id === walletId);
+    if (!wallet) return;
+    
+    const newName = prompt('Nama wallet baru:', wallet.name);
+    if (newName && newName.trim()) {
+        wallet.name = newName.trim();
+        saveData();
+        updateWalletDisplay();
+        showNotification('Wallet berhasil diperbarui!', 'success');
+    }
+}
+
+function addCustomWallet() {
+    const name = prompt('Nama wallet baru:');
+    if (name && name.trim()) {
+        const colors = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#06B6D4'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        
+        const newWallet = {
+            id: Date.now().toString(),
+            name: name.trim(),
+            balance: 0,
+            color: color
+        };
+        
+        wallets.push(newWallet);
+        saveData();
+        updateWalletDisplay();
+        updateCategoryDropdowns();
+        showNotification('Wallet baru berhasil ditambahkan!', 'success');
+    }
+}
+
+function transferBetweenWallets(fromWalletId) {
+    const fromWallet = wallets.find(w => w.id === fromWalletId);
+    if (!fromWallet || fromWallet.balance <= 0) {
+        showNotification('Wallet tidak memiliki saldo untuk ditransfer', 'error');
+        return;
+    }
+    
+    const toWalletId = prompt('ID wallet tujuan:\n' + 
+        wallets.filter(w => w.id !== fromWalletId)
+               .map(w => `${w.id}: ${w.name}`)
+               .join('\n'));
+    
+    const toWallet = wallets.find(w => w.id === toWalletId);
+    if (!toWallet) {
+        showNotification('Wallet tujuan tidak ditemukan', 'error');
+        return;
+    }
+    
+    const amount = parseFloat(prompt(`Transfer dari ${fromWallet.name} ke ${toWallet.name}\nMaksimal: ${formatCurrency(fromWallet.balance)}\nJumlah:`));
+    
+    if (!amount || amount <= 0 || amount > fromWallet.balance) {
+        showNotification('Jumlah transfer tidak valid', 'error');
+        return;
+    }
+    
+    // Create transfer transactions
+    const outTransaction = {
+        id: Date.now().toString(),
+        type: 'expense',
+        amount: amount,
+        category: 'Transfer',
+        description: `Transfer ke ${toWallet.name}`,
+        wallet: fromWallet.id,
+        date: new Date().toISOString(),
+        formattedDate: new Date().toLocaleDateString('id-ID')
+    };
+    
+    const inTransaction = {
+        id: (Date.now() + 1).toString(),
+        type: 'income',
+        amount: amount,
+        category: 'Transfer',
+        description: `Transfer dari ${fromWallet.name}`,
+        wallet: toWallet.id,
+        date: new Date().toISOString(),
+        formattedDate: new Date().toLocaleDateString('id-ID')
+    };
+    
+    transactions.unshift(outTransaction, inTransaction);
+    updateWalletBalances();
+    saveData();
+    updateDashboard();
+    updateTransactionsList();
+    updateWalletDisplay();
+    
+    showNotification(`Transfer ${formatCurrency(amount)} berhasil!`, 'success');
+}
+
+function viewWalletTransactions(walletId) {
+    const wallet = wallets.find(w => w.id === walletId);
+    if (!wallet) return;
+    
+    const walletTransactions = transactions.filter(t => t.wallet === walletId);
+    
+    if (walletTransactions.length === 0) {
+        alert(`Tidak ada transaksi di wallet ${wallet.name}`);
+        return;
+    }
+    
+    const transactionList = walletTransactions.slice(0, 10).map(t => 
+        `${formatDate(t.date)} - ${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)} - ${t.description}`
+    ).join('\n');
+    
+    alert(`Riwayat Transaksi ${wallet.name} (10 terakhir):\n\n${transactionList}`);
+}
+
+// Category Management Functions
+function manageCategoriesUI() {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Kelola Kategori</h3>
+                <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <h4 class="font-medium mb-2">Kategori Pemasukan</h4>
+                    <div class="space-y-2">
+                        ${customCategories.income.map(cat => `
+                            <div class="flex justify-between items-center">
+                                <span>${cat}</span>
+                                ${cat !== 'Lainnya' ? `
+                                    <button onclick="removeCustomCategory('income', '${cat}'); this.closest('.fixed').remove();" 
+                                            class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-trash text-xs"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button onclick="addCustomCategory('income'); this.closest('.fixed').remove();" 
+                            class="mt-2 px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600">
+                        + Tambah Kategori
+                    </button>
+                </div>
+                
+                <div>
+                    <h4 class="font-medium mb-2">Kategori Pengeluaran</h4>
+                    <div class="space-y-2">
+                        ${customCategories.expense.map(cat => `
+                            <div class="flex justify-between items-center">
+                                <span>${cat}</span>
+                                ${cat !== 'Lainnya' ? `
+                                    <button onclick="removeCustomCategory('expense', '${cat}'); this.closest('.fixed').remove();" 
+                                            class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-trash text-xs"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button onclick="addCustomCategory('expense'); this.closest('.fixed').remove();" 
+                            class="mt-2 px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600">
+                        + Tambah Kategori
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// Statistics Configuration UI
+function manageStatisticsConfigUI() {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Pengaturan Statistik</h3>
+                <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-3 max-h-96 overflow-y-auto">
+                ${Object.keys(statisticsConfig).map(key => `
+                    <label class="flex items-center">
+                        <input type="checkbox" 
+                               ${statisticsConfig[key] ? 'checked' : ''} 
+                               onchange="toggleStatisticsConfig('${key}')"
+                               class="mr-3">
+                        <span class="text-sm">${getStatisticsDisplayName(key)}</span>
+                    </label>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function getStatisticsDisplayName(key) {
+    const names = {
+        keyMetrics: 'Metrik Utama',
+        incomeExpenseChart: 'Grafik Pemasukan & Pengeluaran',
+        balanceChart: 'Grafik Saldo',
+        categoryPieChart: 'Grafik Pie Kategori',
+        monthlyComparisonChart: 'Perbandingan Bulanan',
+        dailyActivityChart: 'Aktivitas Harian',
+        topCategories: 'Kategori Teratas',
+        spendingPatterns: 'Pola Pengeluaran',
+        goalsProgress: 'Progress Target',
+        spendingHeatmap: 'Heatmap Pengeluaran',
+        financialHealth: 'Kesehatan Finansial',
+        monthlyForecast: 'Perkiraan Bulanan',
+        financialInsights: 'Wawasan Finansial'
+    };
+    return names[key] || key;
 }

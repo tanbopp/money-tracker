@@ -144,6 +144,19 @@
                 </div>
             </div>
 
+            <!-- Wallet Cards -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900">Wallet Saya</h2>
+                    <button onclick="addCustomWallet()" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition duration-200 text-sm">
+                        <i class="fas fa-plus mr-2"></i>Tambah Wallet
+                    </button>
+                </div>
+                <div id="wallet-cards" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Wallet cards will be populated by JavaScript -->
+                </div>
+            </div>
+
             <!-- Quick Actions -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
@@ -162,6 +175,14 @@
                                     <option value="Investasi">Investasi</option>
                                     <option value="Bonus">Bonus</option>
                                     <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Wallet</label>
+                                <select id="income-wallet" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <option value="bank">Bank</option>
+                                    <option value="cash">Cash</option>
+                                    <option value="ewallet">E-Wallet</option>
                                 </select>
                             </div>
                             <div>
@@ -193,6 +214,14 @@
                                     <option value="Hiburan">Hiburan</option>
                                     <option value="Kesehatan">Kesehatan</option>
                                     <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Wallet</label>
+                                <select id="expense-wallet" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <option value="bank">Bank</option>
+                                    <option value="cash">Cash</option>
+                                    <option value="ewallet">E-Wallet</option>
                                 </select>
                             </div>
                             <div>
@@ -742,6 +771,20 @@
                             </div>
                             
                             <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-700">Pengecualian Batas Harian</label>
+                                <div class="space-y-2">
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" id="exclude-savings" class="text-primary focus:ring-primary" checked>
+                                        <label for="exclude-savings" class="text-sm text-gray-700">Kecualikan tabungan dari batas harian</label>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" id="exclude-goals" class="text-primary focus:ring-primary" checked>
+                                        <label for="exclude-goals" class="text-sm text-gray-700">Kecualikan kontribusi target dari batas harian</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">Reset Otomatis</label>
                                 <div class="flex items-center space-x-2">
                                     <input type="radio" id="reset-midnight" name="reset-time" value="midnight" checked class="text-primary focus:ring-primary">
@@ -779,6 +822,29 @@
                             <button onclick="saveDailyLimitSettings()" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary/90 transition duration-200">
                                 <i class="fas fa-save mr-2"></i>Simpan Pengaturan
                             </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Pengaturan Aplikasi</h2>
+                    <div class="space-y-4">
+                        <button onclick="manageCategoriesUI()" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200">
+                            <i class="fas fa-tags mr-2"></i>Kelola Kategori Custom
+                        </button>
+                        
+                        <button onclick="manageStatisticsConfigUI()" class="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-200">
+                            <i class="fas fa-chart-bar mr-2"></i>Pengaturan Statistik
+                        </button>
+                        
+                        <button onclick="resetApplication()" class="w-full bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition duration-200">
+                            <i class="fas fa-sync-alt mr-2"></i>Reset Aplikasi
+                        </button>
+                        
+                        <div class="border-t pt-4">
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">Info Aplikasi</h3>
+                            <p class="text-xs text-gray-500">Money Tracker v2.0</p>
+                            <p class="text-xs text-gray-500">Fitur terbaru: Wallet, Kategori Custom, Statistik Konfigurasi</p>
                         </div>
                     </div>
                 </div>

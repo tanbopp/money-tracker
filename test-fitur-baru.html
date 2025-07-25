@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Fitur Baru - Money Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .demo-box {
+            border: 2px dashed #4F46E5;
+            background: linear-gradient(45deg, #f8fafc 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f8fafc 25%, transparent 25%);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                <i class="fas fa-wallet text-primary mr-3"></i>
+                Money Tracker v2.0 - Fitur Baru
+            </h1>
+            <p class="text-gray-600">Test semua fitur terbaru yang telah diimplementasikan</p>
+        </div>
+
+        <!-- Status Implementasi -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-lg font-semibold text-green-600 mb-4">
+                    <i class="fas fa-check-circle mr-2"></i>Fitur Berhasil Diimplementasikan
+                </h2>
+                <ul class="space-y-2 text-sm">
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-2"></i>
+                        Daily limit dikecualikan untuk tabungan dan target
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-2"></i>
+                        Kategori custom untuk pemasukan dan pengeluaran
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-2"></i>
+                        History transaksi tidak bisa dihapus (protection)
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-2"></i>
+                        Reset aplikasi untuk memulai dari 0
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-2"></i>
+                        Target bisa dikembalikan atau ditarik sebagian
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-2"></i>
+                        Pengaturan tampilan statistik
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-2"></i>
+                        Sistem wallet (Bank, Cash, E-Wallet)
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-lg font-semibold text-blue-600 mb-4">
+                    <i class="fas fa-info-circle mr-2"></i>Cara Test Fitur
+                </h2>
+                <ol class="space-y-2 text-sm list-decimal list-inside">
+                    <li>Buka aplikasi utama (index.html)</li>
+                    <li>Test wallet system di dashboard</li>
+                    <li>Coba tambah kategori custom di pengaturan</li>
+                    <li>Test daily limit dengan pengecualian</li>
+                    <li>Coba tarik/kembalikan uang dari target</li>
+                    <li>Atur tampilan statistik sesuai kebutuhan</li>
+                    <li>Test transfer antar wallet</li>
+                    <li>Coba hapus transaksi (akan ditolak)</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Demo Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="demo-box p-6 rounded-lg">
+                <h3 class="font-semibold text-gray-900 mb-3">
+                    <i class="fas fa-wallet text-blue-500 mr-2"></i>Wallet System
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    Memecah uang ke 3 wallet: Bank, Cash, E-Wallet dengan tracking terpisah.
+                </p>
+                <div class="space-y-2 text-xs">
+                    <div class="flex justify-between">
+                        <span>Bank:</span>
+                        <span class="font-medium">Rp. 0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Cash:</span>
+                        <span class="font-medium">Rp. 0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>E-Wallet:</span>
+                        <span class="font-medium">Rp. 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-box p-6 rounded-lg">
+                <h3 class="font-semibold text-gray-900 mb-3">
+                    <i class="fas fa-tags text-green-500 mr-2"></i>Custom Categories
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    User bisa menambah kategori sendiri untuk pemasukan dan pengeluaran.
+                </p>
+                <div class="text-xs space-y-1">
+                    <div><strong>Income:</strong> Gaji, Freelance, Bonus...</div>
+                    <div><strong>Expense:</strong> Makanan, Transport, Belanja...</div>
+                    <div class="text-blue-600 mt-2">+ Tambah kategori custom</div>
+                </div>
+            </div>
+
+            <div class="demo-box p-6 rounded-lg">
+                <h3 class="font-semibold text-gray-900 mb-3">
+                    <i class="fas fa-shield-alt text-red-500 mr-2"></i>Transaction Protection
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    History transaksi tidak bisa dihapus untuk melindungi data keuangan.
+                </p>
+                <div class="text-xs">
+                    <div class="text-red-600">❌ Delete transaksi</div>
+                    <div class="text-green-600">✅ Reset aplikasi total</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Features -->
+        <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-8">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                <i class="fas fa-cog mr-2"></i>Fitur Advanced
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-medium text-gray-900 mb-2">Daily Limit Smart Exclusion</h3>
+                    <p class="text-sm text-gray-600 mb-2">
+                        Batas harian mengecualikan kontribusi tabungan dan target sehingga tidak mengganggu goal finansial.
+                    </p>
+                    <div class="text-xs text-blue-600">
+                        ✓ Exclude savings • ✓ Exclude goals
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="font-medium text-gray-900 mb-2">Flexible Goal Management</h3>
+                    <p class="text-sm text-gray-600 mb-2">
+                        Target bisa ditarik sebagian atau dikembalikan sepenuhnya ke saldo utama.
+                    </p>
+                    <div class="text-xs text-green-600">
+                        ✓ Withdraw partial • ✓ Return to balance
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="font-medium text-gray-900 mb-2">Customizable Statistics</h3>
+                    <p class="text-sm text-gray-600 mb-2">
+                        User bisa mengatur sendiri komponen statistik mana yang ingin ditampilkan.
+                    </p>
+                    <div class="text-xs text-purple-600">
+                        ✓ Toggle charts • ✓ Hide/show metrics
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="font-medium text-gray-900 mb-2">Wallet Transfer System</h3>
+                    <p class="text-sm text-gray-600 mb-2">
+                        Transfer uang antar wallet dengan tracking transaksi otomatis.
+                    </p>
+                    <div class="text-xs text-orange-600">
+                        ✓ Inter-wallet transfer • ✓ Auto tracking
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="text-center space-x-4">
+            <a href="index.html" class="inline-block bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition duration-200">
+                <i class="fas fa-rocket mr-2"></i>
+                Test Aplikasi Utama
+            </a>
+            <button onclick="window.location.reload()" class="inline-block bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition duration-200">
+                <i class="fas fa-sync-alt mr-2"></i>
+                Refresh Demo
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-xs text-gray-500">
+            <p>Money Tracker v2.0 - Enhanced with Wallet System, Custom Categories, and Advanced Features</p>
+            <p class="mt-1">Semua fitur telah diimplementasikan dan siap untuk digunakan</p>
+        </div>
+    </div>
+
+    <script>
+        // Demo initialization
+        console.log('🚀 Money Tracker v2.0 Features Demo Loaded');
+        console.log('✅ Wallet System');
+        console.log('✅ Custom Categories'); 
+        console.log('✅ Transaction Protection');
+        console.log('✅ Smart Daily Limits');
+        console.log('✅ Flexible Goals');
+        console.log('✅ Configurable Statistics');
+        console.log('✅ Inter-wallet Transfers');
+    </script>
+</body>
+</html>
