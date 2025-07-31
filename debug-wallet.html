@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Wallet System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">🔧 Debug Wallet System</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Debug Info -->
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-xl font-semibold mb-4">Debug Information</h2>
+                <div class="space-y-2 text-sm">
+                    <div><strong>Wallets Array:</strong> <span id="debug-wallets">Loading...</span></div>
+                    <div><strong>Local Storage:</strong> <span id="debug-storage">Loading...</span></div>
+                    <div><strong>Functions Available:</strong> <span id="debug-functions">Loading...</span></div>
+                </div>
+                <button onclick="debugWallets()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    <i class="fas fa-bug mr-2"></i>Debug Wallets
+                </button>
+            </div>
+
+            <!-- Test Wallet Display -->
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-xl font-semibold mb-4">Test Wallet Display</h2>
+                <div id="test-wallet-cards" class="space-y-4">
+                    <!-- Wallet cards will appear here -->
+                </div>
+                <button onclick="testWalletDisplay()" class="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    <i class="fas fa-wallet mr-2"></i>Test Display
+                </button>
+            </div>
+        </div>
+
+        <!-- Console Log -->
+        <div class="mt-8 bg-black text-green-400 p-4 rounded-lg">
+            <h3 class="text-lg font-semibold mb-2">Console Log:</h3>
+            <div id="console-log" class="space-y-1 font-mono text-sm max-h-96 overflow-y-auto">
+                <!-- Console messages will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v=3.0"></script>
+    <script>
+        // Override console.log to display in our UI
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        function addToConsole(message, type = 'log') {
+            const consoleDiv = document.getElementById('console-log');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type === 'error' ? 'text-red-400' : 'text-green-400';
+            messageDiv.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            consoleDiv.appendChild(messageDiv);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole(args.join(' '), 'log');
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole('ERROR: ' + args.join(' '), 'error');
+        };
+
+        function debugWallets() {
+            console.log('=== WALLET DEBUG START ===');
+            
+            // Check global wallets variable
+            console.log('Global wallets variable:', typeof wallets !== 'undefined' ? wallets : 'UNDEFINED');
+            
+            // Check localStorage directly
+            try {
+                const storedWallets = localStorage.getItem('moneyTracker_wallets');
+                console.log('LocalStorage wallets:', storedWallets);
+                if (storedWallets) {
+                    const parsed = JSON.parse(storedWallets);
+                    console.log('Parsed wallets:', parsed);
+                }
+            } catch (error) {
+                console.error('Error reading localStorage:', error);
+            }
+            
+            // Check if functions exist
+            const requiredFunctions = ['getWallets', 'updateWalletDisplay', 'initializeDefaultWallets'];
+            requiredFunctions.forEach(funcName => {
+                console.log(`Function ${funcName}:`, typeof window[funcName] === 'function' ? 'EXISTS' : 'MISSING');
+            });
+            
+            // Try to initialize wallets
+            try {
+                if (typeof initializeDefaultWallets === 'function') {
+                    console.log('Attempting to initialize default wallets...');
+                    initializeDefaultWallets();
+                    console.log('Default wallets initialized successfully');
+                } else {
+                    console.error('initializeDefaultWallets function not found');
+                }
+            } catch (error) {
+                console.error('Error initializing wallets:', error);
+            }
+            
+            console.log('=== WALLET DEBUG END ===');
+            updateDebugInfo();
+        }
+
+        function testWalletDisplay() {
+            console.log('=== TESTING WALLET DISPLAY ===');
+            
+            try {
+                // Get test container
+                const container = document.getElementById('test-wallet-cards');
+                
+                // Clear container
+                container.innerHTML = '';
+                
+                // Check if wallets exist
+                if (typeof wallets !== 'undefined' && wallets.length > 0) {
+                    console.log('Rendering', wallets.length, 'wallets');
+                    
+                    wallets.forEach(wallet => {
+                        const walletDiv = document.createElement('div');
+                        walletDiv.className = 'bg-gray-50 p-4 rounded border';
+                        walletDiv.innerHTML = `
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 rounded-full mr-3" style="background-color: ${wallet.color}"></div>
+                                    <h3 class="font-semibold">${wallet.name}</h3>
+                                </div>
+                                <span class="font-bold">${formatCurrency ? formatCurrency(wallet.balance || 0) : 'Rp ' + (wallet.balance || 0)}</span>
+                            </div>
+                        `;
+                        container.appendChild(walletDiv);
+                    });
+                    
+                    console.log('Wallet display rendered successfully');
+                } else {
+                    console.error('No wallets found to display');
+                    container.innerHTML = '<div class="text-red-500">No wallets found</div>';
+                }
+            } catch (error) {
+                console.error('Error testing wallet display:', error);
+            }
+        }
+
+        function updateDebugInfo() {
+            try {
+                document.getElementById('debug-wallets').textContent = 
+                    typeof wallets !== 'undefined' ? `${wallets.length} wallets loaded` : 'UNDEFINED';
+                
+                const storageWallets = localStorage.getItem('moneyTracker_wallets');
+                document.getElementById('debug-storage').textContent = 
+                    storageWallets ? 'Data exists' : 'No data';
+                
+                const functions = ['getWallets', 'updateWalletDisplay', 'initializeDefaultWallets'];
+                const functionStatus = functions.map(f => 
+                    typeof window[f] === 'function' ? `✓${f}` : `✗${f}`
+                ).join(', ');
+                document.getElementById('debug-functions').textContent = functionStatus;
+            } catch (error) {
+                console.error('Error updating debug info:', error);
+            }
+        }
+
+        // Initialize debug on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                console.log('Debug page loaded');
+                updateDebugInfo();
+                debugWallets();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

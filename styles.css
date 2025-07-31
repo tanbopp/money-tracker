@@ -5,9 +5,1011 @@
     font-family: 'Inter', sans-serif;
 }
 
+/* Force clean light mode defaults */
+html {
+    background-color: #ffffff;
+    color: #111827;
+}
+
+body {
+    background-color: #ffffff;
+    color: #111827;
+}
+
+/* Dark mode support */
+html.dark {
+    color-scheme: dark;
+    background-color: #111827;
+    color: #f9fafb;
+}
+
+html.dark body {
+    background-color: #111827;
+    color: #f9fafb;
+}
+
 /* Smooth transitions */
 .section {
     transition: opacity 0.3s ease-in-out;
+}
+
+/* Body transitions for dark mode */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Ensure cards have proper background */
+.bg-white {
+    background-color: #ffffff !important;
+}
+
+html.dark .bg-white {
+    background-color: #1f2937 !important;
+}
+
+/* Ensure gray backgrounds are white in light mode */
+.bg-gray-50 {
+    background-color: #ffffff !important;
+}
+
+html.dark .bg-gray-50 {
+    background-color: #111827 !important;
+}
+
+/* Navigation background */
+nav {
+    background-color: #ffffff !important;
+}
+
+html.dark nav {
+    background-color: #1f2937 !important;
+}
+
+/* Text color overrides for better contrast */
+/* Light mode - black text */
+.text-gray-900 {
+    color: #111827 !important;
+}
+
+.text-gray-800 {
+    color: #1f2937 !important;
+}
+
+.text-gray-700 {
+    color: #374151 !important;
+}
+
+.text-gray-600 {
+    color: #4b5563 !important;
+}
+
+.text-gray-500 {
+    color: #6b7280 !important;
+}
+
+/* Dark mode - white/light text */
+html.dark .text-gray-900 {
+    color: #f9fafb !important;
+}
+
+html.dark .text-gray-800 {
+    color: #f3f4f6 !important;
+}
+
+html.dark .text-gray-700 {
+    color: #e5e7eb !important;
+}
+
+html.dark .text-gray-600 {
+    color: #d1d5db !important;
+}
+
+html.dark .text-gray-500 {
+    color: #9ca3af !important;
+}
+
+/* Dark mode utility classes */
+html.dark .dark\:text-white {
+    color: #ffffff !important;
+}
+
+html.dark .dark\:text-gray-300 {
+    color: #d1d5db !important;
+}
+
+html.dark .dark\:text-gray-400 {
+    color: #9ca3af !important;
+}
+
+/* Headings and important text */
+h1, h2, h3, h4, h5, h6 {
+    color: #111827 !important;
+}
+
+html.dark h1, 
+html.dark h2, 
+html.dark h3, 
+html.dark h4, 
+html.dark h5, 
+html.dark h6 {
+    color: #f9fafb !important;
+}
+
+/* Body text */
+p, span, div {
+    color: #374151;
+}
+
+html.dark p, 
+html.dark span, 
+html.dark div {
+    color: #d1d5db;
+}
+
+/* Labels */
+label {
+    color: #374151 !important;
+}
+
+html.dark label {
+    color: #d1d5db !important;
+}
+
+/* Button text */
+button {
+    transition: all 0.2s ease;
+}
+
+/* Input and form elements */
+input, select, textarea {
+    color: #111827;
+    background-color: #ffffff;
+}
+
+html.dark input, 
+html.dark select, 
+html.dark textarea {
+    color: #f9fafb;
+    background-color: #374151;
+}
+
+/* Force strong contrast for readability */
+/* Light mode - ensure text is dark enough */
+.text-black {
+    color: #000000 !important;
+}
+
+.font-semibold, .font-bold, .font-medium {
+    color: #111827;
+}
+
+html.dark .font-semibold, 
+html.dark .font-bold, 
+html.dark .font-medium {
+    color: #f9fafb;
+}
+
+/* Navigation text */
+.nav-btn, .nav-btn-mobile {
+    color: #374151 !important;
+}
+
+html.dark .nav-btn,
+html.dark .nav-btn-mobile {
+    color: #d1d5db !important;
+}
+
+/* Dashboard Cards - Enhanced contrast */
+/* Balance Cards */
+.balance-card-text {
+    color: #111827 !important;
+}
+
+html.dark .balance-card-text {
+    color: #f9fafb !important;
+}
+
+/* Large amounts - Strong contrast */
+.balance-amount {
+    color: #000000 !important;
+    font-weight: 700;
+}
+
+html.dark .balance-amount {
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
+/* Wallet Cards */
+.wallet-card {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+html.dark .wallet-card {
+    background-color: #1f2937;
+    border: 1px solid #374151;
+}
+
+.wallet-title {
+    color: #111827 !important;
+    font-weight: 600;
+}
+
+html.dark .wallet-title {
+    color: #f9fafb !important;
+}
+
+.wallet-amount {
+    color: #000000 !important;
+    font-weight: 700;
+}
+
+html.dark .wallet-amount {
+    color: #ffffff !important;
+}
+
+/* Icon backgrounds - Better contrast */
+.icon-bg-blue {
+    background-color: #dbeafe !important;
+}
+
+html.dark .icon-bg-blue {
+    background-color: #1e3a8a !important;
+}
+
+.icon-bg-green {
+    background-color: #dcfce7 !important;
+}
+
+html.dark .icon-bg-green {
+    background-color: #14532d !important;
+}
+
+.icon-bg-red {
+    background-color: #fee2e2 !important;
+}
+
+html.dark .icon-bg-red {
+    background-color: #7f1d1d !important;
+}
+
+/* AI Assistant */
+.ai-section {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+html.dark .ai-section {
+    background-color: #1f2937;
+    border: 1px solid #374151;
+}
+
+.ai-text {
+    color: #111827 !important;
+}
+
+html.dark .ai-text {
+    color: #f9fafb !important;
+}
+
+/* Stats text */
+.stats-text {
+    color: #4b5563 !important;
+}
+
+html.dark .stats-text {
+    color: #9ca3af !important;
+}
+
+.stats-value {
+    color: #111827 !important;
+    font-weight: 600;
+}
+
+html.dark .stats-value {
+    color: #f9fafb !important;
+}
+
+/* Force strong contrast for wallet cards */
+.wallet-card .wallet-title,
+.wallet-card h3 {
+    color: #111827 !important;
+    font-weight: 600;
+}
+
+html.dark .wallet-card .wallet-title,
+html.dark .wallet-card h3 {
+    color: #f9fafb !important;
+}
+
+.wallet-card .wallet-amount,
+.wallet-card p {
+    color: #000000 !important;
+    font-weight: 700;
+}
+
+html.dark .wallet-card .wallet-amount,
+html.dark .wallet-card p {
+    color: #ffffff !important;
+}
+
+/* AI Chat Message styling */
+.ai-chat-message {
+    color: #111827 !important;
+}
+
+html.dark .ai-chat-message {
+    color: #f9fafb !important;
+}
+
+/* Force text contrast in all cards */
+.wallet-card *,
+.ai-section * {
+    color: inherit;
+}
+
+.wallet-card span,
+.ai-section span,
+.wallet-card div,
+.ai-section div {
+    color: #374151 !important;
+}
+
+html.dark .wallet-card span,
+html.dark .ai-section span,
+html.dark .wallet-card div,
+html.dark .ai-section div {
+    color: #d1d5db !important;
+}
+
+/* Button text in wallet cards */
+.wallet-card button,
+.ai-section button {
+    color: inherit !important;
+}
+
+.wallet-card button.bg-blue-100 {
+    background-color: #dbeafe !important;
+    color: #1e40af !important;
+}
+
+html.dark .wallet-card button.bg-blue-100 {
+    background-color: #1e3a8a !important;
+    color: #93c5fd !important;
+}
+
+.wallet-card button.bg-gray-100 {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+html.dark .wallet-card button.bg-gray-100 {
+    background-color: #374151 !important;
+    color: #d1d5db !important;
+}
+
+/* Override any conflicting text colors */
+.wallet-card .text-2xl,
+.balance-amount,
+.wallet-amount {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+html.dark .wallet-card .text-2xl,
+html.dark .balance-amount,
+html.dark .wallet-amount {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+/* Force very specific text colors */
+#wallet-cards .wallet-card h3,
+#wallet-cards-mobile .wallet-card h3 {
+    color: #111827 !important;
+    font-weight: 600 !important;
+}
+
+html.dark #wallet-cards .wallet-card h3,
+html.dark #wallet-cards-mobile .wallet-card h3 {
+    color: #f9fafb !important;
+    font-weight: 600 !important;
+}
+
+#wallet-cards .wallet-card p,
+#wallet-cards-mobile .wallet-card p {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+html.dark #wallet-cards .wallet-card p,
+html.dark #wallet-cards-mobile .wallet-card p {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+/* AI Assistant text - force visibility */
+.ai-section h4 {
+    color: #111827 !important;
+    font-weight: 600 !important;
+}
+
+html.dark .ai-section h4 {
+    color: #f9fafb !important;
+    font-weight: 600 !important;
+}
+
+.ai-section span {
+    color: #374151 !important;
+}
+
+html.dark .ai-section span {
+    color: #d1d5db !important;
+}
+
+/* AI Chat Widget specific styling */
+#dashboard-chat-messages {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+}
+
+html.dark #dashboard-chat-messages {
+    background-color: #1f2937 !important;
+    color: #f9fafb !important;
+}
+
+/* AI Chat message bubbles */
+#dashboard-chat-messages .bg-gray-100 {
+    background-color: #f3f4f6 !important;
+    color: #111827 !important;
+}
+
+html.dark #dashboard-chat-messages .bg-gray-100 {
+    background-color: #374151 !important;
+    color: #f9fafb !important;
+}
+
+/* AI Chat input field */
+#dashboard-chat-input {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border-color: #d1d5db !important;
+}
+
+html.dark #dashboard-chat-input {
+    background-color: #374151 !important;
+    color: #f9fafb !important;
+    border-color: #4b5563 !important;
+}
+
+/* Quick action buttons text */
+.ai-section button span {
+    color: #374151 !important;
+}
+
+html.dark .ai-section button span {
+    color: #d1d5db !important;
+}
+
+/* Stats text and values in AI Chat */
+.ai-section .stats-text {
+    color: #6b7280 !important;
+}
+
+html.dark .ai-section .stats-text {
+    color: #9ca3af !important;
+}
+
+.ai-section .stats-value {
+    color: #111827 !important;
+    font-weight: 600 !important;
+}
+
+html.dark .ai-section .stats-value {
+    color: #f9fafb !important;
+    font-weight: 600 !important;
+}
+
+/* AI Chat container background */
+#dashboard-chat-widget {
+    background-color: transparent !important;
+}
+
+#dashboard-chat-widget .bg-white {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+}
+
+html.dark #dashboard-chat-widget .bg-white {
+    background-color: #1f2937 !important;
+    color: #f9fafb !important;
+}
+
+/* AI Chat text content */
+#dashboard-chat-widget p,
+#dashboard-chat-widget span,
+#dashboard-chat-widget div {
+    color: #374151 !important;
+}
+
+html.dark #dashboard-chat-widget p,
+html.dark #dashboard-chat-widget span,
+html.dark #dashboard-chat-widget div {
+    color: #d1d5db !important;
+}
+
+/* Message text in AI Chat */
+#dashboard-chat-messages p {
+    color: #111827 !important;
+}
+
+html.dark #dashboard-chat-messages p {
+    color: #f9fafb !important;
+}
+
+/* AI Assistant title enhancement */
+h2.ai-text,
+.ai-text {
+    color: #111827 !important;
+    font-weight: 600 !important;
+}
+
+html.dark h2.ai-text,
+html.dark .ai-text {
+    color: #f9fafb !important;
+    font-weight: 600 !important;
+}
+
+/* Chat toggle button */
+#chat-toggle-btn {
+    background-color: #4f46e5 !important;
+    color: #ffffff !important;
+    font-weight: 500 !important;
+}
+
+#chat-toggle-btn:hover {
+    background-color: #4338ca !important;
+}
+
+/* Quick action button text improvements */
+.ai-section button {
+    transition: all 0.2s ease !important;
+}
+
+.ai-section button:hover {
+    background-color: #f3f4f6 !important;
+}
+
+html.dark .ai-section button:hover {
+    background-color: #4b5563 !important;
+}
+
+/* Consultation button colors */
+.bg-blue-50 {
+    background-color: #eff6ff !important;
+}
+
+html.dark .bg-blue-50 {
+    background-color: #1e3a8a !important;
+}
+
+.bg-green-50 {
+    background-color: #f0fdf4 !important;
+}
+
+html.dark .bg-green-50 {
+    background-color: #14532d !important;
+}
+
+/* Text in consultation buttons */
+.bg-blue-50 span {
+    color: #1e40af !important;
+}
+
+html.dark .bg-blue-50 span {
+    color: #93c5fd !important;
+}
+
+.bg-green-50 span {
+    color: #166534 !important;
+}
+
+html.dark .bg-green-50 span {
+    color: #86efac !important;
+}
+
+html.dark #dashboard-chat-messages p {
+    color: #f9fafb !important;
+}
+
+/* Transaction and Planning Section Improvements */
+/* Form Labels */
+#transactions-section label,
+#planning-section label {
+    color: #111827 !important;
+    font-weight: 500 !important;
+}
+
+html.dark #transactions-section label,
+html.dark #planning-section label {
+    color: #f3f4f6 !important;
+}
+
+/* Input Fields */
+#transactions-section input,
+#planning-section input,
+#transactions-section select,
+#planning-section select,
+#transactions-section textarea,
+#planning-section textarea {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border-color: #d1d5db !important;
+}
+
+html.dark #transactions-section input,
+html.dark #planning-section input,
+html.dark #transactions-section select,
+html.dark #planning-section select,
+html.dark #transactions-section textarea,
+html.dark #planning-section textarea {
+    background-color: #374151 !important;
+    color: #f9fafb !important;
+    border-color: #4b5563 !important;
+}
+
+/* Placeholder text */
+#transactions-section input::placeholder,
+#planning-section input::placeholder,
+#transactions-section textarea::placeholder,
+#planning-section textarea::placeholder {
+    color: #6b7280 !important;
+}
+
+html.dark #transactions-section input::placeholder,
+html.dark #planning-section input::placeholder,
+html.dark #transactions-section textarea::placeholder,
+html.dark #planning-section textarea::placeholder {
+    color: #9ca3af !important;
+}
+
+/* Section titles and headers */
+#transactions-section h1,
+#planning-section h1,
+#transactions-section h2,
+#planning-section h2,
+#transactions-section h3,
+#planning-section h3 {
+    color: #111827 !important;
+    font-weight: 600 !important;
+}
+
+html.dark #transactions-section h1,
+html.dark #planning-section h1,
+html.dark #transactions-section h2,
+html.dark #planning-section h2,
+html.dark #transactions-section h3,
+html.dark #planning-section h3 {
+    color: #f9fafb !important;
+}
+
+/* Card backgrounds */
+#transactions-section .bg-white,
+#planning-section .bg-white {
+    background-color: #ffffff !important;
+    border-color: #e5e7eb !important;
+}
+
+html.dark #transactions-section .bg-white,
+html.dark #planning-section .bg-white {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+}
+
+/* Button text improvements */
+#transactions-section button,
+#planning-section button {
+    font-weight: 500 !important;
+}
+
+/* Text content in forms */
+#transactions-section p,
+#planning-section p,
+#transactions-section span,
+#planning-section span {
+    color: #374151 !important;
+}
+
+html.dark #transactions-section p,
+html.dark #planning-section p,
+html.dark #transactions-section span,
+html.dark #planning-section span {
+    color: #d1d5db !important;
+}
+
+/* Select dropdown styling */
+#transactions-section select option,
+#planning-section select option {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+}
+
+html.dark #transactions-section select option,
+html.dark #planning-section select option {
+    background-color: #374151 !important;
+    color: #f9fafb !important;
+}
+
+/* Target specific form elements that appear dark in light mode */
+/* Income and Expense form improvements */
+#income-amount, #expense-amount,
+#income-category, #expense-category,
+#income-wallet, #expense-wallet,
+#income-description, #expense-description {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border: 1px solid #d1d5db !important;
+}
+
+html.dark #income-amount, html.dark #expense-amount,
+html.dark #income-category, html.dark #expense-category,
+html.dark #income-wallet, html.dark #expense-wallet,
+html.dark #income-description, html.dark #expense-description {
+    background-color: #374151 !important;
+    color: #f9fafb !important;
+    border: 1px solid #4b5563 !important;
+}
+
+/* Planning form elements */
+#goal-name, #goal-amount, #goal-date, #goal-description,
+#target-name, #target-amount, #target-date, #target-description {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border: 1px solid #d1d5db !important;
+}
+
+html.dark #goal-name, html.dark #goal-amount, html.dark #goal-date, html.dark #goal-description,
+html.dark #target-name, html.dark #target-amount, html.dark #target-date, html.dark #target-description {
+    background-color: #374151 !important;
+    color: #f9fafb !important;
+    border: 1px solid #4b5563 !important;
+}
+
+/* Transaction history table improvements */
+#transactions-section table,
+#planning-section table {
+    background-color: #ffffff !important;
+}
+
+html.dark #transactions-section table,
+html.dark #planning-section table {
+    background-color: #1f2937 !important;
+}
+
+#transactions-section th,
+#planning-section th,
+#transactions-section td,
+#planning-section td {
+    color: #111827 !important;
+    border-color: #e5e7eb !important;
+}
+
+html.dark #transactions-section th,
+html.dark #planning-section th,
+html.dark #transactions-section td,
+html.dark #planning-section td {
+    color: #f9fafb !important;
+    border-color: #374151 !important;
+}
+
+/* Focus states for better UX */
+#transactions-section input:focus,
+#planning-section input:focus,
+#transactions-section select:focus,
+#planning-section select:focus,
+#transactions-section textarea:focus,
+#planning-section textarea:focus {
+    border-color: #4f46e5 !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+}
+
+/* Text color for small text elements */
+#transactions-section .text-xs,
+#planning-section .text-xs,
+#transactions-section .text-sm,
+#planning-section .text-sm {
+    color: #6b7280 !important;
+}
+
+html.dark #transactions-section .text-xs,
+html.dark #planning-section .text-xs,
+html.dark #transactions-section .text-sm,
+html.dark #planning-section .text-sm {
+    color: #9ca3af !important;
+}
+
+/* Modal improvements */
+.modal .bg-white,
+[id*="modal"] .bg-white {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+}
+
+html.dark .modal .bg-white,
+html.dark [id*="modal"] .bg-white {
+    background-color: #1f2937 !important;
+    color: #f9fafb !important;
+}
+
+/* Modal form elements */
+.modal input,
+.modal select,
+.modal textarea,
+[id*="modal"] input,
+[id*="modal"] select,
+[id*="modal"] textarea {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border: 1px solid #d1d5db !important;
+}
+
+html.dark .modal input,
+html.dark .modal select,
+html.dark .modal textarea,
+html.dark [id*="modal"] input,
+html.dark [id*="modal"] select,
+html.dark [id*="modal"] textarea {
+    background-color: #374151 !important;
+    color: #f9fafb !important;
+    border: 1px solid #4b5563 !important;
+}
+
+/* Modal labels and text */
+.modal label,
+.modal h1,
+.modal h2,
+.modal h3,
+.modal p,
+[id*="modal"] label,
+[id*="modal"] h1,
+[id*="modal"] h2,
+[id*="modal"] h3,
+[id*="modal"] p {
+    color: #111827 !important;
+}
+
+html.dark .modal label,
+html.dark .modal h1,
+html.dark .modal h2,
+html.dark .modal h3,
+html.dark .modal p,
+html.dark [id*="modal"] label,
+html.dark [id*="modal"] h1,
+html.dark [id*="modal"] h2,
+html.dark [id*="modal"] h3,
+html.dark [id*="modal"] p {
+    color: #f9fafb !important;
+}
+
+/* Specific styling for Portfolio modal visible in the attachment */
+#add-stock-modal .bg-white {
+    background-color: #ffffff !important;
+}
+
+html.dark #add-stock-modal .bg-white {
+    background-color: #1f2937 !important;
+}
+
+#portfolio-stock-code,
+#portfolio-shares,
+#portfolio-buy-price,
+#portfolio-buy-date,
+#portfolio-company-name {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border: 1px solid #d1d5db !important;
+}
+
+html.dark #portfolio-stock-code,
+html.dark #portfolio-shares,
+html.dark #portfolio-buy-price,
+html.dark #portfolio-buy-date,
+html.dark #portfolio-company-name {
+    background-color: #374151 !important;
+    color: #f9fafb !important;
+    border: 1px solid #4b5563 !important;
+}
+
+/* Force all gray backgrounds to be white in light mode */
+.bg-gray-50,
+.bg-gray-100 {
+    background-color: #ffffff !important;
+}
+
+html.dark .bg-gray-50,
+html.dark .bg-gray-100 {
+    background-color: #1f2937 !important;
+}
+
+/* Ensure text visibility in light backgrounds */
+.bg-gray-50 *,
+.bg-gray-100 * {
+    color: #111827 !important;
+}
+
+html.dark .bg-gray-50 *,
+html.dark .bg-gray-100 * {
+    color: #f9fafb !important;
+}
+
+/* List items in AI Chat */
+#dashboard-chat-messages li {
+    color: #6b7280 !important;
+}
+
+html.dark #dashboard-chat-messages li {
+    color: #9ca3af !important;
+}
+
+/* Specific AI Chat button styling */
+button[onclick*="sendDashboardQuickMessage"] {
+    background-color: #f9fafb !important;
+    color: #374151 !important;
+}
+
+html.dark button[onclick*="sendDashboardQuickMessage"] {
+    background-color: #374151 !important;
+    color: #d1d5db !important;
+}
+
+button[onclick*="sendDashboardQuickMessage"]:hover {
+    background-color: #f3f4f6 !important;
+    color: #111827 !important;
+}
+
+html.dark button[onclick*="sendDashboardQuickMessage"]:hover {
+    background-color: #4b5563 !important;
+    color: #f9fafb !important;
+}
+
+/* AI Chat header text */
+#dashboard-chat-widget .text-lg {
+    color: #111827 !important;
+}
+
+html.dark #dashboard-chat-widget .text-lg {
+    color: #f9fafb !important;
+}
+
+/* Force all text in AI section to be readable */
+.ai-section *:not(i):not(button) {
+    color: #374151 !important;
+}
+
+html.dark .ai-section *:not(i):not(button) {
+    color: #d1d5db !important;
+}
+
+.ai-section h4 * {
+    color: inherit !important;
+}
+
+/* Active navigation */
+.nav-btn.text-primary,
+.nav-btn-mobile.text-primary {
+    color: #3B82F6 !important;
+}
+
+/* Icons and special elements */
+i {
+    transition: color 0.3s ease;
 }
 
 /* Custom scrollbar */
@@ -17,7 +1019,10 @@
 
 ::-webkit-scrollbar-track {
     background: #f1f1f1;
-    border-radius: 10px;
+}
+
+html.dark ::-webkit-scrollbar-track {
+    background: #374151;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -25,8 +1030,55 @@
     border-radius: 10px;
 }
 
+html.dark ::-webkit-scrollbar-thumb {
+    background: #6b7280;
+}
+
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Swiper Pagination Customization */
+.swiper-pagination {
+    position: static !important;
+    margin-top: 16px;
+}
+
+.swiper-pagination-bullet {
+    background: #d1d5db;
+    opacity: 1;
+    width: 8px;
+    height: 8px;
+}
+
+.swiper-pagination-bullet-active {
+    background: #4f46e5;
+}
+
+html.dark .swiper-pagination-bullet {
+    background: #4b5563;
+}
+
+html.dark .swiper-pagination-bullet-active {
+    background: #6366f1;
+}
+
+/* Planning Tabs Animation */
+.planning-tab-content {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 /* Chat Interface Styles */

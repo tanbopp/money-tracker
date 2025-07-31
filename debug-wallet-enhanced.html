@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Wallet System - Enhanced</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-6">Debug Wallet System - Enhanced</h1>
+        
+        <!-- Debug Controls -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">Debug Controls</h2>
+            <div class="flex flex-wrap gap-4">
+                <button onclick="debugWallets()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    Debug Wallets
+                </button>
+                <button onclick="clearStorage()" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                    Clear Storage
+                </button>
+                <button onclick="initializeDefaultWallets()" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                    Initialize Default Wallets
+                </button>
+                <button onclick="testUpdateWalletDisplay()" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">
+                    Test Update Wallet Display
+                </button>
+                <button onclick="addSampleTransactions()" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">
+                    Add Sample Transactions
+                </button>
+                <button onclick="location.reload()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                    Reload Page
+                </button>
+            </div>
+        </div>
+
+        <!-- Status Display -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">Status</h2>
+            <div id="status-display" class="space-y-2"></div>
+        </div>
+
+        <!-- Desktop Wallet Display Test -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">Desktop Wallet Cards Test</h2>
+            <div id="wallet-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+
+        <!-- Mobile Wallet Display Test -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">Mobile Wallet Cards Test</h2>
+            <div class="wallet-swiper">
+                <div id="wallet-cards-mobile" class="swiper-wrapper"></div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </div>
+
+        <!-- Console Log -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold mb-4">Console Log</h2>
+            <div id="console-log" class="bg-black text-green-400 p-4 rounded font-mono text-sm max-h-96 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Enhanced console logging
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        const originalConsoleWarn = console.warn;
+        const consoleLogDiv = document.getElementById('console-log');
+
+        function addToConsoleLog(message, type = 'log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'text-red-400' : type === 'warn' ? 'text-yellow-400' : 'text-green-400';
+            consoleLogDiv.innerHTML += `<div class="${color}">[${timestamp}] ${message}</div>`;
+            consoleLogDiv.scrollTop = consoleLogDiv.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            addToConsoleLog(args.join(' '), 'log');
+        };
+
+        console.error = function(...args) {
+            originalConsoleError.apply(console, args);
+            addToConsoleLog(args.join(' '), 'error');
+        };
+
+        console.warn = function(...args) {
+            originalConsoleWarn.apply(console, args);
+            addToConsoleLog(args.join(' '), 'warn');
+        };
+
+        // Debug functions
+        function debugWallets() {
+            console.log('=== ENHANCED WALLET DEBUG ===');
+            
+            // Check localStorage
+            const storedWallets = localStorage.getItem('money_tracker_wallets');
+            console.log('Stored wallets in localStorage:', storedWallets);
+            
+            // Check getWallets function
+            try {
+                const wallets = getWallets();
+                console.log('getWallets() result:', wallets);
+                console.log('Number of wallets:', wallets ? wallets.length : 0);
+                
+                if (wallets && wallets.length > 0) {
+                    wallets.forEach((wallet, index) => {
+                        console.log(`Wallet ${index + 1}:`, {
+                            id: wallet.id,
+                            name: wallet.name,
+                            balance: wallet.balance,
+                            color: wallet.color
+                        });
+                    });
+                }
+            } catch (error) {
+                console.error('Error calling getWallets():', error);
+            }
+            
+            // Check DOM elements
+            const desktopContainer = document.getElementById('wallet-cards');
+            const mobileContainer = document.getElementById('wallet-cards-mobile');
+            console.log('Desktop container found:', !!desktopContainer);
+            console.log('Mobile container found:', !!mobileContainer);
+            
+            if (desktopContainer) {
+                console.log('Desktop container children:', desktopContainer.children.length);
+                console.log('Desktop container HTML:', desktopContainer.innerHTML.substring(0, 200) + '...');
+            }
+            if (mobileContainer) {
+                console.log('Mobile container children:', mobileContainer.children.length);
+                console.log('Mobile container HTML:', mobileContainer.innerHTML.substring(0, 200) + '...');
+            }
+            
+            updateStatus();
+        }
+
+        function clearStorage() {
+            localStorage.clear();
+            console.log('Storage cleared');
+            updateStatus();
+        }
+
+        function testUpdateWalletDisplay() {
+            console.log('Testing updateWalletDisplay...');
+            try {
+                updateWalletDisplay();
+                console.log('updateWalletDisplay completed');
+            } catch (error) {
+                console.error('Error in updateWalletDisplay:', error);
+            }
+            updateStatus();
+        }
+
+        function addSampleTransactions() {
+            console.log('Adding sample transactions...');
+            const sampleTransactions = [
+                {
+                    id: Date.now().toString(),
+                    type: 'income',
+                    category: 'Salary',
+                    description: 'Monthly Salary',
+                    amount: 5000000,
+                    date: new Date().toISOString().split('T')[0],
+                    walletId: 'cash'
+                },
+                {
+                    id: (Date.now() + 1).toString(),
+                    type: 'expense',
+                    category: 'Food',
+                    description: 'Lunch',
+                    amount: 50000,
+                    date: new Date().toISOString().split('T')[0],
+                    walletId: 'cash'
+                },
+                {
+                    id: (Date.now() + 2).toString(),
+                    type: 'income',
+                    category: 'Investment',
+                    description: 'Stock Dividend',
+                    amount: 200000,
+                    date: new Date().toISOString().split('T')[0],
+                    walletId: 'bank'
+                }
+            ];
+            
+            // Get existing transactions
+            let transactions = [];
+            try {
+                const stored = localStorage.getItem('money_tracker_transactions');
+                if (stored) {
+                    transactions = JSON.parse(stored);
+                }
+            } catch (error) {
+                console.error('Error parsing transactions:', error);
+            }
+            
+            // Add sample transactions
+            transactions.push(...sampleTransactions);
+            localStorage.setItem('money_tracker_transactions', JSON.stringify(transactions));
+            
+            console.log('Sample transactions added:', sampleTransactions.length);
+            updateStatus();
+            testUpdateWalletDisplay(); // Refresh display
+        }
+
+        function updateStatus() {
+            const statusDiv = document.getElementById('status-display');
+            let status = '';
+            
+            // Check localStorage
+            const storedWallets = localStorage.getItem('money_tracker_wallets');
+            const storedTransactions = localStorage.getItem('money_tracker_transactions');
+            
+            status += `<div><strong>Storage Status:</strong></div>`;
+            status += `<div>• Wallets in storage: ${storedWallets ? 'Found' : 'Not found'}</div>`;
+            status += `<div>• Transactions in storage: ${storedTransactions ? 'Found' : 'Not found'}</div>`;
+            
+            if (storedTransactions) {
+                try {
+                    const transactions = JSON.parse(storedTransactions);
+                    status += `<div>• Transaction count: ${transactions.length}</div>`;
+                } catch (error) {
+                    status += `<div>• Transaction parsing error: ${error.message}</div>`;
+                }
+            }
+            
+            // Check functions
+            status += `<div class="mt-2"><strong>Function Status:</strong></div>`;
+            status += `<div>• getWallets: ${typeof getWallets === 'function' ? 'Available' : 'Missing'}</div>`;
+            status += `<div>• initializeDefaultWallets: ${typeof initializeDefaultWallets === 'function' ? 'Available' : 'Missing'}</div>`;
+            status += `<div>• updateWalletDisplay: ${typeof updateWalletDisplay === 'function' ? 'Available' : 'Missing'}</div>`;
+            status += `<div>• calculateWalletBalance: ${typeof calculateWalletBalance === 'function' ? 'Available' : 'Missing'}</div>`;
+            status += `<div>• updateDesktopWalletCards: ${typeof updateDesktopWalletCards === 'function' ? 'Available' : 'Missing'}</div>`;
+            status += `<div>• updateMobileWalletCards: ${typeof updateMobileWalletCards === 'function' ? 'Available' : 'Missing'}</div>`;
+            
+            // Check DOM elements
+            const desktopContainer = document.getElementById('wallet-cards');
+            const mobileContainer = document.getElementById('wallet-cards-mobile');
+            
+            status += `<div class="mt-2"><strong>DOM Elements:</strong></div>`;
+            status += `<div>• Desktop container: ${desktopContainer ? 'Found' : 'Not found'}</div>`;
+            status += `<div>• Mobile container: ${mobileContainer ? 'Found' : 'Not found'}</div>`;
+            
+            if (desktopContainer) {
+                status += `<div>• Desktop cards count: ${desktopContainer.children.length}</div>`;
+            }
+            if (mobileContainer) {
+                status += `<div>• Mobile cards count: ${mobileContainer.children.length}</div>`;
+            }
+            
+            // Check swiper
+            status += `<div class="mt-2"><strong>Swiper Status:</strong></div>`;
+            status += `<div>• walletSwiper available: ${typeof window.walletSwiper !== 'undefined' ? 'Yes' : 'No'}</div>`;
+            
+            statusDiv.innerHTML = status;
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Enhanced debug page loaded');
+            
+            // Initialize swiper for mobile wallet cards
+            if (document.querySelector('.wallet-swiper')) {
+                const walletSwiper = new Swiper('.wallet-swiper', {
+                    slidesPerView: 1,
+                    spaceBetween: 16,
+                    pagination: {
+                        el: '.wallet-swiper .swiper-pagination',
+                        clickable: true,
+                    },
+                    breakpoints: {
+                        640: {
+                            slidesPerView: 1,
+                        },
+                        768: {
+                            slidesPerView: 2,
+                        },
+                    },
+                });
+                console.log('Wallet swiper initialized');
+                window.walletSwiper = walletSwiper;
+            }
+            
+            updateStatus();
+            
+            // Auto-run enhanced test
+            setTimeout(() => {
+                console.log('Running enhanced initial test...');
+                debugWallets();
+                testUpdateWalletDisplay();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
