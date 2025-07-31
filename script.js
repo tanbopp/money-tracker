@@ -154,6 +154,29 @@ document.addEventListener('DOMContentLoaded', function() {
             
         }, 500); // Increased delay to 500ms
         
+        // Add mobile menu modal event listeners
+        const mobileMenuModal = document.getElementById('mobile-menu-modal');
+        if (mobileMenuModal) {
+            mobileMenuModal.addEventListener('click', function(e) {
+                if (e.target === mobileMenuModal) {
+                    hideMobileMenu();
+                }
+            });
+        }
+        
+        // Add quick add modal event listeners
+        const quickAddModal = document.getElementById('quick-add-modal');
+        if (quickAddModal) {
+            quickAddModal.addEventListener('click', function(e) {
+                if (e.target === quickAddModal) {
+                    hideQuickAddModal();
+                }
+            });
+        }
+        
+        // Initialize with dashboard and update mobile nav
+        updateMobileNavigation('dashboard');
+        
         console.log('App initialization completed successfully');
         
     } catch (error) {
@@ -366,6 +389,9 @@ function showSection(sectionName) {
             mobileMenu.classList.add('hidden');
         }
         
+        // Update mobile navigation active state
+        updateMobileNavigation(sectionName);
+        
         console.log(`Section '${sectionName}' displayed successfully`);
     } catch (error) {
         console.error('Error in showSection:', error);
@@ -380,6 +406,234 @@ function toggleMobileMenu() {
         }
     } catch (error) {
         console.error('Error toggling mobile menu:', error);
+    }
+}
+
+// Mobile Menu Functions
+function showMobileMenu() {
+    try {
+        const modal = document.getElementById('mobile-menu-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('Error showing mobile menu:', error);
+    }
+}
+
+function hideMobileMenu() {
+    try {
+        const modal = document.getElementById('mobile-menu-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    } catch (error) {
+        console.error('Error hiding mobile menu:', error);
+    }
+}
+
+// Quick Add Modal Functions
+function showQuickAddModal() {
+    try {
+        // Open add transaction modal directly
+        const modal = document.getElementById('quick-add-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            resetQuickAddModal();
+        }
+    } catch (error) {
+        console.error('Error showing quick add modal:', error);
+    }
+}
+
+function hideQuickAddModal() {
+    try {
+        const modal = document.getElementById('quick-add-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            resetQuickAddModal();
+        }
+    } catch (error) {
+        console.error('Error hiding quick add modal:', error);
+    }
+}
+
+function resetQuickAddModal() {
+    try {
+        // Reset to initial state
+        const formContainer = document.getElementById('quick-form-container');
+        const quickBtns = document.querySelectorAll('.quick-add-btn');
+        
+        if (formContainer) formContainer.classList.add('hidden');
+        quickBtns.forEach(btn => btn.classList.remove('hidden'));
+        
+        // Reset form
+        const form = document.getElementById('quick-transaction-form');
+        if (form) form.reset();
+    } catch (error) {
+        console.error('Error resetting quick add modal:', error);
+    }
+}
+
+function showQuickIncomeForm() {
+    try {
+        // Hide action buttons and show form
+        document.querySelectorAll('.quick-add-btn').forEach(btn => btn.classList.add('hidden'));
+        const formContainer = document.getElementById('quick-form-container');
+        if (formContainer) formContainer.classList.remove('hidden');
+        
+        // Set up form for income
+        const submitBtn = document.getElementById('quick-submit-btn');
+        if (submitBtn) {
+            submitBtn.className = 'flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-200';
+            submitBtn.innerHTML = '<i class="fas fa-plus mr-2"></i>Tambah Pemasukan';
+        }
+        
+        // Populate categories with income categories
+        populateQuickCategories('income');
+        populateQuickWallets();
+        
+        // Set form type
+        document.getElementById('quick-transaction-form').setAttribute('data-type', 'income');
+    } catch (error) {
+        console.error('Error showing quick income form:', error);
+    }
+}
+
+function showQuickExpenseForm() {
+    try {
+        // Hide action buttons and show form
+        document.querySelectorAll('.quick-add-btn').forEach(btn => btn.classList.add('hidden'));
+        const formContainer = document.getElementById('quick-form-container');
+        if (formContainer) formContainer.classList.remove('hidden');
+        
+        // Set up form for expense
+        const submitBtn = document.getElementById('quick-submit-btn');
+        if (submitBtn) {
+            submitBtn.className = 'flex-1 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200';
+            submitBtn.innerHTML = '<i class="fas fa-minus mr-2"></i>Tambah Pengeluaran';
+        }
+        
+        // Populate categories with expense categories
+        populateQuickCategories('expense');
+        populateQuickWallets();
+        
+        // Set form type
+        document.getElementById('quick-transaction-form').setAttribute('data-type', 'expense');
+    } catch (error) {
+        console.error('Error showing quick expense form:', error);
+    }
+}
+
+function populateQuickCategories(type) {
+    try {
+        const select = document.getElementById('quick-category');
+        if (!select) return;
+        
+        const customCategories = getCustomCategories();
+        const categories = type === 'income' ? customCategories.income : customCategories.expense;
+        
+        select.innerHTML = '';
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error populating quick categories:', error);
+    }
+}
+
+function populateQuickWallets() {
+    try {
+        const select = document.getElementById('quick-wallet');
+        if (!select) return;
+        
+        const wallets = getWallets();
+        select.innerHTML = '';
+        
+        wallets.forEach(wallet => {
+            const option = document.createElement('option');
+            option.value = wallet.name;
+            option.textContent = wallet.name;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error populating quick wallets:', error);
+    }
+}
+
+function submitQuickTransaction(event) {
+    event.preventDefault();
+    
+    try {
+        const form = event.target;
+        const type = form.getAttribute('data-type');
+        
+        const amount = parseFloat(document.getElementById('quick-amount').value);
+        const category = document.getElementById('quick-category').value;
+        const wallet = document.getElementById('quick-wallet').value;
+        const description = document.getElementById('quick-description').value;
+        
+        if (amount <= 0) {
+            showNotification('Jumlah harus lebih dari 0', 'error');
+            return;
+        }
+        
+        const transaction = {
+            id: Date.now(),
+            type: type,
+            amount: amount,
+            category: category,
+            wallet: wallet,
+            description: description,
+            date: new Date().toISOString().split('T')[0],
+            timestamp: new Date().toISOString()
+        };
+        
+        // Add transaction
+        transactions.push(transaction);
+        saveTransactions();
+        
+        // Update wallet balance
+        updateWalletBalance(wallet, type === 'income' ? amount : -amount);
+        
+        // Update displays
+        updateWalletDisplay();
+        updateDashboard();
+        updateTransactionsList();
+        
+        // Show success notification
+        const message = type === 'income' ? 
+            `Pemasukan Rp ${formatCurrency(amount)} berhasil ditambahkan` :
+            `Pengeluaran Rp ${formatCurrency(amount)} berhasil ditambahkan`;
+        showNotification(message, 'success');
+        
+        // Close modal
+        hideQuickAddModal();
+        
+    } catch (error) {
+        console.error('Error submitting quick transaction:', error);
+        showNotification('Terjadi kesalahan saat menambah transaksi', 'error');
+    }
+}
+
+// Update navigation active states for mobile
+function updateMobileNavigation(activeSection) {
+    try {
+        // Remove active class from all mobile nav buttons
+        document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Add active class to current section button
+        const activeBtn = document.querySelector(`[onclick="showSection('${activeSection}')"].mobile-nav-btn`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+        }
+    } catch (error) {
+        console.error('Error updating mobile navigation:', error);
     }
 }
 
@@ -6648,21 +6902,28 @@ function initializeDarkMode() {
 
 // Toggle dark mode
 function toggleDarkMode() {
-    const darkModeToggle = document.getElementById('dark-mode-toggle');
-    if (!darkModeToggle) return;
-    
-    const isDark = darkModeToggle.checked;
+    const isDark = document.documentElement.classList.contains('dark');
     
     if (isDark) {
-        document.documentElement.classList.add('dark');
-        document.body.classList.add('dark');
-        localStorage.setItem('darkMode', 'true');
-        showNotification('🌙 Mode gelap diaktifkan', 'success');
-    } else {
         document.documentElement.classList.remove('dark');
         document.body.classList.remove('dark');
         localStorage.setItem('darkMode', 'false');
+        // Update both desktop and mobile icons
+        const desktopIcon = document.getElementById('dark-mode-icon');
+        const mobileIcon = document.getElementById('dark-mode-icon-mobile');
+        if (desktopIcon) desktopIcon.className = 'fas fa-moon';
+        if (mobileIcon) mobileIcon.className = 'fas fa-moon';
         showNotification('☀️ Mode terang diaktifkan', 'success');
+    } else {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+        localStorage.setItem('darkMode', 'true');
+        // Update both desktop and mobile icons
+        const desktopIcon = document.getElementById('dark-mode-icon');
+        const mobileIcon = document.getElementById('dark-mode-icon-mobile');
+        if (desktopIcon) desktopIcon.className = 'fas fa-sun';
+        if (mobileIcon) mobileIcon.className = 'fas fa-sun';
+        showNotification('🌙 Mode gelap diaktifkan', 'success');
     }
 }
 

@@ -1596,3 +1596,1153 @@ input[type="number"] {
 .forecast-neutral {
     color: #6b7280;
 }
+
+/* Mobile Navigation Styles */
+.mobile-nav-btn.active {
+    color: #3B82F6 !important;
+}
+
+.mobile-nav-btn.active i {
+    color: #3B82F6 !important;
+}
+
+/* Quick Add Modal Styles */
+.quick-add-btn.active {
+    transform: scale(0.95);
+}
+
+.quick-add-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Modal form elements positioning fix */
+#quick-add-modal {
+    z-index: 50;
+}
+
+#quick-add-modal .bg-white,
+#quick-add-modal .dark\:bg-gray-800 {
+    position: relative;
+    z-index: 51;
+}
+
+/* Dropdown select styling within modals */
+#quick-add-modal select {
+    position: relative;
+    z-index: 52 !important;
+    background-color: white;
+    border: 1px solid #d1d5db;
+}
+
+#quick-add-modal select:focus {
+    z-index: 53 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Dark mode support for modal selects */
+.dark #quick-add-modal select {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+    color: white !important;
+}
+
+/* Ensure form container has proper layering */
+#quick-form-container {
+    position: relative;
+    z-index: 52;
+}
+
+#quick-form-container form {
+    position: relative;
+    z-index: 52;
+}
+
+/* Animation for mobile menu modal */
+@keyframes slide-up {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+}
+
+/* Z-index hierarchy to prevent overlapping */
+.fixed {
+    position: fixed;
+}
+
+/* Navigation layers */
+nav {
+    z-index: 30;
+}
+
+/* Mobile bottom navigation - highest priority for mobile */
+.md\:hidden.fixed.bottom-0 {
+    z-index: 40 !important;
+}
+
+/* Modal layers - above everything else */
+#mobile-menu-modal {
+    z-index: 50 !important;
+}
+
+#quick-add-modal {
+    z-index: 50 !important;
+}
+
+#manage-categories-modal {
+    z-index: 50 !important;
+}
+
+#stats-settings-modal {
+    z-index: 50 !important;
+}
+
+#add-stock-modal {
+    z-index: 50 !important;
+}
+
+/* Notification should be above modals */
+.notification {
+    z-index: 60 !important;
+}
+
+/* Mobile bottom navigation padding */
+@media (max-width: 768px) {
+    /* Main content container needs bottom padding */
+    .main-container {
+        padding-bottom: 100px !important; /* Space for bottom navigation + extra margin */
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Body padding for overall spacing */
+    body {
+        padding-bottom: 0 !important; /* Remove body padding, use container padding instead */
+    }
+    
+    .mobile-nav-btn:active {
+        transform: scale(0.95);
+    }
+    
+    /* Ensure sections don't overlap with bottom nav */
+    .section {
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Make sure chat widget doesn't go behind bottom nav */
+    #dashboard-chat-widget {
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 2;
+    }
+    
+    /* Ensure modals are properly positioned above bottom nav */
+    .fixed.inset-0 {
+        z-index: 50;
+    }
+}
+
+/* Desktop spacing - no bottom navigation */
+@media (min-width: 769px) {
+    .main-container {
+        padding-bottom: 32px !important; /* Standard padding for desktop */
+        position: relative;
+        z-index: 1;
+    }
+}
+
+/* Additional fixes for element positioning */
+.swiper {
+    z-index: 1; /* Keep swiper below navigation */
+    position: relative;
+}
+
+.swiper-pagination {
+    z-index: 2; /* Pagination above swiper content */
+    position: relative;
+}
+
+.swiper-slide {
+    position: relative;
+    z-index: 1;
+}
+
+/* Chat widget positioning */
+.chat-widget {
+    position: relative;
+    z-index: 1;
+}
+
+/* Balance and wallet cards */
+.balance-swiper,
+.wallet-swiper {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 20px;
+}
+
+/* Ensure dropdowns don't go behind bottom nav on mobile */
+@media (max-width: 768px) {
+    select {
+        position: relative;
+        z-index: 10;
+    }
+    
+    /* Special handling for modal dropdowns */
+    #quick-add-modal select,
+    #mobile-menu-modal select,
+    .modal select {
+        z-index: 60 !important;
+        position: relative;
+    }
+    
+    /* Ensure dropdown options are visible */
+    select option {
+        background-color: white;
+        color: black;
+        z-index: 61;
+    }
+    
+    .dark select option {
+        background-color: #374151 !important;
+        color: white !important;
+    }
+    
+    /* Form elements should be above base content */
+    .form-container,
+    form {
+        position: relative;
+        z-index: 5;
+    }
+    
+    /* Modal forms get higher priority */
+    .modal form,
+    #quick-add-modal form {
+        z-index: 55;
+    }
+    
+    /* Transaction list positioning */
+    #transactions-list {
+        position: relative;
+        z-index: 1;
+        margin-bottom: 20px;
+    }
+    
+    /* Statistics charts positioning */
+    .chart-container canvas {
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Wallet cards positioning */
+    .wallet-card {
+        position: relative;
+        z-index: 1;
+        margin-bottom: 10px;
+    }
+    
+    /* Grid layouts should have proper spacing */
+    .grid {
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Cards should not overlap */
+    .bg-white.rounded-lg,
+    .bg-gray-800.rounded-lg {
+        position: relative;
+        z-index: 1;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Prevent any absolute positioned elements from overlapping */
+.absolute {
+    z-index: auto;
+}
+
+/* Floating action button should be below modals but above content */
+.floating-action {
+    z-index: 20;
+}
+
+/* Ensure notification system is always visible */
+.notification {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 60 !important;
+}
+
+/* Make sure loading states don't interfere */
+.loading-overlay {
+    z-index: 45;
+}
+
+/* Final safety measures for mobile */
+@media (max-width: 768px) {
+    /* Prevent any content from going behind bottom nav */
+    .section:last-child {
+        padding-bottom: 40px;
+    }
+    
+    /* Ensure proper spacing between elements */
+    .mb-8 {
+        margin-bottom: 2rem !important;
+    }
+    
+    .mb-6 {
+        margin-bottom: 1.5rem !important;
+    }
+    
+    .mb-4 {
+        margin-bottom: 1rem !important;
+    }
+    
+    /* Specific fixes for known problem areas */
+    .swiper-pagination {
+        padding-bottom: 10px;
+    }
+    
+    /* Statistics section spacing */
+    #statistics-section .grid {
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Planning section spacing */
+    #planning-section .grid {
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Investment section spacing */
+    #investment-section .grid {
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Settings section spacing */
+    #settings-section .space-y-6 > * {
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* Additional fixes for dropdown interactions */
+.modal-open {
+    overflow: hidden;
+}
+
+/* Ensure select dropdowns in modals work properly */
+.modal select {
+    appearance: menulist;
+    -webkit-appearance: menulist;
+    -moz-appearance: menulist;
+}
+
+/* Force proper stacking context for modal elements */
+.fixed.inset-0.bg-black.bg-opacity-50 {
+    z-index: 50;
+}
+
+.fixed.inset-0.bg-black.bg-opacity-50 > div {
+    z-index: 51;
+}
+
+/* Ensure form inputs in modals are accessible */
+.modal input,
+.modal select,
+.modal button {
+    position: relative;
+    z-index: 52;
+}
+
+/* Specific fix for quick add modal dropdown */
+#quick-category,
+#quick-wallet {
+    position: relative !important;
+    z-index: 9999 !important;
+    background: white;
+}
+
+.dark #quick-category,
+.dark #quick-wallet {
+    background: #374151 !important;
+}
+
+/* Override any conflicting z-index for modal dropdowns */
+#quick-add-modal select {
+    z-index: 9999 !important;
+    position: relative !important;
+}
+
+#quick-add-modal select:focus {
+    z-index: 10000 !important;
+}
+
+/* Ensure the select dropdown arrow is clickable */
+#quick-add-modal select:not([multiple]) {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+/* Make sure modal overlay doesn't interfere */
+.modal-container {
+    z-index: 50;
+}
+
+.modal-content {
+    z-index: 51;
+}
+
+/* Force higher z-index for all form elements in quick add modal */
+#quick-form-container * {
+    position: relative;
+    z-index: 9999;
+}
+
+/* Specific fix for form that appears after selecting income/expense */
+#quick-form-container {
+    position: relative !important;
+    z-index: 10100 !important;
+}
+
+#quick-form-container form {
+    position: relative !important;
+    z-index: 10101 !important;
+}
+
+#quick-form-container .space-y-4 {
+    position: relative !important;
+    z-index: 10102 !important;
+}
+
+#quick-form-container .space-y-4 > div {
+    position: relative !important;
+    z-index: 10103 !important;
+}
+
+/* Ultra high z-index for category and wallet dropdowns */
+#quick-category,
+#quick-wallet {
+    position: relative !important;
+    z-index: 10200 !important;
+    background: white !important;
+    isolation: isolate !important;
+}
+
+#quick-category:focus,
+#quick-wallet:focus {
+    z-index: 10300 !important;
+}
+
+.dark #quick-category,
+.dark #quick-wallet {
+    background: #374151 !important;
+}
+
+/* Extreme priority for dropdown elements when form is shown */
+#quick-form-container.form-fields select {
+    z-index: 15000 !important;
+    position: relative !important;
+    isolation: isolate !important;
+}
+
+#quick-form-container.form-fields select:focus {
+    z-index: 15001 !important;
+}
+
+/* Ensure form container creates new stacking context */
+#quick-form-container:not(.hidden) {
+    transform: translateZ(0);
+    isolation: isolate;
+    z-index: 15000 !important;
+}
+
+/* Override any element that might interfere */
+#quick-add-modal .modal-content > * {
+    z-index: auto;
+}
+
+#quick-add-modal .modal-content #quick-form-container {
+    z-index: 15000 !important;
+}
+
+/* Specific targeting for the dropdown fields */
+.dropdown-field select {
+    z-index: 15002 !important;
+    position: relative !important;
+    transform: translateZ(0);
+}
+
+.modal-select {
+    z-index: 15003 !important;
+    position: relative !important;
+    background-color: white !important;
+    isolation: isolate !important;
+    transform: translateZ(0);
+}
+
+.dark .modal-select {
+    background-color: #374151 !important;
+}
+
+/* Modal container improvements */
+.modal-container {
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: 9998 !important;
+}
+
+.modal-content {
+    position: relative;
+    z-index: 9999 !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Prevent backdrop from blocking interactions */
+.modal-container.modal-open {
+    pointer-events: auto;
+}
+
+.modal-container > .modal-content {
+    pointer-events: auto;
+}
+
+/* Ensure modal selects work on all devices */
+.modal-content select {
+    position: relative !important;
+    z-index: 10001 !important;
+    min-height: 40px;
+    line-height: 1.5;
+    pointer-events: auto;
+}
+
+.modal-content select:focus {
+    z-index: 10002 !important;
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Fix for mobile webkit select rendering */
+@media (max-width: 768px) {
+    .modal-content select {
+        -webkit-appearance: menulist;
+        appearance: menulist;
+        background-image: none;
+        padding-right: 40px;
+    }
+    
+    /* Ensure select arrow is visible */
+    .modal-content select:not([multiple]) {
+        background-position: right 12px center;
+        background-repeat: no-repeat;
+        background-size: 16px;
+    }
+}
+
+/* Additional mobile fixes for dropdowns */
+@media (max-width: 768px) and (-webkit-min-device-pixel-ratio: 2) {
+    .modal-content select {
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+    }
+}
+
+/* Emergency fix for z-index conflicts */
+.modal-container * {
+    z-index: auto;
+}
+
+.modal-content {
+    z-index: 51 !important;
+}
+
+#quick-add-modal {
+    z-index: 9998 !important;
+}
+
+#quick-add-modal .modal-content {
+    z-index: 9999 !important;
+}
+
+#quick-add-modal select,
+#quick-add-modal input,
+#quick-add-modal button {
+    z-index: 10000 !important;
+    position: relative !important;
+}
+
+/* Ensure nothing can interfere with modal form elements */
+#quick-add-modal .space-y-4 > * {
+    z-index: 10000 !important;
+    position: relative !important;
+}
+
+/* Fix for mobile browsers select rendering */
+@media (max-width: 768px) {
+    #quick-add-modal select {
+        -webkit-appearance: menulist !important;
+        appearance: menulist !important;
+        z-index: 10001 !important;
+    }
+}
+
+/* Additional classes for better control */
+.form-container {
+    z-index: 10000 !important;
+    position: relative !important;
+}
+
+.quick-form {
+    z-index: 10001 !important;
+    position: relative !important;
+}
+
+.form-fields {
+    z-index: 10002 !important;
+    position: relative !important;
+}
+
+.form-field {
+    z-index: 10003 !important;
+    position: relative !important;
+}
+
+.dropdown-field {
+    z-index: 10004 !important;
+    position: relative !important;
+}
+
+.modal-select {
+    z-index: 10005 !important;
+    position: relative !important;
+    background-color: white !important;
+    isolation: isolate;
+}
+
+.dark .modal-select {
+    background-color: #374151 !important;
+}
+
+/* Super high priority when form is visible - this is the key fix */
+#quick-form-container:not(.hidden) select {
+    z-index: 20000 !important;
+    position: relative !important;
+    isolation: isolate !important;
+    transform: translateZ(0) !important;
+    background-color: white !important;
+}
+
+#quick-form-container:not(.hidden) select:focus {
+    z-index: 20001 !important;
+}
+
+.dark #quick-form-container:not(.hidden) select {
+    background-color: #374151 !important;
+}
+
+/* Ensure the form container itself doesn't block */
+#quick-form-container:not(.hidden) {
+    isolation: isolate !important;
+    transform: translateZ(0) !important;
+}
+
+/* Create new stacking context for modal */
+#quick-add-modal {
+    isolation: isolate;
+}
+
+/* Ensure select options are visible */
+.modal-select option {
+    z-index: 10006;
+    background-color: white;
+    color: black;
+}
+
+.dark .modal-select option {
+    background-color: #374151;
+    color: white;
+}
+
+/* ULTIMATE FIX - Complete z-index hierarchy for all modals and dropdowns */
+
+/* Base modal layer - foundation */
+.modal, [id*="modal"] {
+    z-index: 50000 !important;
+    isolation: isolate !important;
+}
+
+/* Modal backdrop */
+.fixed.inset-0.bg-black.bg-opacity-50,
+.modal-backdrop {
+    z-index: 50000 !important;
+}
+
+/* Modal content container */
+.modal-content,
+.modal .bg-white,
+.modal .dark\:bg-gray-800 {
+    z-index: 50001 !important;
+    position: relative !important;
+    isolation: isolate !important;
+}
+
+/* Quick Add Modal specific - highest priority */
+#quick-add-modal {
+    z-index: 60000 !important;
+    isolation: isolate !important;
+}
+
+#quick-add-modal .modal-content,
+#quick-add-modal .bg-white {
+    z-index: 60001 !important;
+    position: relative !important;
+    isolation: isolate !important;
+}
+
+/* Quick Add Modal buttons - below form elements */
+#quick-add-modal .quick-add-btn {
+    z-index: 60002 !important;
+    position: relative !important;
+}
+
+/* Form container - when visible after selection */
+#quick-form-container {
+    z-index: 70000 !important;
+    position: relative !important;
+    isolation: isolate !important;
+    transform: translateZ(0) !important;
+}
+
+#quick-form-container:not(.hidden) {
+    z-index: 70001 !important;
+    position: relative !important;
+    isolation: isolate !important;
+    transform: translateZ(0) !important;
+}
+
+/* All form elements inside form container */
+#quick-form-container form,
+#quick-form-container .space-y-4,
+#quick-form-container .space-y-4 > div {
+    z-index: 70002 !important;
+    position: relative !important;
+}
+
+/* ALL SELECT ELEMENTS - Ultimate priority */
+#quick-form-container select,
+#quick-category,
+#quick-wallet,
+.modal-select,
+.dropdown-field select {
+    z-index: 80000 !important;
+    position: relative !important;
+    isolation: isolate !important;
+    transform: translateZ(0) !important;
+    background-color: white !important;
+    will-change: transform !important;
+    backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
+    -webkit-appearance: menulist !important;
+    appearance: menulist !important;
+}
+
+/* Focus states for selects - even higher */
+#quick-form-container select:focus,
+#quick-category:focus,
+#quick-wallet:focus,
+.modal-select:focus,
+.dropdown-field select:focus {
+    z-index: 85000 !important;
+    outline: 2px solid #3b82f6 !important;
+    outline-offset: 2px !important;
+}
+
+/* Dark mode support */
+.dark #quick-form-container select,
+.dark #quick-category,
+.dark #quick-wallet,
+.dark .modal-select {
+    background-color: #374151 !important;
+    color: white !important;
+}
+
+/* Option elements */
+select option {
+    z-index: 85001 !important;
+    background-color: white !important;
+    color: black !important;
+}
+
+.dark select option {
+    background-color: #374151 !important;
+    color: white !important;
+}
+
+/* Mobile specific enhancements */
+@media (max-width: 768px) {
+    /* Ensure mobile dropdowns work properly */
+    #quick-form-container:not(.hidden) select {
+        z-index: 90000 !important;
+        position: relative !important;
+        -webkit-appearance: menulist !important;
+        appearance: menulist !important;
+        transform: translateZ(0) !important;
+        will-change: transform !important;
+        min-height: 44px !important; /* Touch target size */
+        font-size: 16px !important; /* Prevent zoom on iOS */
+    }
+    
+    #quick-form-container:not(.hidden) select:focus {
+        z-index: 95000 !important;
+    }
+    
+    /* Create stacking contexts to prevent interference */
+    #quick-add-modal .grid {
+        z-index: 1 !important;
+        position: relative !important;
+    }
+    
+    /* Bottom navigation - keep below modals */
+    .md\:hidden.fixed.bottom-0 {
+        z-index: 40 !important;
+    }
+    
+    /* Ensure no other elements can interfere */
+    .swiper,
+    .swiper-slide,
+    .balance-card,
+    .wallet-card {
+        z-index: 1 !important;
+        position: relative !important;
+    }
+}
+
+/* Reset any conflicting z-index values */
+#quick-add-modal * {
+    z-index: auto;
+}
+
+/* Re-apply specific high values only where needed */
+#quick-add-modal .modal-content {
+    z-index: 60001 !important;
+}
+
+#quick-form-container {
+    z-index: 70000 !important;
+}
+
+/* Additional safety measures - prevent any overlapping */
+
+/* Ensure all other modals stay below Quick Add Modal */
+#mobile-menu-modal {
+    z-index: 45000 !important;
+}
+
+#manage-categories-modal,
+#stats-settings-modal,
+#add-stock-modal {
+    z-index: 45000 !important;
+}
+
+/* Navigation elements - keep well below modals */
+nav {
+    z-index: 30 !important;
+}
+
+.md\:hidden.fixed.bottom-0 {
+    z-index: 40 !important;
+}
+
+/* Content elements - lowest priority */
+.section,
+.swiper,
+.swiper-slide,
+.balance-card,
+.wallet-card,
+.ai-section,
+#dashboard-chat-widget {
+    z-index: 1 !important;
+    position: relative !important;
+}
+
+/* Notification system - above everything */
+.notification,
+#notification {
+    z-index: 100000 !important;
+    position: fixed !important;
+}
+
+/* Force isolation for modal containers */
+.modal-container {
+    isolation: isolate !important;
+}
+
+/* Ensure proper layering for all select elements globally */
+select {
+    position: relative !important;
+}
+
+/* Modal select elements get priority */
+.modal select,
+[id*="modal"] select {
+    z-index: 55000 !important;
+    position: relative !important;
+}
+
+/* Quick Add Modal selects get ultimate priority */
+#quick-add-modal select {
+    z-index: 80000 !important;
+    position: relative !important;
+}
+
+/* Form elements in visible form container */
+#quick-form-container:not(.hidden) select {
+    z-index: 80000 !important;
+    position: relative !important;
+}
+
+/* Dropdown specific targeting */
+.dropdown-field,
+.form-field {
+    position: relative !important;
+    z-index: 79999 !important;
+}
+
+/* Input elements should also be properly layered */
+#quick-form-container input,
+#quick-form-container textarea,
+#quick-form-container button {
+    z-index: 79000 !important;
+    position: relative !important;
+}
+
+/* Labels and other form accessories */
+#quick-form-container label {
+    z-index: 78000 !important;
+    position: relative !important;
+}
+
+/* Emergency override for any remaining conflicts */
+#quick-form-container * {
+    position: relative;
+    z-index: auto;
+}
+
+/* Re-apply critical elements */
+/* FINAL COMPREHENSIVE DROPDOWN FIX */
+
+/* Specific targeting for the problem flow: Center Button → Income/Expense → Category */
+#quick-form-container.form-visible select,
+#quick-form-container[style*="block"] select,
+#quick-form-container:not(.hidden) select {
+    z-index: 99999 !important;
+    position: relative !important;
+    isolation: isolate !important;
+    transform: translateZ(0) !important;
+    background-color: white !important;
+    border: 2px solid #d1d5db !important;
+    border-radius: 6px !important;
+    padding: 8px 12px !important;
+    min-height: 44px !important;
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    -webkit-appearance: menulist !important;
+    appearance: menulist !important;
+    will-change: transform !important;
+    backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
+}
+
+/* Focus state for the dropdown */
+#quick-form-container:not(.hidden) select:focus {
+    z-index: 100000 !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    outline: none !important;
+}
+
+/* Dark mode support */
+.dark #quick-form-container:not(.hidden) select {
+    background-color: #374151 !important;
+    color: white !important;
+    border-color: #4b5563 !important;
+}
+
+.dark #quick-form-container:not(.hidden) select:focus {
+    border-color: #60a5fa !important;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1) !important;
+}
+
+/* Options styling */
+#quick-form-container select option {
+    background-color: white !important;
+    color: black !important;
+    padding: 8px 12px !important;
+}
+
+.dark #quick-form-container select option {
+    background-color: #374151 !important;
+    color: white !important;
+}
+
+/* Ensure the select arrow is properly positioned */
+#quick-form-container select:not([multiple]) {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+    background-position: right 12px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px 16px !important;
+    padding-right: 40px !important;
+}
+
+/* Form container isolation */
+#quick-form-container:not(.hidden) {
+    isolation: isolate !important;
+    transform: translateZ(0) !important;
+    contain: layout style paint !important;
+}
+
+/* Prevent any parent elements from interfering */
+#quick-add-modal {
+    contain: layout !important;
+}
+
+#quick-add-modal .modal-content {
+    contain: layout !important;
+}
+
+/* Mobile specific optimizations */
+@media (max-width: 768px) {
+    #quick-form-container:not(.hidden) select {
+        -webkit-user-select: none !important;
+        user-select: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+        touch-action: manipulation !important;
+    }
+    
+    /* Ensure proper touch targets */
+    #quick-form-container:not(.hidden) select {
+        min-height: 48px !important;
+        font-size: 16px !important; /* Prevents zoom on iOS */
+    }
+    
+    /* Hardware acceleration for smooth scrolling */
+    #quick-form-container:not(.hidden) {
+        -webkit-transform: translate3d(0, 0, 0) !important;
+        transform: translate3d(0, 0, 0) !important;
+    }
+}
+
+/* Accessibility improvements */
+#quick-form-container select:focus {
+    outline: 2px solid #3b82f6 !important;
+    outline-offset: 2px !important;
+}
+
+/* Force proper rendering order */
+#quick-form-container:not(.hidden) * {
+    z-index: auto !important;
+}
+
+#quick-form-container:not(.hidden) select {
+    z-index: 99999 !important;
+}
+
+/* Prevent backdrop interference */
+#quick-add-modal .fixed.inset-0 {
+    pointer-events: auto !important;
+}
+
+#quick-add-modal .modal-content {
+    pointer-events: auto !important;
+}
+
+/* ULTIMATE SAFETY NET - Reset all potential conflicts */
+
+/* Only specific elements get high z-index */
+.modal {
+    z-index: 50000 !important;
+}
+
+#quick-add-modal {
+    z-index: 60000 !important;
+}
+
+#quick-form-container:not(.hidden) {
+    z-index: 70000 !important;
+}
+
+#quick-form-container:not(.hidden) select {
+    z-index: 99999 !important;
+}
+
+/* Force isolation at each level */
+.modal {
+    isolation: isolate;
+}
+
+#quick-add-modal {
+    isolation: isolate;
+}
+
+#quick-form-container:not(.hidden) {
+    isolation: isolate;
+    transform: translateZ(0);
+}
+
+/* Ensure proper stacking context hierarchy */
+body {
+    isolation: isolate;
+}
+
+.main-container {
+    isolation: isolate;
+}
+
+/* Debug helper - remove if working */
+#quick-form-container:not(.hidden) select {
+    border: 2px solid #ef4444 !important; /* Red border to see if dropdown is visible */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+#quick-form-container:not(.hidden) select:focus {
+    border-color: #3b82f6 !important; /* Blue when focused */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Ensure dropdown arrow is clickable */
+#quick-form-container:not(.hidden) select {
+    cursor: pointer !important;
+}
+
+/* Remove any transforms that might interfere */
+#quick-add-modal * {
+    transform: none;
+}
+
+/* Re-apply only where needed */
+#quick-form-container:not(.hidden) {
+    transform: translateZ(0) !important;
+}
+
+#quick-form-container:not(.hidden) select {
+    transform: translateZ(0) !important;
+}

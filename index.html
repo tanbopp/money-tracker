@@ -41,6 +41,7 @@
                     <i class="fas fa-wallet text-primary text-2xl mr-3"></i>
                     <h1 class="text-xl font-bold text-gray-900 dark:text-white">Money Tracker</h1>
                 </div>
+                <!-- Desktop Navigation -->
                 <div class="hidden md:block">
                     <div class="flex items-center space-x-4">
                         <button onclick="showSection('dashboard')" class="nav-btn text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium dark:text-gray-300">Dashboard</button>
@@ -49,27 +50,173 @@
                         <button onclick="showSection('planning')" class="nav-btn text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium dark:text-gray-300">Planning</button>
                         <button onclick="showSection('investment')" class="nav-btn text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium dark:text-gray-300">Investasi</button>
                         <button onclick="showSection('settings')" class="nav-btn text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium dark:text-gray-300">Pengaturan</button>
+                        <button onclick="toggleDarkMode()" class="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700 transition duration-200">
+                            <i id="dark-mode-icon" class="fas fa-moon"></i>
+                        </button>
                     </div>
                 </div>
-                <button class="md:hidden dark:text-gray-300" onclick="toggleMobileMenu()">
-                    <i class="fas fa-bars text-gray-700 dark:text-gray-300"></i>
-                </button>
-            </div>
-        </div>
-        <!-- Mobile menu -->
-        <div id="mobile-menu" class="hidden md:hidden">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t dark:bg-gray-800 dark:border-gray-700">
-                <button onclick="showSection('dashboard')" class="nav-btn-mobile block w-full text-left px-3 py-2 text-gray-700 hover:text-primary dark:text-gray-300">Dashboard</button>
-                <button onclick="showSection('transactions')" class="nav-btn-mobile block w-full text-left px-3 py-2 text-gray-700 hover:text-primary dark:text-gray-300">Transaksi</button>
-                <button onclick="showSection('statistics')" class="nav-btn-mobile block w-full text-left px-3 py-2 text-gray-700 hover:text-primary dark:text-gray-300">Statistik</button>
-                <button onclick="showSection('planning')" class="nav-btn-mobile block w-full text-left px-3 py-2 text-gray-700 hover:text-primary dark:text-gray-300">Planning</button>
-                <button onclick="showSection('investment')" class="nav-btn-mobile block w-full text-left px-3 py-2 text-gray-700 hover:text-primary dark:text-gray-300">Investasi</button>
-                <button onclick="showSection('settings')" class="nav-btn-mobile block w-full text-left px-3 py-2 text-gray-700 hover:text-primary dark:text-gray-300">Pengaturan</button>
+                <!-- Mobile - Show dark mode toggle and menu button -->
+                <div class="md:hidden flex items-center space-x-2">
+                    <button onclick="toggleDarkMode()" class="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700 transition duration-200">
+                        <i id="dark-mode-icon-mobile" class="fas fa-moon"></i>
+                    </button>
+                    <button onclick="showMobileMenu()" class="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700 transition duration-200">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white dark:bg-gray-900 transition-colors duration-300 mt-4">
+    <!-- Mobile Bottom Navigation -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-40 shadow-lg">
+        <div class="grid grid-cols-5 h-16">
+            <!-- Dashboard -->
+            <button onclick="showSection('dashboard')" class="mobile-nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 active:bg-gray-50 dark:active:bg-gray-700">
+                <i class="fas fa-home text-lg"></i>
+                <span class="text-xs font-medium">Dashboard</span>
+            </button>
+            
+            <!-- Transactions -->
+            <button onclick="showSection('transactions')" class="mobile-nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 active:bg-gray-50 dark:active:bg-gray-700">
+                <i class="fas fa-list-alt text-lg"></i>
+                <span class="text-xs font-medium">Catatan</span>
+            </button>
+            
+            <!-- Add Transaction (Center Button) -->
+            <button onclick="showQuickAddModal()" class="flex flex-col items-center justify-center">
+                <div class="bg-primary text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-primary/90 transition-all duration-200 transform hover:scale-105 active:scale-95">
+                    <i class="fas fa-plus text-xl"></i>
+                </div>
+            </button>
+            
+            <!-- Statistics -->
+            <button onclick="showSection('statistics')" class="mobile-nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 active:bg-gray-50 dark:active:bg-gray-700">
+                <i class="fas fa-chart-bar text-lg"></i>
+                <span class="text-xs font-medium">Grafik</span>
+            </button>
+            
+            <!-- Planning -->
+            <button onclick="showSection('planning')" class="mobile-nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 active:bg-gray-50 dark:active:bg-gray-700">
+                <i class="fas fa-target text-lg"></i>
+                <span class="text-xs font-medium">Planning</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Modal for Additional Options -->
+    <div id="mobile-menu-modal" class="md:hidden fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-t-3xl w-full max-w-md mx-4 pb-8 animate-slide-up">
+            <div class="p-6">
+                <!-- Handle bar -->
+                <div class="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-6"></div>
+                
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Menu Lainnya</h3>
+                    <button onclick="hideMobileMenu()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-3">
+                    <button onclick="showSection('investment'); hideMobileMenu();" class="w-full flex items-center space-x-4 p-4 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-colors duration-200">
+                        <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-chart-line text-green-600 dark:text-green-400 text-lg"></i>
+                        </div>
+                        <div class="flex-1 text-left">
+                            <p class="font-medium">Investasi</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Kelola portfolio saham</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </button>
+                    
+                    <button onclick="showSection('settings'); hideMobileMenu();" class="w-full flex items-center space-x-4 p-4 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-colors duration-200">
+                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-cog text-blue-600 dark:text-blue-400 text-lg"></i>
+                        </div>
+                        <div class="flex-1 text-left">
+                            <p class="font-medium">Pengaturan</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Atur preferensi aplikasi</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Add Modal -->
+    <div id="quick-add-modal" class="modal-container fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md mx-4 p-6 animate-slide-up">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Tambah Transaksi</h3>
+                <button onclick="hideQuickAddModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Quick Action Buttons -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <button onclick="showQuickIncomeForm()" class="quick-add-btn bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 rounded-xl p-4 text-center hover:bg-green-100 dark:hover:bg-green-900/30 transition-all duration-200">
+                    <div class="w-12 h-12 bg-green-100 dark:bg-green-900/40 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <i class="fas fa-plus text-green-600 dark:text-green-400 text-xl"></i>
+                    </div>
+                    <p class="font-medium">Pemasukan</p>
+                    <p class="text-xs opacity-75">Tambah pendapatan</p>
+                </button>
+                
+                <button onclick="showQuickExpenseForm()" class="quick-add-btn bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 rounded-xl p-4 text-center hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-200">
+                    <div class="w-12 h-12 bg-red-100 dark:bg-red-900/40 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <i class="fas fa-minus text-red-600 dark:text-red-400 text-xl"></i>
+                    </div>
+                    <p class="font-medium">Pengeluaran</p>
+                    <p class="text-xs opacity-75">Tambah belanja</p>
+                </button>
+            </div>
+            
+            <!-- Quick Form (Initially Hidden) -->
+            <div id="quick-form-container" class="hidden form-container">
+                <form id="quick-transaction-form" class="quick-form" onsubmit="submitQuickTransaction(event)">
+                    <div class="space-y-4 form-fields">
+                        <div class="form-field">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jumlah</label>
+                            <input type="number" id="quick-amount" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white" placeholder="0">
+                        </div>
+                        
+                        <div class="form-field dropdown-field">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kategori</label>
+                            <select id="quick-category" class="modal-select w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white">
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
+                        </div>
+                        
+                        <div class="form-field dropdown-field">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Wallet</label>
+                            <select id="quick-wallet" class="modal-select w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white">
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Keterangan</label>
+                            <input type="text" id="quick-description" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white" placeholder="Keterangan (opsional)">
+                        </div>
+                        
+                        <div class="flex space-x-3 pt-4">
+                            <button type="button" onclick="hideQuickAddModal()" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition duration-200">
+                                Batal
+                            </button>
+                            <button type="submit" id="quick-submit-btn" class="flex-1 bg-primary text-white py-2 px-4 rounded-md hover:bg-primary/90 transition duration-200">
+                                Tambah
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white dark:bg-gray-900 transition-colors duration-300 mt-4">
         <!-- Dashboard Section -->
         <div id="dashboard-section" class="section"
              style="display: block;">
@@ -1305,7 +1452,7 @@
         </div>
 
     <!-- Notification -->
-    <div id="notification" class="fixed top-4 right-4 z-50 hidden">
+    <div id="notification" class="fixed top-4 right-4 z-60 hidden">
         <div class="bg-white border border-gray-200 rounded-lg shadow-lg p-4 max-w-sm">
             <div class="flex items-center">
                 <div id="notification-icon" class="flex-shrink-0 mr-3"></div>
