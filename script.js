@@ -31,11 +31,310 @@ let dailyLimitSettings = {
     excludeGoals: true // Exclude goal contributions from daily limit
 };
 
-// Custom categories
+// Custom categories with icons
 let customCategories = {
-    income: ['Gaji', 'Freelance', 'Bonus', 'Investasi', 'Lainnya'],
-    expense: ['Makanan', 'Transportasi', 'Belanja', 'Tagihan', 'Hiburan', 'Kesehatan', 'Lainnya']
+    income: [
+        { id: 'gaji', name: 'Gaji', icon: 'fas fa-briefcase', color: '#10B981' },
+        { id: 'freelance', name: 'Freelance', icon: 'fas fa-laptop-code', color: '#3B82F6' },
+        { id: 'bonus', name: 'Bonus', icon: 'fas fa-gift', color: '#F59E0B' },
+        { id: 'investasi', name: 'Investasi', icon: 'fas fa-chart-line', color: '#8B5CF6' },
+        { id: 'lainnya-income', name: 'Lainnya', icon: 'fas fa-coins', color: '#6B7280' }
+    ],
+    expense: [
+        { id: 'makanan', name: 'Makanan', icon: 'fas fa-utensils', color: '#EF4444' },
+        { id: 'transportasi', name: 'Transportasi', icon: 'fas fa-car', color: '#3B82F6' },
+        { id: 'belanja', name: 'Belanja', icon: 'fas fa-shopping-cart', color: '#F59E0B' },
+        { id: 'tagihan', name: 'Tagihan', icon: 'fas fa-file-invoice-dollar', color: '#EF4444' },
+        { id: 'hiburan', name: 'Hiburan', icon: 'fas fa-gamepad', color: '#8B5CF6' },
+        { id: 'kesehatan', name: 'Kesehatan', icon: 'fas fa-heartbeat', color: '#10B981' },
+        { id: 'pendidikan', name: 'Pendidikan', icon: 'fas fa-graduation-cap', color: '#3B82F6' },
+        { id: 'olahraga', name: 'Olahraga', icon: 'fas fa-dumbbell', color: '#F59E0B' },
+        { id: 'kecantikan', name: 'Kecantikan', icon: 'fas fa-heart', color: '#EC4899' },
+        { id: 'sosial', name: 'Sosial', icon: 'fas fa-users', color: '#6B7280' },
+        { id: 'pakaian', name: 'Pakaian', icon: 'fas fa-tshirt', color: '#8B5CF6' },
+        { id: 'mobil', name: 'Mobil', icon: 'fas fa-car', color: '#3B82F6' },
+        { id: 'minuman', name: 'Minuman', icon: 'fas fa-wine-glass', color: '#10B981' },
+        { id: 'rokok', name: 'Rokok', icon: 'fas fa-smoking', color: '#6B7280' },
+        { id: 'elektronik', name: 'Elektronik', icon: 'fas fa-mobile-alt', color: '#3B82F6' },
+        { id: 'bepergian', name: 'Bepergian', icon: 'fas fa-plane', color: '#F59E0B' },
+        { id: 'peliharaan', name: 'Peliharaan', icon: 'fas fa-paw', color: '#10B981' },
+        { id: 'perbaikan', name: 'Perbaikan', icon: 'fas fa-tools', color: '#6B7280' },
+        { id: 'perumahan', name: 'Perumahan', icon: 'fas fa-home', color: '#8B5CF6' },
+        { id: 'rumah', name: 'Rumah', icon: 'fas fa-house-user', color: '#10B981' },
+        { id: 'hadiah', name: 'Hadiah', icon: 'fas fa-gift', color: '#EC4899' },
+        { id: 'donasi', name: 'Donasi', icon: 'fas fa-hand-holding-heart', color: '#10B981' },
+        { id: 'lotre', name: 'Lotre', icon: 'fas fa-dice', color: '#F59E0B' },
+        { id: 'makanan-ringan', name: 'Makanan Ringan', icon: 'fas fa-cookie-bite', color: '#F59E0B' },
+        { id: 'anak-anak', name: 'Anak-anak', icon: 'fas fa-baby', color: '#EC4899' },
+        { id: 'sayur-mayur', name: 'Sayur-mayur', icon: 'fas fa-carrot', color: '#10B981' },
+        { id: 'buah', name: 'Buah', icon: 'fas fa-apple-alt', color: '#10B981' },
+        { id: 'lainnya-expense', name: 'Lainnya', icon: 'fas fa-ellipsis-h', color: '#6B7280' }
+    ]
 };
+
+// Make customCategories available globally
+window.customCategories = customCategories;
+
+// Validate AI system on load
+try {
+    console.log('AI Category System loaded');
+    console.log('Available categories:', customCategories);
+    if (typeof categoryKeywords !== 'undefined') {
+        console.log('Available keywords:', Object.keys(categoryKeywords).length, 'categories with keywords');
+    } else {
+        console.error('categoryKeywords not defined!');
+    }
+} catch (error) {
+    console.error('Error initializing AI system:', error);
+}
+
+// AI Category Recognition System
+const categoryKeywords = {
+    // INCOME CATEGORIES
+    'gaji': {
+        keywords: ['gaji', 'salary', 'upah', 'honor', 'honorarium', 'take home pay', 'thp', 'penghasilan tetap', 'bulanan', 'gapok', 'gaji pokok'],
+        type: 'income'
+    },
+    'freelance': {
+        keywords: ['freelance', 'project', 'proyek', 'kontrak', 'commission', 'komisi', 'jasa', 'konsultasi', 'design', 'desain', 'website', 'aplikasi', 'programming', 'coding', 'menulis', 'artikel', 'content', 'konten'],
+        type: 'income'
+    },
+    'bonus': {
+        keywords: ['bonus', 'insentif', 'reward', 'hadiah', 'prize', 'lomba', 'kompetisi', 'achievement', 'prestasi', 'thr', 'lebaran', 'natal', '13th month'],
+        type: 'income'
+    },
+    'investasi': {
+        keywords: ['investasi', 'dividen', 'saham', 'reksadana', 'obligasi', 'crypto', 'cryptocurrency', 'bitcoin', 'trading', 'profit', 'keuntungan', 'bunga', 'deposito', 'suku bunga'],
+        type: 'income'
+    },
+
+    // EXPENSE CATEGORIES
+    'makanan': {
+        keywords: ['makan', 'makanan', 'nasi', 'ayam', 'sate', 'gudeg', 'rendang', 'soto', 'bakso', 'mie', 'burger', 'pizza', 'sushi', 'padang', 'warteg', 'resto', 'restoran', 'cafe', 'food', 'lunch', 'dinner', 'breakfast', 'sarapan', 'makan siang', 'makan malam'],
+        type: 'expense'
+    },
+    'minuman': {
+        keywords: ['minum', 'minuman', 'kopi', 'coffee', 'teh', 'tea', 'jus', 'juice', 'air', 'water', 'soda', 'cola', 'sprite', 'beer', 'wine', 'cocktail', 'smoothie', 'milkshake', 'bubble tea', 'boba', 'starbucks', 'chatime'],
+        type: 'expense'
+    },
+    'makanan-ringan': {
+        keywords: ['snack', 'cemilan', 'keripik', 'biskuit', 'coklat', 'permen', 'ice cream', 'es krim', 'donat', 'roti', 'cake', 'kue', 'cookies', 'crackers', 'nuts', 'kacang'],
+        type: 'expense'
+    },
+    'transportasi': {
+        keywords: ['transport', 'transportasi', 'ojek', 'gojek', 'grab', 'taxi', 'bus', 'kereta', 'commuter', 'mrt', 'lrt', 'pesawat', 'flight', 'tiket', 'bensin', 'solar', 'parkir', 'tol', 'uber', 'bluebird'],
+        type: 'expense'
+    },
+    'belanja': {
+        keywords: ['belanja', 'shopping', 'beli', 'membeli', 'pembelian', 'mall', 'supermarket', 'minimarket', 'indomaret', 'alfamart', 'hypermart', 'carrefour', 'tokopedia', 'shopee', 'lazada', 'bukalapak', 'online shop', 'olshop', 'purchase', 'buy'],
+        type: 'expense'
+    },
+    'pakaian': {
+        keywords: ['baju', 'pakaian', 'kemeja', 'celana', 'rok', 'dress', 'kaos', 'jacket', 'jaket', 'sepatu', 'sandal', 'tas', 'topi', 'ikat pinggang', 'underwear', 'fashion', 'uniqlo', 'zara', 'h&m'],
+        type: 'expense'
+    },
+    'kecantikan': {
+        keywords: ['makeup', 'make up', 'cosmetic', 'kosmetik', 'lipstik', 'foundation', 'bedak', 'maskara', 'eyeshadow', 'blush', 'skincare', 'facial', 'serum', 'moisturizer', 'cleanser', 'toner', 'sunscreen', 'salon', 'spa', 'manicure', 'pedicure', 'hair treatment', 'creambath', 'beli makeup', 'makeup kit', 'beauty', 'kecantikan', 'cantik'],
+        type: 'expense'
+    },
+    'anak-anak': {
+        keywords: ['popok', 'diaper', 'susu formula', 'baby', 'bayi', 'anak', 'mainan', 'toy', 'perlengkapan bayi', 'stroller', 'car seat', 'baby food', 'mpasi', 'pampers', 'sweety', 'merries', 'beli popok', 'popok bayi', 'susu bayi'],
+        type: 'expense'
+    },
+    'kesehatan': {
+        keywords: ['obat', 'medicine', 'dokter', 'doctor', 'hospital', 'rumah sakit', 'klinik', 'apotek', 'pharmacy', 'vitamin', 'supplement', 'checkup', 'medical', 'dental', 'gigi', 'mata', 'glasses', 'kacamata', 'contact lens', 'lab test'],
+        type: 'expense'
+    },
+    'pendidikan': {
+        keywords: ['sekolah', 'school', 'kuliah', 'university', 'college', 'kursus', 'course', 'les', 'bimbel', 'tuition', 'spp', 'uang sekolah', 'buku', 'book', 'alat tulis', 'stationary', 'laptop', 'seminar', 'workshop', 'training'],
+        type: 'expense'
+    },
+    'hiburan': {
+        keywords: ['bioskop', 'cinema', 'movie', 'film', 'netflix', 'spotify', 'game', 'gaming', 'playstation', 'xbox', 'nintendo', 'concert', 'konser', 'musik', 'karaoke', 'ktv', 'bowling', 'billiard', 'arcade', 'theme park', 'taman bermain'],
+        type: 'expense'
+    },
+    'olahraga': {
+        keywords: ['gym', 'fitness', 'olahraga', 'sport', 'sepak bola', 'futsal', 'badminton', 'tennis', 'basket', 'renang', 'swimming', 'yoga', 'pilates', 'marathon', 'lari', 'jogging', 'cycling', 'sepeda'],
+        type: 'expense'
+    },
+    'elektronik': {
+        keywords: ['handphone', 'hp', 'smartphone', 'iphone', 'samsung', 'xiaomi', 'oppo', 'vivo', 'laptop', 'computer', 'pc', 'tablet', 'ipad', 'headphone', 'earphone', 'speaker', 'tv', 'televisi', 'ac', 'kulkas', 'mesin cuci'],
+        type: 'expense'
+    },
+    'mobil': {
+        keywords: ['mobil', 'car', 'motor', 'motorcycle', 'service', 'bengkel', 'spare part', 'oli', 'ban', 'tire', 'insurance', 'asuransi', 'pajak kendaraan', 'stnk', 'sim'],
+        type: 'expense'
+    },
+    'rumah': {
+        keywords: ['rumah', 'house', 'home', 'furniture', 'furnitur', 'kasur', 'bed', 'sofa', 'meja', 'kursi', 'lemari', 'rak', 'perabot', 'dekorasi', 'decoration', 'cat', 'paint', 'renovasi'],
+        type: 'expense'
+    },
+    'perumahan': {
+        keywords: ['sewa', 'rent', 'kost', 'kontrakan', 'apartemen', 'apartment', 'listrik', 'electricity', 'air', 'water', 'gas', 'internet', 'wifi', 'telepon', 'phone', 'cable tv'],
+        type: 'expense'
+    },
+    'tagihan': {
+        keywords: ['tagihan', 'bill', 'pembayaran', 'payment', 'cicilan', 'installment', 'kredit', 'credit', 'pinjaman', 'loan', 'utang', 'debt', 'kartu kredit', 'credit card', 'kpr', 'mortgage'],
+        type: 'expense'
+    },
+    'peliharaan': {
+        keywords: ['pet', 'peliharaan', 'anjing', 'dog', 'kucing', 'cat', 'ikan', 'fish', 'burung', 'bird', 'makanan hewan', 'pet food', 'vet', 'veteriner', 'grooming'],
+        type: 'expense'
+    },
+    'sosial': {
+        keywords: ['arisan', 'social', 'pesta', 'party', 'wedding', 'pernikahan', 'ulang tahun', 'birthday', 'gathering', 'reunion', 'acara', 'event', 'traktir', 'treat'],
+        type: 'expense'
+    },
+    'hadiah': {
+        keywords: ['hadiah', 'gift', 'present', 'souvenir', 'oleh-oleh', 'hampers', 'surprise', 'anniversary'],
+        type: 'expense'
+    },
+    'donasi': {
+        keywords: ['donasi', 'donation', 'charity', 'amal', 'zakat', 'infaq', 'sedekah', 'sumbangan', 'bantuan', 'help'],
+        type: 'expense'
+    },
+    'bepergian': {
+        keywords: ['travel', 'trip', 'vacation', 'liburan', 'holiday', 'tour', 'wisata', 'hotel', 'penginapan', 'accommodation', 'backpacking', 'jalan-jalan'],
+        type: 'expense'
+    },
+    'rokok': {
+        keywords: ['rokok', 'cigarette', 'tobacco', 'tembakau', 'vape', 'vaping', 'e-cigarette', 'marlboro', 'gudang garam', 'djarum', 'sampoerna'],
+        type: 'expense'
+    },
+    'perbaikan': {
+        keywords: ['perbaikan', 'repair', 'service', 'maintenance', 'fix', 'benerin', 'ganti', 'replace', 'spare part', 'tools', 'alat'],
+        type: 'expense'
+    },
+    'sayur-mayur': {
+        keywords: ['sayur', 'sayuran', 'vegetable', 'kangkung', 'bayam', 'sawi', 'wortel', 'kentang', 'brokoli', 'kubis', 'tomat', 'bawang', 'cabai', 'pasar'],
+        type: 'expense'
+    },
+    'buah': {
+        keywords: ['buah', 'fruit', 'apel', 'apple', 'pisang', 'banana', 'jeruk', 'orange', 'mangga', 'mango', 'anggur', 'grape', 'semangka', 'watermelon', 'melon', 'strawberry', 'durian', 'rambutan'],
+        type: 'expense'
+    }
+};
+
+// AI Category Recognition Function
+function recognizeCategory(description) {
+    if (!description || typeof description !== 'string') {
+        return null;
+    }
+    
+    const text = description.toLowerCase().trim();
+    if (!text) return null;
+    
+    console.log('🔍 AI analyzing:', text);
+    
+    let bestMatch = null;
+    let maxScore = 0;
+    let debugMatches = [];
+    
+    // Check each category
+    for (const [categoryId, categoryData] of Object.entries(categoryKeywords)) {
+        let score = 0;
+        let matchedKeywords = [];
+        
+        // Check each keyword for this category
+        for (const keyword of categoryData.keywords) {
+            const keywordLower = keyword.toLowerCase();
+            if (text.includes(keywordLower)) {
+                // Improved scoring system
+                let keywordScore = keyword.length;
+                
+                // Special handling for "beli" keyword - prioritize specific items
+                if (keyword === 'beli' || keyword === 'membeli') {
+                    // Lower base score for generic "beli" to let specific items win
+                    keywordScore = 2;
+                } else if (keywordLower.length >= 4) {
+                    // Longer, more specific keywords get higher priority
+                    keywordScore = keywordLower.length * 1.5;
+                }
+                
+                // Bonus for exact word match (not just substring)
+                const words = text.split(/\s+/);
+                if (words.includes(keywordLower)) {
+                    keywordScore *= 2.5;
+                }
+                
+                // Bonus for exact full match
+                if (text === keywordLower) {
+                    keywordScore *= 4;
+                }
+                
+                // Bonus for keyword at start of description
+                if (text.startsWith(keywordLower)) {
+                    keywordScore *= 1.8;
+                }
+                
+                // Special bonus for multi-word phrases that match exactly
+                if (keywordLower.includes(' ') && text.includes(keywordLower)) {
+                    keywordScore *= 3;
+                }
+                
+                score += keywordScore;
+                matchedKeywords.push({ keyword, score: keywordScore });
+                console.log(`✅ Match: "${keyword}" in "${text}" (score: ${keywordScore})`);
+            }
+        }
+        
+        debugMatches.push({
+            categoryId,
+            score,
+            matchedKeywords,
+            type: categoryData.type
+        });
+        
+        // Update best match if this category has higher score
+        if (score > maxScore) {
+            maxScore = score;
+            bestMatch = {
+                categoryId: categoryId,
+                type: categoryData.type,
+                confidence: Math.min(score / 20, 1), // Adjusted confidence calculation
+                debugInfo: { score, matchedKeywords }
+            };
+            console.log(`🏆 New best: ${categoryId} (score: ${score})`);
+        }
+    }
+    
+    console.log('📊 Final result:', bestMatch);
+    return bestMatch;
+}
+
+// Get category data by ID
+function getCategoryById(categoryId, type) {
+    const categories = customCategories[type] || [];
+    return categories.find(cat => cat.id === categoryId);
+}
+
+// Auto-suggest category based on description
+function autoSuggestCategory(description) {
+    try {
+        const recognition = recognizeCategory(description);
+        
+        if (recognition && recognition.confidence > 0.02) { // Lowered threshold for better sensitivity
+            const categoryData = getCategoryById(recognition.categoryId, recognition.type);
+            if (categoryData) {
+                return {
+                    ...categoryData,
+                    type: recognition.type,
+                    confidence: recognition.confidence,
+                    suggested: true
+                };
+            }
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('Error in autoSuggestCategory:', error);
+        return null;
+    }
+}
+
+// Helper functions for categories
+const incomeCategories = customCategories.income;
+const expenseCategories = customCategories.expense;
 
 // Statistics display configuration
 let statisticsConfig = {
@@ -139,6 +438,9 @@ document.addEventListener('DOMContentLoaded', function() {
             updateDashboardAIStats();
             populateWalletDropdowns();
             
+            // Initialize transaction categories
+            initializeTransactionTabs();
+            
             // Apply custom categories and statistics settings
             updateCategorySelects();
             applyStatisticsSettings();
@@ -172,6 +474,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     hideQuickAddModal();
                 }
             });
+            
+            // Add mobile dropdown event listeners
+            quickAddModal.addEventListener('click', function(e) {
+                // Close mobile dropdowns if clicking outside them
+                if (!e.target.closest('.mobile-dropdown-container') && 
+                    !e.target.closest('.mobile-dropdown-panel')) {
+                    closeMobileCategoryDropdown();
+                    closeMobileWalletDropdown();
+                }
+            });
         }
         
         // Initialize with dashboard and update mobile nav
@@ -196,7 +508,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Load data from localStorage
 function loadData() {
-    transactions = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS)) || [];
+    console.log('=== LOADING DATA FROM LOCALSTORAGE ===');
+    
+    const rawTransactions = localStorage.getItem(STORAGE_KEYS.TRANSACTIONS);
+    console.log('Raw transactions from localStorage:', rawTransactions);
+    
+    transactions = JSON.parse(rawTransactions) || [];
+    console.log('Parsed transactions:', transactions.length, 'items');
+    console.log('First few transactions:', transactions.slice(0, 3));
+    
     goals = JSON.parse(localStorage.getItem(STORAGE_KEYS.GOALS)) || [];
     savings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SAVINGS)) || [];
     portfolio = JSON.parse(localStorage.getItem(STORAGE_KEYS.PORTFOLIO)) || [];
@@ -208,7 +528,31 @@ function loadData() {
     
     const savedCategories = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
     if (savedCategories) {
-        customCategories = { ...customCategories, ...JSON.parse(savedCategories) };
+        try {
+            const parsed = JSON.parse(savedCategories);
+            
+            // Check if it's the old format (array of strings)
+            if (Array.isArray(parsed.income) && typeof parsed.income[0] === 'string') {
+                // Convert old format to new format
+                customCategories.income = parsed.income.map((name, index) => ({
+                    id: name.toLowerCase().replace(/\s+/g, '-'),
+                    name: name,
+                    icon: 'fas fa-coins',
+                    color: '#10B981'
+                }));
+                customCategories.expense = parsed.expense.map((name, index) => ({
+                    id: name.toLowerCase().replace(/\s+/g, '-'),
+                    name: name,
+                    icon: 'fas fa-shopping-cart',
+                    color: '#EF4444'
+                }));
+            } else if (parsed.income && parsed.income[0] && typeof parsed.income[0] === 'object') {
+                // New format
+                customCategories = { ...customCategories, ...parsed };
+            }
+        } catch (error) {
+            console.error('Error loading categories:', error);
+        }
     }
     
     const savedStatisticsConfig = localStorage.getItem(STORAGE_KEYS.STATISTICS_CONFIG);
@@ -217,20 +561,57 @@ function loadData() {
     }
     
     const savedWallets = localStorage.getItem(STORAGE_KEYS.WALLETS);
+    console.log('Raw wallets from localStorage:', savedWallets);
+    
     if (savedWallets) {
-        wallets = JSON.parse(savedWallets);
+        try {
+            wallets = JSON.parse(savedWallets);
+            console.log('Parsed wallets:', wallets);
+            
+            // Validate wallet structure
+            if (!Array.isArray(wallets) || wallets.length === 0) {
+                console.log('Invalid wallets structure, initializing defaults...');
+                wallets = [];
+                initializeDefaultWallets();
+            }
+        } catch (error) {
+            console.error('Error parsing wallets:', error);
+            wallets = [];
+            initializeDefaultWallets();
+        }
+    } else {
+        console.log('No wallets in localStorage, initializing defaults...');
+        wallets = [];
+        initializeDefaultWallets();
     }
+    
+    console.log('Final wallets after loading:', wallets);
 }
 
 // Save data to localStorage
 function saveData() {
-    localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(transactions));
-    localStorage.setItem(STORAGE_KEYS.GOALS, JSON.stringify(goals));
-    localStorage.setItem(STORAGE_KEYS.SAVINGS, JSON.stringify(savings));
-    localStorage.setItem(STORAGE_KEYS.DAILY_LIMIT, JSON.stringify(dailyLimitSettings));
-    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(customCategories));
-    localStorage.setItem(STORAGE_KEYS.STATISTICS_CONFIG, JSON.stringify(statisticsConfig));
-    localStorage.setItem(STORAGE_KEYS.WALLETS, JSON.stringify(wallets));
+    try {
+        localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(transactions));
+        localStorage.setItem(STORAGE_KEYS.GOALS, JSON.stringify(goals));
+        localStorage.setItem(STORAGE_KEYS.SAVINGS, JSON.stringify(savings));
+        localStorage.setItem(STORAGE_KEYS.DAILY_LIMIT, JSON.stringify(dailyLimitSettings));
+        localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(customCategories));
+        localStorage.setItem(STORAGE_KEYS.STATISTICS_CONFIG, JSON.stringify(statisticsConfig));
+        localStorage.setItem(STORAGE_KEYS.WALLETS, JSON.stringify(wallets));
+    } catch (error) {
+        console.error('Error saving data:', error);
+        throw error;
+    }
+}
+
+// Save wallets to localStorage
+function saveWallets() {
+    try {
+        localStorage.setItem(STORAGE_KEYS.WALLETS, JSON.stringify(wallets));
+    } catch (error) {
+        console.error('Error saving wallets:', error);
+        throw error;
+    }
 }
 
 // Currency formatting
@@ -376,8 +757,10 @@ function showSection(sectionName) {
                 updateAIStats();
             }, 100);
         } else if (sectionName === 'transactions') {
-            // Update transactions list when showing transactions section
+            // Initialize transaction categories and update transactions list when showing transactions section
             setTimeout(() => {
+                // Initialize transaction tabs with expense as default
+                showTransactionTab('expense');
                 updateTransactionsList();
                 updateFilterCategories();
             }, 100);
@@ -470,6 +853,9 @@ function resetQuickAddModal() {
         // Reset form
         const form = document.getElementById('quick-transaction-form');
         if (form) form.reset();
+        
+        // Reset mobile dropdowns
+        resetMobileDropdownSelections();
     } catch (error) {
         console.error('Error resetting quick add modal:', error);
     }
@@ -489,12 +875,17 @@ function showQuickIncomeForm() {
             submitBtn.innerHTML = '<i class="fas fa-plus mr-2"></i>Tambah Pemasukan';
         }
         
-        // Populate categories with income categories
+        // Populate categories with income categories (both desktop and mobile)
         populateQuickCategories('income');
+        populateMobileCategoryDropdown('income');
         populateQuickWallets();
+        populateMobileWalletDropdown();
         
         // Set form type
         document.getElementById('quick-transaction-form').setAttribute('data-type', 'income');
+        
+        // Reset mobile dropdown selections
+        resetMobileDropdownSelections();
     } catch (error) {
         console.error('Error showing quick income form:', error);
     }
@@ -514,12 +905,17 @@ function showQuickExpenseForm() {
             submitBtn.innerHTML = '<i class="fas fa-minus mr-2"></i>Tambah Pengeluaran';
         }
         
-        // Populate categories with expense categories
+        // Populate categories with expense categories (both desktop and mobile)
         populateQuickCategories('expense');
+        populateMobileCategoryDropdown('expense');
         populateQuickWallets();
+        populateMobileWalletDropdown();
         
         // Set form type
         document.getElementById('quick-transaction-form').setAttribute('data-type', 'expense');
+        
+        // Reset mobile dropdown selections
+        resetMobileDropdownSelections();
     } catch (error) {
         console.error('Error showing quick expense form:', error);
     }
@@ -530,14 +926,25 @@ function populateQuickCategories(type) {
         const select = document.getElementById('quick-category');
         if (!select) return;
         
-        const customCategories = getCustomCategories();
         const categories = type === 'income' ? customCategories.income : customCategories.expense;
         
         select.innerHTML = '';
+        
+        // Add default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Pilih kategori';
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+        select.appendChild(defaultOption);
+        
+        // Add category options
         categories.forEach(category => {
             const option = document.createElement('option');
-            option.value = category;
-            option.textContent = category;
+            option.value = category.id;
+            option.textContent = category.name;
+            option.dataset.icon = category.icon;
+            option.dataset.color = category.color;
             select.appendChild(option);
         });
     } catch (error) {
@@ -940,6 +1347,7 @@ function updateDashboard() {
 // Update transactions list
 function updateTransactionsList() {
     try {
+        console.log('Updating transactions list...');
         const container = document.getElementById('transactions-list');
         if (!container) {
             console.error('Transactions list container not found');
@@ -956,7 +1364,44 @@ function updateTransactionsList() {
             return;
         }
         
-        const filteredTransactions = getFilteredTransactions();
+        // Try to get filtered transactions, fallback to all transactions if filters not ready
+        let filteredTransactions;
+        const typeFilter = document.getElementById('filter-type');
+        const categoryFilter = document.getElementById('filter-category');
+        
+        if (!typeFilter || !categoryFilter) {
+            console.warn('Filter elements not ready, showing all transactions');
+            filteredTransactions = transactions || [];
+        } else {
+            try {
+                filteredTransactions = getFilteredTransactions();
+            } catch (error) {
+                console.warn('Error in getFilteredTransactions, using all transactions:', error);
+                filteredTransactions = transactions || [];
+            }
+        }
+        
+        // Enhance transactions with missing icon/color data
+        filteredTransactions = filteredTransactions.map(transaction => {
+            if (!transaction.icon || !transaction.color) {
+                // Find category data from customCategories
+                const categoryType = transaction.type === 'income' ? 'income' : 'expense';
+                const categoryData = customCategories[categoryType].find(cat => 
+                    cat.name === transaction.category || cat.id === transaction.categoryId
+                );
+                
+                if (categoryData) {
+                    return {
+                        ...transaction,
+                        icon: transaction.icon || categoryData.icon,
+                        color: transaction.color || categoryData.color
+                    };
+                }
+            }
+            return transaction;
+        });
+        
+        console.log('Final filtered transactions:', filteredTransactions.length);
         
         if (filteredTransactions.length === 0) {
             container.innerHTML = `
@@ -968,11 +1413,12 @@ function updateTransactionsList() {
             return;
         }
     
+        console.log('Rendering', filteredTransactions.length, 'transactions');
         container.innerHTML = filteredTransactions.map(transaction => `
             <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div class="flex items-center flex-1">
-                    <div class="p-2 ${transaction.type === 'income' ? 'bg-green-100' : 'bg-red-100'} rounded-lg mr-4">
-                        <i class="fas ${transaction.type === 'income' ? 'fa-arrow-up text-green-600' : 'fa-arrow-down text-red-600'}"></i>
+                    <div class="p-2 rounded-lg mr-4" style="background-color: ${transaction.color ? transaction.color + '20' : (transaction.type === 'income' ? '#10B98120' : '#EF444420')}">
+                        <i class="${transaction.icon || (transaction.type === 'income' ? 'fas fa-arrow-up' : 'fas fa-arrow-down')}" style="color: ${transaction.color || (transaction.type === 'income' ? '#10B981' : '#EF4444')}"></i>
                     </div>
                     <div class="flex-1">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -995,6 +1441,8 @@ function updateTransactionsList() {
             </div>
         `).join('');
         
+        console.log('Transactions list updated successfully');
+        
     } catch (error) {
         console.error('Error updating transactions list:', error);
         const container = document.getElementById('transactions-list');
@@ -1015,18 +1463,22 @@ function getFilteredTransactions() {
         const categoryFilter = document.getElementById('filter-category');
         
         if (!typeFilter || !categoryFilter) {
-            console.error('Filter elements not found');
+            console.warn('Filter elements not found, returning all transactions');
+            // Return all transactions if filters not available
             return transactions || [];
         }
         
         const typeValue = typeFilter.value;
         const categoryValue = categoryFilter.value;
         
-        return (transactions || []).filter(transaction => {
-            const matchesType = typeValue === 'all' || transaction.type === typeValue;
-            const matchesCategory = categoryValue === 'all' || transaction.category === categoryValue;
+        const filtered = (transactions || []).filter(transaction => {
+            const matchesType = typeValue === '' || typeValue === 'all' || transaction.type === typeValue;
+            const matchesCategory = categoryValue === '' || categoryValue === 'all' || transaction.category === categoryValue;
+            
             return matchesType && matchesCategory;
         });
+        
+        return filtered;
     } catch (error) {
         console.error('Error filtering transactions:', error);
         return transactions || [];
@@ -1048,7 +1500,7 @@ function updateFilterCategories() {
         const categories = [...new Set((transactions || []).map(t => t.category))].sort();
         
         // Keep the "Semua Kategori" option and add unique categories
-        categoryFilter.innerHTML = '<option value="all">Semua Kategori</option>' + 
+        categoryFilter.innerHTML = '<option value="">Semua Kategori</option>' + 
             categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
     } catch (error) {
         console.error('Error updating filter categories:', error);
@@ -1534,20 +1986,40 @@ function deleteSaving(id) {
 
 // Daily Limit Functions
 function getTodayExpenses() {
-    const today = new Date().toLocaleDateString('id-ID');
-    return transactions
-        .filter(t => {
-            if (t.type !== 'expense' || t.formattedDate !== today) return false;
+    try {
+        const today = new Date().toDateString();
+        
+        const todayExpenses = transactions
+            .filter(t => {
+                if (t.type !== 'expense') return false;
+                
+                // Handle both formattedDate and date fields
+                let transactionDate;
+                if (t.formattedDate) {
+                    transactionDate = new Date(t.formattedDate).toDateString();
+                } else if (t.date) {
+                    transactionDate = new Date(t.date).toDateString();
+                } else {
+                    return false;
+                }
+                
+                if (transactionDate !== today) return false;
+                
+                // Exclude savings from daily limit if setting is enabled
+                if (dailyLimitSettings && dailyLimitSettings.excludeSavings && t.category === 'Tabungan') return false;
+                
+                // Exclude goal contributions from daily limit if setting is enabled
+                if (dailyLimitSettings && dailyLimitSettings.excludeGoals && t.category === 'Target/Goal') return false;
+                
+                return true;
+            })
+            .reduce((sum, t) => sum + t.amount, 0);
             
-            // Exclude savings from daily limit if setting is enabled
-            if (dailyLimitSettings.excludeSavings && t.category === 'Tabungan') return false;
-            
-            // Exclude goal contributions from daily limit if setting is enabled
-            if (dailyLimitSettings.excludeGoals && t.category === 'Target/Goal') return false;
-            
-            return true;
-        })
-        .reduce((sum, t) => sum + t.amount, 0);
+        return todayExpenses;
+    } catch (error) {
+        console.error('Error getting today expenses:', error);
+        return 0;
+    }
 }
 
 function checkDailyLimitReset() {
@@ -2937,23 +3409,13 @@ class MoneyTrackerAI {
             // Transaction patterns
             expense: {
                 keywords: ['beli', 'bayar', 'belanja', 'buat', 'untuk', 'keluar', 'habis', 'spend', 'buat beli', 'utk', 'byr', 'bli', 'blnja', 'keluarin', 'pake', 'pakai', 'pkai'],
-                categories: {
-                    'Makanan': ['makan', 'nasi', 'bakso', 'soto', 'gudeg', 'ayam', 'ikan', 'sayur', 'buah', 'jajan', 'snack', 'minum', 'kopi', 'teh', 'restoran', 'warung', 'food', 'cafe', 'mkn', 'mknan', 'jjn', 'kfe'],
-                    'Transportasi': ['bensin', 'spbu', 'ojek', 'gojek', 'grab', 'bus', 'taxi', 'motor', 'mobil', 'parkir', 'tol', 'tiket', 'transport', 'bnsn', 'ojol', 'grb', 'trnsprt', 'isi bensin', 'isi', 'shell', 'pertamina', 'bbm', 'solar', 'premium', 'pertalite'],
-                    'Belanja': ['baju', 'celana', 'sepatu', 'tas', 'kosmetik', 'shopping', 'mall', 'toko', 'online', 'marketplace', 'skincare', 'bj', 'sptu', 'kosmetk', 'shp', 'ol'],
-                    'Tagihan': ['listrik', 'air', 'internet', 'wifi', 'pulsa', 'token', 'pln', 'pdam', 'telkom', 'indihome', 'tv', 'kabel', 'lstrk', 'intrnt', 'wf', 'plsa', 'tkn'],
-                    'Hiburan': ['film', 'bioskop', 'game', 'konser', 'wisata', 'liburan', 'rekreasi', 'netflix', 'spotify', 'youtube', 'flm', 'bioskp', 'gm', 'wsta', 'lbrn'],
-                    'Kesehatan': ['dokter', 'obat', 'apotek', 'rumah sakit', 'rs', 'vitamin', 'medical', 'therapy', 'checkup', 'dktr', 'obt', 'aptk', 'rs', 'vtmn', 'chckp']
-                }
+                // Dynamic categories will be loaded after customCategories is available
+                categories: {}
             },
             income: {
                 keywords: ['gaji', 'gajian', 'terima', 'dapat', 'income', 'masuk', 'bayaran', 'honor', 'bonus', 'untung', 'profit', 'duit', 'uang masuk', 'gj', 'gjn', 'trma', 'dpt', 'duit masuk', 'uang', 'duwit'],
-                categories: {
-                    'Gaji': ['gaji', 'gajian', 'salary', 'bulanan', 'tetap', 'gj', 'gjn', 'slry'],
-                    'Freelance': ['freelance', 'project', 'kerja', 'jasa', 'service', 'frelnc', 'prjct', 'krj', 'js', 'srvc'],
-                    'Bonus': ['bonus', 'thr', 'reward', 'hadiah', 'extra', 'bns', 'rwrd', 'hdh', 'xtr'],
-                    'Investasi': ['investasi', 'saham', 'dividen', 'bunga', 'deposito', 'reksadana', 'invst', 'shm', 'dvdn', 'bng', 'dpst']
-                }
+                // Dynamic categories will be loaded after customCategories is available
+                categories: {}
             },
             savings: {
                 keywords: ['nabung', 'menabung', 'tabung', 'simpan', 'saving', 'celengan', 'setor', 'masukin', 'masukkan', 'taruh tabungan'],
@@ -2965,7 +3427,13 @@ class MoneyTrackerAI {
             }
         };
 
-        this.numberPatterns = {
+    // Initialize categories when customCategories is available
+    setTimeout(() => {
+        this.updateCategories();
+    }, 100);
+    
+    // Make customCategories available globally for AI
+    window.customCategories = customCategories;        this.numberPatterns = {
             // Indonesian number patterns
             'rb': 1000,
             'ribu': 1000,
@@ -3002,8 +3470,78 @@ class MoneyTrackerAI {
             saturday: ['sabtu', 'saturday'],
             sunday: ['minggu', 'sunday', 'ahad']
         };
+    }
 
-        this.loadAIStats();
+    // Build dynamic categories from customCategories global variable
+    buildDynamicCategories(type) {
+        try {
+            const categories = {};
+            
+            // Check if customCategories is available
+            if (!window.customCategories || !window.customCategories[type]) {
+                console.log(`CustomCategories not available for ${type}, using empty categories`);
+                return categories;
+            }
+            
+            const categoryList = window.customCategories[type];
+            
+            categoryList.forEach(category => {
+                // Create keywords for this category
+                const keywords = [
+                    category.name.toLowerCase(),
+                    // Add variations
+                    category.name.toLowerCase().replace(/\s+/g, ''),
+                    // Add short versions
+                    category.name.split(' ').map(word => word.substring(0, 3)).join(''),
+                ];
+                
+                // Add specific keywords based on category name
+                if (category.name.toLowerCase().includes('makan')) {
+                    keywords.push('makan', 'nasi', 'makanan', 'food', 'meal');
+                }
+                if (category.name.toLowerCase().includes('transport')) {
+                    keywords.push('transportasi', 'perjalanan', 'travel', 'bensin', 'ojek');
+                }
+                if (category.name.toLowerCase().includes('belanja')) {
+                    keywords.push('shopping', 'beli', 'buy', 'purchase');
+                }
+                if (category.name.toLowerCase().includes('tagihan')) {
+                    keywords.push('bayar', 'payment', 'bill', 'listrik', 'air');
+                }
+                if (category.name.toLowerCase().includes('hiburan')) {
+                    keywords.push('entertainment', 'fun', 'game', 'film', 'movie');
+                }
+                if (category.name.toLowerCase().includes('kesehatan')) {
+                    keywords.push('health', 'dokter', 'obat', 'medical', 'rumah sakit');
+                }
+                if (category.name.toLowerCase().includes('pendidikan')) {
+                    keywords.push('sekolah', 'kuliah', 'kursus', 'buku', 'education', 'school');
+                }
+                if (category.name.toLowerCase().includes('gaji')) {
+                    keywords.push('salary', 'kerja', 'work', 'income', 'penghasilan');
+                }
+                if (category.name.toLowerCase().includes('freelance')) {
+                    keywords.push('project', 'kerja sampingan', 'side job', 'freelance');
+                }
+                
+                categories[category.name] = keywords;
+            });
+            
+            return categories;
+        } catch (error) {
+            console.error('Error building dynamic categories:', error);
+            return {};
+        }
+    }
+
+    // Update categories when customCategories change
+    updateCategories() {
+        try {
+            this.patterns.expense.categories = this.buildDynamicCategories('expense');
+            this.patterns.income.categories = this.buildDynamicCategories('income');
+        } catch (error) {
+            console.error('Error updating AI categories:', error);
+        }
     }
 
     // Main AI processing function
@@ -3188,6 +3726,22 @@ class MoneyTrackerAI {
     }
 
     detectCategory(message, type) {
+        // Use the enhanced recognizeCategory function for better accuracy
+        try {
+            const recognition = recognizeCategory(message);
+            
+            if (recognition && recognition.type === type && recognition.confidence > 0.02) {
+                const categoryData = getCategoryById(recognition.categoryId, recognition.type);
+                if (categoryData) {
+                    console.log(`🎯 AI Chat using enhanced recognition: "${message}" → ${categoryData.name} (confidence: ${recognition.confidence})`);
+                    return categoryData.name;
+                }
+            }
+        } catch (error) {
+            console.error('Error using enhanced recognition in AI Chat:', error);
+        }
+        
+        // Fallback to old method if enhanced recognition fails
         const words = message.split(' ');
         const categories = this.patterns[type].categories;
         
@@ -3204,15 +3758,36 @@ class MoneyTrackerAI {
     generateDescription(message, type) {
         const words = message.split(' ');
         
-        // Remove common patterns and numbers
+        // Remove common patterns and numbers but keep meaningful words
         const filteredWords = words.filter(word => {
             return !this.isNumber(word) && 
                    !this.isCommonWord(word) &&
-                   word.length > 2;
+                   word.length > 2 &&
+                   // Don't filter out category-specific keywords
+                   !['beli', 'bayar', 'untuk', 'gaji', 'bonus', 'nabung', 'ambil'].includes(word.toLowerCase());
         });
         
         if (filteredWords.length > 0) {
-            return filteredWords.slice(0, 3).join(' ');
+            // Limit to 4 words for better descriptions
+            let description = filteredWords.slice(0, 4).join(' ');
+            
+            // Capitalize first letter
+            description = description.charAt(0).toUpperCase() + description.slice(1);
+            
+            return description;
+        }
+        
+        // Enhanced default descriptions based on recognized category
+        try {
+            const recognition = recognizeCategory(message);
+            if (recognition && recognition.confidence > 0.02) {
+                const categoryData = getCategoryById(recognition.categoryId, recognition.type);
+                if (categoryData) {
+                    return `${categoryData.name} via AI Chat`;
+                }
+            }
+        } catch (error) {
+            console.error('Error generating enhanced description:', error);
         }
         
         // Generate default description based on type
@@ -3574,6 +4149,8 @@ class MoneyTrackerAI {
 let moneyAI = null;
 try {
     moneyAI = new MoneyTrackerAI();
+    // Make AI available globally for category updates
+    window.moneyTrackerAI = moneyAI;
     console.log('MoneyAI initialized successfully');
 } catch (error) {
     console.error('Error initializing MoneyAI:', error);
@@ -3589,8 +4166,12 @@ try {
         },
         updateStats: function() {
             console.log('AI stats update called (fallback mode)');
+        },
+        updateCategories: function() {
+            console.log('AI categories update called (fallback mode)');
         }
     };
+    window.moneyTrackerAI = moneyAI;
 }
 
 // Initialize AI stats display
@@ -4311,13 +4892,22 @@ function updateWalletDisplay() {
         // Ensure wallets array exists and has data
         if (!currentWallets || currentWallets.length === 0) {
             console.log('No wallets found, initializing defaults...');
-            initializeDefaultWallets();
-            currentWallets = getWallets();
+            currentWallets = initializeDefaultWallets();
             console.log('After initialization:', currentWallets);
         }
         
         // Update global wallets variable
         wallets = currentWallets;
+        
+        // Calculate balances for each wallet
+        currentWallets.forEach(wallet => {
+            try {
+                wallet.balance = calculateWalletBalance(wallet.id);
+            } catch (error) {
+                console.error(`Error calculating balance for wallet ${wallet.id}:`, error);
+                wallet.balance = 0;
+            }
+        });
         
         const desktopContainer = document.getElementById('wallet-cards');
         const mobileContainer = document.getElementById('wallet-cards-mobile');
@@ -4330,7 +4920,7 @@ function updateWalletDisplay() {
             updateDesktopWalletCards(desktopContainer);
             console.log('Desktop cards count after update:', desktopContainer.children.length);
         } else {
-            console.error('Desktop wallet container not found!');
+            console.warn('Desktop wallet container not found!');
         }
         
         if (mobileContainer) {
@@ -4342,79 +4932,97 @@ function updateWalletDisplay() {
         }
         
         // Update wallet dropdowns in forms
-        populateWalletDropdowns();
-        console.log('Wallet dropdowns populated');
+        try {
+            populateWalletDropdowns();
+            console.log('Wallet dropdowns populated');
+        } catch (error) {
+            console.error('Error populating wallet dropdowns:', error);
+        }
         
         console.log('updateWalletDisplay completed successfully');
         
     } catch (error) {
         console.error('Error in updateWalletDisplay:', error);
-        // Show error notification
-        showNotification('Error updating wallet display', 'error');
+        // Show error notification but don't let it crash the app
+        if (typeof showNotification === 'function') {
+            showNotification('Error updating wallet display: ' + error.message, 'error');
+        }
     }
 }
 
 function updateDesktopWalletCards(container) {
     console.log('updateDesktopWalletCards called');
     
-    if (!container) {
-        console.error('Desktop container not provided');
-        return;
-    }
-    
-    // Get current wallets
-    const currentWallets = getWallets();
-    console.log('Current wallets for desktop cards:', currentWallets);
-    
-    if (!currentWallets || currentWallets.length === 0) {
-        console.log('No wallets available for desktop display, initializing...');
-        initializeDefaultWallets();
-        currentWallets = getWallets();
-    }
-    
-    if (!currentWallets || currentWallets.length === 0) {
-        container.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-8"><i class="fas fa-wallet text-4xl mb-2"></i><p>Belum ada wallet</p></div>';
-        return;
-    }
-    
-    // Calculate wallet balances
-    currentWallets.forEach(wallet => {
-        wallet.balance = calculateWalletBalance(wallet.id);
-    });
-    
-    console.log('Generating HTML for', currentWallets.length, 'wallets');
-    
-    container.innerHTML = currentWallets.map(wallet => `
-        <div class="wallet-card">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center">
-                    <div class="w-4 h-4 rounded-full mr-3" style="background-color: ${wallet.color || '#3B82F6'}"></div>
-                    <h3 class="font-semibold wallet-title">${wallet.name}</h3>
+    try {
+        if (!container) {
+            console.error('Desktop container not provided');
+            return;
+        }
+        
+        // Get current wallets
+        let currentWallets = getWallets();
+        console.log('Current wallets for desktop cards:', currentWallets);
+        
+        if (!currentWallets || currentWallets.length === 0) {
+            console.log('No wallets available for desktop display, initializing...');
+            currentWallets = initializeDefaultWallets();
+        }
+        
+        if (!currentWallets || currentWallets.length === 0) {
+            container.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-8"><i class="fas fa-wallet text-4xl mb-2"></i><p>Belum ada wallet</p></div>';
+            return;
+        }
+        
+        // Calculate wallet balances safely
+        currentWallets.forEach(wallet => {
+            try {
+                wallet.balance = calculateWalletBalance(wallet.id) || 0;
+            } catch (error) {
+                console.error(`Error calculating balance for wallet ${wallet.id}:`, error);
+                wallet.balance = 0;
+            }
+        });
+        
+        console.log('Generating HTML for', currentWallets.length, 'wallets');
+        
+        container.innerHTML = currentWallets.map(wallet => `
+            <div class="wallet-card">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 rounded-full mr-3" style="background-color: ${wallet.color || '#3B82F6'}"></div>
+                        <h3 class="font-semibold wallet-title">${wallet.name || 'Unknown Wallet'}</h3>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="editWallet('${wallet.id}')" class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300" title="Edit wallet">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ${currentWallets.length > 1 ? `<button onclick="deleteWallet('${wallet.id}')" class="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-300" title="Delete wallet">
+                            <i class="fas fa-trash"></i>
+                        </button>` : ''}
+                    </div>
                 </div>
-                <div class="flex space-x-2">
-                    <button onclick="editWallet('${wallet.id}')" class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300">
-                        <i class="fas fa-edit"></i>
+                <p class="text-2xl font-bold wallet-amount">${formatCurrency(wallet.balance || 0)}</p>
+                <div class="mt-4 flex space-x-2">
+                    <button onclick="transferBetweenWallets('${wallet.id}')" 
+                            class="px-3 py-1 bg-blue-100 rounded text-sm hover:bg-blue-200" title="Transfer funds">
+                        Transfer
                     </button>
-                    ${currentWallets.length > 1 ? `<button onclick="deleteWallet('${wallet.id}')" class="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-300">
-                        <i class="fas fa-trash"></i>
-                    </button>` : ''}
+                    <button onclick="viewWalletTransactions('${wallet.id}')" 
+                            class="px-3 py-1 bg-gray-100 rounded text-sm hover:bg-gray-200" title="View transaction history">
+                        History
+                    </button>
                 </div>
             </div>
-            <p class="text-2xl font-bold wallet-amount">${formatCurrency(wallet.balance)}</p>
-            <div class="mt-4 flex space-x-2">
-                <button onclick="transferBetweenWallets('${wallet.id}')" 
-                        class="px-3 py-1 bg-blue-100 rounded text-sm hover:bg-blue-200">
-                    Transfer
-                </button>
-                <button onclick="viewWalletTransactions('${wallet.id}')" 
-                        class="px-3 py-1 bg-gray-100 rounded text-sm hover:bg-gray-200">
-                    History
-                </button>
-            </div>
-        </div>
-    `).join('');
-    
-    console.log('Desktop wallet cards HTML updated, container children:', container.children.length);
+        `).join('');
+        
+        console.log('Desktop wallet cards HTML updated, container children:', container.children.length);
+        
+    } catch (error) {
+        console.error('Error in updateDesktopWalletCards:', error);
+        if (container) {
+            container.innerHTML = '<div class="col-span-3 text-center text-red-500 py-8"><i class="fas fa-exclamation-triangle text-4xl mb-2"></i><p>Error loading wallets</p></div>';
+        }
+    }
 }
 
 function updateMobileWalletCards(container) {
@@ -4494,33 +5102,41 @@ function updateMobileWalletCards(container) {
 function populateWalletDropdowns() {
     console.log('Populating wallet dropdowns...');
     
-    const incomeWalletSelect = document.getElementById('income-wallet');
-    const expenseWalletSelect = document.getElementById('expense-wallet');
-    
-    // Get current wallets
-    const currentWallets = getWallets();
-    console.log('Current wallets for dropdown:', currentWallets);
-    
-    if (incomeWalletSelect) {
-        incomeWalletSelect.innerHTML = '';
-        currentWallets.forEach(wallet => {
-            const option = document.createElement('option');
-            option.value = wallet.id;
-            option.textContent = wallet.name;
-            incomeWalletSelect.appendChild(option);
-        });
-        console.log('Income wallet dropdown populated');
-    }
-    
-    if (expenseWalletSelect) {
-        expenseWalletSelect.innerHTML = '';
-        currentWallets.forEach(wallet => {
-            const option = document.createElement('option');
-            option.value = wallet.id;
-            option.textContent = wallet.name;
-            expenseWalletSelect.appendChild(option);
-        });
-        console.log('Expense wallet dropdown populated');
+    try {
+        const incomeWalletSelect = document.getElementById('income-wallet');
+        const expenseWalletSelect = document.getElementById('expense-wallet');
+        const transactionWalletSelect = document.getElementById('transaction-wallet');
+        
+        // Get current wallets
+        let currentWallets = getWallets();
+        console.log('Current wallets for dropdown:', currentWallets);
+        
+        if (!currentWallets || currentWallets.length === 0) {
+            console.log('No wallets found for dropdowns, initializing...');
+            currentWallets = initializeDefaultWallets();
+        }
+        
+        const populateSelect = (selectElement, elementName) => {
+            if (selectElement) {
+                selectElement.innerHTML = '<option value="">Pilih wallet</option>';
+                currentWallets.forEach(wallet => {
+                    const option = document.createElement('option');
+                    option.value = wallet.id;
+                    option.textContent = `${wallet.name} (${formatCurrency(wallet.balance || 0)})`;
+                    selectElement.appendChild(option);
+                });
+                console.log(`${elementName} dropdown populated with ${currentWallets.length} wallets`);
+            } else {
+                console.log(`${elementName} dropdown not found`);
+            }
+        };
+        
+        populateSelect(incomeWalletSelect, 'Income wallet');
+        populateSelect(expenseWalletSelect, 'Expense wallet');
+        populateSelect(transactionWalletSelect, 'Transaction wallet');
+        
+    } catch (error) {
+        console.error('Error populating wallet dropdowns:', error);
     }
 }
 
@@ -7539,5 +8155,1144 @@ function loadStatisticsConfig() {
         } catch (error) {
             console.error('Error loading statistics config:', error);
         }
+    }
+}
+
+// Mobile Custom Dropdown Functions
+function openMobileCategoryDropdown() {
+    try {
+        const trigger = document.getElementById('mobile-category-trigger');
+        const dropdown = document.getElementById('mobile-category-dropdown');
+        const arrow = document.getElementById('mobile-category-arrow');
+        
+        if (!dropdown || !trigger) return;
+        
+        // Close wallet dropdown if open
+        closeMobileWalletDropdown();
+        
+        // Toggle dropdown
+        if (dropdown.classList.contains('hidden')) {
+            // Open dropdown
+            dropdown.classList.remove('hidden');
+            trigger.classList.add('active');
+            arrow.style.transform = 'rotate(180deg)';
+            
+            // Create backdrop
+            createMobileDropdownBackdrop('category');
+            
+            // Position dropdown relative to trigger
+            positionMobileDropdown(trigger, dropdown);
+        } else {
+            // Close dropdown
+            closeMobileCategoryDropdown();
+        }
+    } catch (error) {
+        console.error('Error opening mobile category dropdown:', error);
+    }
+}
+
+function closeMobileCategoryDropdown() {
+    try {
+        const trigger = document.getElementById('mobile-category-trigger');
+        const dropdown = document.getElementById('mobile-category-dropdown');
+        const arrow = document.getElementById('mobile-category-arrow');
+        
+        if (dropdown) dropdown.classList.add('hidden');
+        if (trigger) trigger.classList.remove('active');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+        
+        removeMobileDropdownBackdrop();
+    } catch (error) {
+        console.error('Error closing mobile category dropdown:', error);
+    }
+}
+
+function openMobileWalletDropdown() {
+    try {
+        const trigger = document.getElementById('mobile-wallet-trigger');
+        const dropdown = document.getElementById('mobile-wallet-dropdown');
+        const arrow = document.getElementById('mobile-wallet-arrow');
+        
+        if (!dropdown || !trigger) return;
+        
+        // Close category dropdown if open
+        closeMobileCategoryDropdown();
+        
+        // Toggle dropdown
+        if (dropdown.classList.contains('hidden')) {
+            // Open dropdown
+            dropdown.classList.remove('hidden');
+            trigger.classList.add('active');
+            arrow.style.transform = 'rotate(180deg)';
+            
+            // Create backdrop
+            createMobileDropdownBackdrop('wallet');
+            
+            // Position dropdown relative to trigger
+            positionMobileDropdown(trigger, dropdown);
+        } else {
+            // Close dropdown
+            closeMobileWalletDropdown();
+        }
+    } catch (error) {
+        console.error('Error opening mobile wallet dropdown:', error);
+    }
+}
+
+function closeMobileWalletDropdown() {
+    try {
+        const trigger = document.getElementById('mobile-wallet-trigger');
+        const dropdown = document.getElementById('mobile-wallet-dropdown');
+        const arrow = document.getElementById('mobile-wallet-arrow');
+        
+        if (dropdown) dropdown.classList.add('hidden');
+        if (trigger) trigger.classList.remove('active');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+        
+        removeMobileDropdownBackdrop();
+    } catch (error) {
+        console.error('Error closing mobile wallet dropdown:', error);
+    }
+}
+
+function createMobileDropdownBackdrop(type) {
+    try {
+        // Remove existing backdrop
+        removeMobileDropdownBackdrop();
+        
+        // Create new backdrop
+        const backdrop = document.createElement('div');
+        backdrop.className = 'mobile-dropdown-backdrop';
+        backdrop.id = 'mobile-dropdown-backdrop';
+        
+        // Add click handler to close dropdown
+        backdrop.onclick = () => {
+            if (type === 'category') {
+                closeMobileCategoryDropdown();
+            } else if (type === 'wallet') {
+                closeMobileWalletDropdown();
+            }
+        };
+        
+        document.body.appendChild(backdrop);
+    } catch (error) {
+        console.error('Error creating mobile dropdown backdrop:', error);
+    }
+}
+
+function removeMobileDropdownBackdrop() {
+    try {
+        const backdrop = document.getElementById('mobile-dropdown-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
+    } catch (error) {
+        console.error('Error removing mobile dropdown backdrop:', error);
+    }
+}
+
+function positionMobileDropdown(trigger, dropdown) {
+    try {
+        if (window.innerWidth <= 768) {
+            // On mobile, position dropdown relative to viewport
+            const triggerRect = trigger.getBoundingClientRect();
+            const modalRect = document.getElementById('quick-add-modal').getBoundingClientRect();
+            
+            dropdown.style.position = 'fixed';
+            dropdown.style.left = '16px';
+            dropdown.style.right = '16px';
+            
+            // Position below trigger with some margin
+            const topPosition = triggerRect.bottom + 8;
+            const availableHeight = window.innerHeight - topPosition - 20;
+            
+            dropdown.style.top = topPosition + 'px';
+            dropdown.style.maxHeight = Math.min(240, availableHeight) + 'px';
+        }
+    } catch (error) {
+        console.error('Error positioning mobile dropdown:', error);
+    }
+}
+
+function selectMobileCategoryOption(value, text, icon) {
+    try {
+        const selectedSpan = document.getElementById('mobile-category-selected');
+        const desktopSelect = document.getElementById('quick-category');
+        
+        if (selectedSpan) {
+            selectedSpan.textContent = text;
+            selectedSpan.classList.remove('placeholder');
+        }
+        
+        if (desktopSelect) {
+            desktopSelect.value = value;
+        }
+        
+        // Update UI to show selection
+        const options = document.querySelectorAll('#mobile-category-options .mobile-dropdown-option');
+        options.forEach(opt => opt.classList.remove('selected'));
+        
+        const selectedOption = document.querySelector(`#mobile-category-options .mobile-dropdown-option[data-value="${value}"]`);
+        if (selectedOption) {
+            selectedOption.classList.add('selected');
+        }
+        
+        closeMobileCategoryDropdown();
+    } catch (error) {
+        console.error('Error selecting mobile category option:', error);
+    }
+}
+
+function selectMobileWalletOption(value, text, icon) {
+    try {
+        const selectedSpan = document.getElementById('mobile-wallet-selected');
+        const desktopSelect = document.getElementById('quick-wallet');
+        
+        if (selectedSpan) {
+            selectedSpan.textContent = text;
+            selectedSpan.classList.remove('placeholder');
+        }
+        
+        if (desktopSelect) {
+            desktopSelect.value = value;
+        }
+        
+        // Update UI to show selection
+        const options = document.querySelectorAll('#mobile-wallet-options .mobile-dropdown-option');
+        options.forEach(opt => opt.classList.remove('selected'));
+        
+        const selectedOption = document.querySelector(`#mobile-wallet-options .mobile-dropdown-option[data-value="${value}"]`);
+        if (selectedOption) {
+            selectedOption.classList.add('selected');
+        }
+        
+        closeMobileWalletDropdown();
+    } catch (error) {
+        console.error('Error selecting mobile wallet option:', error);
+    }
+}
+
+function populateMobileCategoryDropdown(type) {
+    try {
+        const container = document.getElementById('mobile-category-options');
+        if (!container) return;
+        
+        const categories = type === 'income' ? customCategories.income : customCategories.expense;
+        
+        container.innerHTML = '';
+        
+        categories.forEach(category => {
+            const option = document.createElement('div');
+            option.className = 'mobile-dropdown-option';
+            option.setAttribute('data-value', category.id);
+            option.setAttribute('data-category', category.id);
+            option.onclick = () => selectMobileCategoryOption(category.id, category.name, category.icon);
+            
+            option.innerHTML = `
+                <i class="${category.icon}" style="color: ${category.color}"></i>
+                <span>${category.name}</span>
+            `;
+            
+            container.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error populating mobile category dropdown:', error);
+    }
+}
+
+function populateMobileWalletDropdown() {
+    try {
+        const container = document.getElementById('mobile-wallet-options');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        wallets.forEach(wallet => {
+            const option = document.createElement('div');
+            option.className = 'mobile-dropdown-option';
+            option.setAttribute('data-value', wallet.id);
+            option.setAttribute('data-wallet', wallet.id);
+            option.onclick = () => selectMobileWalletOption(wallet.id, wallet.name, 'fas fa-wallet');
+            
+            option.innerHTML = `
+                <i class="fas fa-wallet"></i>
+                <span>${wallet.name}</span>
+            `;
+            
+            container.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error populating mobile wallet dropdown:', error);
+    }
+}
+
+function resetMobileDropdownSelections() {
+    try {
+        // Reset category dropdown
+        const categorySelected = document.getElementById('mobile-category-selected');
+        if (categorySelected) {
+            categorySelected.textContent = 'Pilih Kategori';
+            categorySelected.classList.add('placeholder');
+        }
+        
+        // Reset wallet dropdown
+        const walletSelected = document.getElementById('mobile-wallet-selected');
+        if (walletSelected) {
+            walletSelected.textContent = 'Pilih Dompet';
+            walletSelected.classList.add('placeholder');
+        }
+        
+        // Close any open dropdowns
+        closeMobileCategoryDropdown();
+        closeMobileWalletDropdown();
+        
+        // Remove selected state from all options
+        const allOptions = document.querySelectorAll('.mobile-dropdown-option');
+        allOptions.forEach(opt => opt.classList.remove('selected'));
+    } catch (error) {
+        console.error('Error resetting mobile dropdown selections:', error);
+    }
+}
+
+// Transaction Tab Functions
+function showTransactionTab(tabName) {
+    try {
+        // Hide all tab content
+        document.querySelectorAll('.transaction-tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        
+        // Remove active class from all tab buttons
+        document.querySelectorAll('#expense-tab, #income-tab, #transfer-tab').forEach(btn => {
+            btn.classList.remove('bg-white', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+            btn.classList.add('text-gray-600', 'dark:text-gray-400', 'hover:text-gray-900', 'dark:hover:text-white');
+        });
+        
+        // Show selected tab content
+        if (tabName === 'expense') {
+            document.getElementById('expense-categories').classList.remove('hidden');
+            document.getElementById('expense-tab').classList.add('bg-white', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+            document.getElementById('expense-tab').classList.remove('text-gray-600', 'dark:text-gray-400', 'hover:text-gray-900', 'dark:hover:text-white');
+            populateTransactionCategories('expense');
+        } else if (tabName === 'income') {
+            document.getElementById('income-categories').classList.remove('hidden');
+            document.getElementById('income-tab').classList.add('bg-white', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+            document.getElementById('income-tab').classList.remove('text-gray-600', 'dark:text-gray-400', 'hover:text-gray-900', 'dark:hover:text-white');
+            populateTransactionCategories('income');
+        } else if (tabName === 'transfer') {
+            document.getElementById('transfer-content').classList.remove('hidden');
+            document.getElementById('transfer-tab').classList.add('bg-white', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+            document.getElementById('transfer-tab').classList.remove('text-gray-600', 'dark:text-gray-400', 'hover:text-gray-900', 'dark:hover:text-white');
+            populateTransferWalletOptions();
+        }
+    } catch (error) {
+        console.error('Error showing transaction tab:', error);
+    }
+}
+
+function populateTransactionCategories(type) {
+    try {
+        const containerId = type === 'expense' ? 'expense-categories' : 'income-categories';
+        const container = document.querySelector(`#${containerId} .grid`);
+        
+        if (!container) {
+            console.error(`Container not found: #${containerId} .grid`);
+            return;
+        }
+        
+        const categories = type === 'expense' ? customCategories.expense : customCategories.income;
+        
+        container.innerHTML = '';
+        
+        categories.forEach((category, index) => {
+            const categoryCard = document.createElement('div');
+            categoryCard.className = 'flex flex-col items-center p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 cursor-pointer';
+            categoryCard.onclick = () => showTransactionModal(type, category);
+            
+            categoryCard.innerHTML = `
+                <div class="w-12 h-12 rounded-full flex items-center justify-center mb-2" style="background-color: ${category.color}20;">
+                    <i class="${category.icon}" style="color: ${category.color}; font-size: 20px;"></i>
+                </div>
+                <span class="text-sm font-medium text-gray-900 dark:text-white text-center">${category.name}</span>
+            `;
+            
+            container.appendChild(categoryCard);
+        });
+    } catch (error) {
+        console.error('Error populating transaction categories:', error);
+    }
+}
+
+function populateTransferWalletOptions() {
+    try {
+        const fromSelect = document.getElementById('transfer-from');
+        const toSelect = document.getElementById('transfer-to');
+        
+        if (!fromSelect || !toSelect) return;
+        
+        fromSelect.innerHTML = '<option value="">Pilih wallet</option>';
+        toSelect.innerHTML = '<option value="">Pilih wallet</option>';
+        
+        wallets.forEach(wallet => {
+            const fromOption = document.createElement('option');
+            fromOption.value = wallet.id;
+            fromOption.textContent = `${wallet.name} (${formatCurrency(wallet.balance)})`;
+            fromSelect.appendChild(fromOption);
+            
+            const toOption = document.createElement('option');
+            toOption.value = wallet.id;
+            toOption.textContent = wallet.name;
+            toSelect.appendChild(toOption);
+        });
+    } catch (error) {
+        console.error('Error populating transfer wallet options:', error);
+    }
+}
+
+function showTransactionModal(type, category) {
+    try {
+        // Create transaction modal HTML
+        const modalHtml = `
+            <div id="transaction-modal" class="modal-container fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md mx-4 p-6 animate-slide-up">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: ${category.color}20;">
+                                <i class="${category.icon}" style="color: ${category.color}; font-size: 18px;"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">${category.name}</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">${type === 'expense' ? 'Pengeluaran' : 'Pemasukan'}</p>
+                            </div>
+                        </div>
+                        <button onclick="closeTransactionModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <form onsubmit="submitTransaction(event, '${type}', '${category.id}')" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jumlah</label>
+                            <input type="number" id="transaction-amount" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white" placeholder="0" autofocus>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Wallet</label>
+                            <select id="transaction-wallet" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white">
+                                <option value="">Pilih wallet</option>
+                                ${wallets.map(wallet => `<option value="${wallet.id}">${wallet.name} (${formatCurrency(wallet.balance)})</option>`).join('')}
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Keterangan</label>
+                            <input type="text" id="transaction-description" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white" placeholder="Keterangan (opsional)">
+                            <div id="ai-suggestion-container" class="hidden mt-2 p-3 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-md">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fas fa-robot text-blue-500"></i>
+                                        <span class="text-sm font-medium text-blue-700 dark:text-blue-300">AI Menyarankan:</span>
+                                    </div>
+                                    <button type="button" onclick="dismissAISuggestion()" class="text-blue-400 hover:text-blue-600">
+                                        <i class="fas fa-times text-xs"></i>
+                                    </button>
+                                </div>
+                                <div id="ai-suggestion-content" class="mt-2"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex space-x-3 pt-4">
+                            <button type="button" onclick="closeTransactionModal()" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition duration-200">
+                                Batal
+                            </button>
+                            <button type="submit" class="flex-1 ${type === 'expense' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white py-2 px-4 rounded-md transition duration-200">
+                                <i class="fas ${type === 'expense' ? 'fa-minus' : 'fa-plus'} mr-2"></i>Tambah
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        
+        // Insert modal into DOM
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // Focus on amount input
+        setTimeout(() => {
+            const amountInput = document.getElementById('transaction-amount');
+            if (amountInput) amountInput.focus();
+            
+            // Setup AI suggestion on description input
+            console.log('Setting up AI suggestion for type:', type);
+            setupAISuggestion(type);
+        }, 100);
+    } catch (error) {
+        console.error('Error showing transaction modal:', error);
+    }
+}
+
+// Setup AI Suggestion for transaction description
+function setupAISuggestion(currentType) {
+    const descriptionInput = document.getElementById('transaction-description');
+    const suggestionContainer = document.getElementById('ai-suggestion-container');
+    const suggestionContent = document.getElementById('ai-suggestion-content');
+    
+    if (!descriptionInput || !suggestionContainer || !suggestionContent) {
+        console.warn('AI Suggestion elements not found');
+        return;
+    }
+    
+    let suggestionTimeout;
+    
+    descriptionInput.addEventListener('input', function() {
+        const description = this.value.trim();
+        
+        // Clear previous timeout
+        if (suggestionTimeout) {
+            clearTimeout(suggestionTimeout);
+        }
+        
+        if (description.length < 2) {
+            suggestionContainer.classList.add('hidden');
+            return;
+        }
+        
+        // Debounce the suggestion to avoid too many calls
+        suggestionTimeout = setTimeout(() => {
+            try {
+                // Check if required functions exist
+                if (typeof autoSuggestCategory !== 'function') {
+                    console.error('autoSuggestCategory function not found');
+                    return;
+                }
+                
+                const suggestion = autoSuggestCategory(description);
+                console.log('AI Suggestion for "' + description + '":', suggestion);
+                
+                if (suggestion && suggestion.confidence > 0.02) { // Lowered threshold
+                    if (typeof showAISuggestion === 'function') {
+                        showAISuggestion(suggestion, currentType);
+                    } else {
+                        console.error('showAISuggestion function not found');
+                    }
+                } else {
+                    suggestionContainer.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Error in AI suggestion:', error);
+                suggestionContainer.classList.add('hidden');
+            }
+        }, 300);
+    });
+}
+
+// Show AI suggestion in the modal
+function showAISuggestion(suggestion, currentType) {
+    const suggestionContainer = document.getElementById('ai-suggestion-container');
+    const suggestionContent = document.getElementById('ai-suggestion-content');
+    
+    if (!suggestionContainer || !suggestionContent) {
+        console.warn('AI suggestion UI elements not found');
+        return;
+    }
+    
+    console.log('Showing AI suggestion:', suggestion, 'for type:', currentType);
+    
+    const confidencePercent = Math.round(suggestion.confidence * 100);
+    const typeMatch = suggestion.type === currentType;
+    
+    suggestionContent.innerHTML = `
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background-color: ${suggestion.color}20;">
+                    <i class="${suggestion.icon}" style="color: ${suggestion.color}; font-size: 14px;"></i>
+                </div>
+                <div>
+                    <div class="text-sm font-medium text-blue-800 dark:text-blue-200">${suggestion.name}</div>
+                    <div class="text-xs text-blue-600 dark:text-blue-400">
+                        ${suggestion.type === 'income' ? 'Pemasukan' : 'Pengeluaran'} • ${confidencePercent}% yakin
+                    </div>
+                    ${!typeMatch ? `<div class="text-xs text-orange-600 dark:text-orange-400 mt-1">⚠️ Berbeda dengan tipe yang dipilih (${currentType === 'income' ? 'Pemasukan' : 'Pengeluaran'})</div>` : ''}
+                </div>
+            </div>
+            <div class="space-x-2">
+                ${!typeMatch ? `<button type="button" onclick="switchToSuggestedCategory('${suggestion.id}', '${suggestion.type}')" class="text-xs bg-orange-500 text-white px-2 py-1 rounded hover:bg-orange-600">
+                    Pindah ke ${suggestion.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
+                </button>` : ''}
+                ${typeMatch ? `<button type="button" onclick="applySuggestedCategory('${suggestion.id}')" class="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">
+                    Gunakan
+                </button>` : ''}
+            </div>
+        </div>
+    `;
+    
+    suggestionContainer.classList.remove('hidden');
+    console.log('AI suggestion displayed successfully');
+}
+
+// Apply suggested category (same type)
+function applySuggestedCategory(categoryId) {
+    // Close current modal
+    closeTransactionModal();
+    
+    // Find the category data
+    const expenseCategory = customCategories.expense.find(cat => cat.id === categoryId);
+    const incomeCategory = customCategories.income.find(cat => cat.id === categoryId);
+    
+    const category = expenseCategory || incomeCategory;
+    const type = expenseCategory ? 'expense' : 'income';
+    
+    if (category) {
+        // Get the current description
+        const currentDescription = document.getElementById('transaction-description')?.value || '';
+        
+        // Show new modal with suggested category
+        showTransactionModal(type, category);
+        
+        // Restore the description
+        setTimeout(() => {
+            const descInput = document.getElementById('transaction-description');
+            if (descInput) {
+                descInput.value = currentDescription;
+            }
+        }, 150);
+    }
+}
+
+// Switch to suggested category (different type)
+function switchToSuggestedCategory(categoryId, suggestedType) {
+    // Get current description before closing modal
+    const currentDescription = document.getElementById('transaction-description')?.value || '';
+    const currentAmount = document.getElementById('transaction-amount')?.value || '';
+    const currentWallet = document.getElementById('transaction-wallet')?.value || '';
+    
+    // Close current modal
+    closeTransactionModal();
+    
+    // Find the category data
+    const categories = customCategories[suggestedType] || [];
+    const category = categories.find(cat => cat.id === categoryId);
+    
+    if (category) {
+        // Show new modal with suggested category and type
+        showTransactionModal(suggestedType, category);
+        
+        // Restore form data
+        setTimeout(() => {
+            const descInput = document.getElementById('transaction-description');
+            const amountInput = document.getElementById('transaction-amount');
+            const walletInput = document.getElementById('transaction-wallet');
+            
+            if (descInput) descInput.value = currentDescription;
+            if (amountInput) amountInput.value = currentAmount;
+            if (walletInput) walletInput.value = currentWallet;
+        }, 150);
+    }
+}
+
+// Dismiss AI suggestion
+function dismissAISuggestion() {
+    const suggestionContainer = document.getElementById('ai-suggestion-container');
+    if (suggestionContainer) {
+        suggestionContainer.classList.add('hidden');
+    }
+}
+
+function closeTransactionModal() {
+    try {
+        const modal = document.getElementById('transaction-modal');
+        if (modal) {
+            modal.remove();
+        }
+    } catch (error) {
+        console.error('Error closing transaction modal:', error);
+    }
+}
+
+function submitTransaction(event, type, categoryId) {
+    event.preventDefault();
+    
+    try {
+        const amountElement = document.getElementById('transaction-amount');
+        const walletElement = document.getElementById('transaction-wallet');
+        const descriptionElement = document.getElementById('transaction-description');
+        
+        if (!amountElement || !walletElement || !descriptionElement) {
+            throw new Error('Form elements not found');
+        }
+        
+        const amount = parseFloat(amountElement.value);
+        const walletId = walletElement.value;
+        const description = descriptionElement.value;
+        
+        if (!amount || amount <= 0) {
+            showNotification('Jumlah harus lebih dari 0', 'error');
+            return;
+        }
+        
+        if (!walletId) {
+            showNotification('Pilih wallet terlebih dahulu', 'error');
+            return;
+        }
+        
+        // Find category
+        const categories = type === 'expense' ? customCategories.expense : customCategories.income;
+        const category = categories.find(cat => cat.id === categoryId);
+        
+        if (!category) {
+            throw new Error('Kategori tidak ditemukan');
+        }
+        
+        // Check wallets
+        const wallet = wallets.find(w => w.id === walletId);
+        
+        if (!wallet) {
+            throw new Error('Wallet tidak ditemukan');
+        }
+        
+        // Create transaction
+        const transaction = {
+            id: Date.now().toString(),
+            type: type,
+            amount: amount,
+            category: category.name,
+            categoryId: categoryId,
+            wallet: walletId,
+            walletName: wallet.name,
+            description: description || '',
+            date: new Date().toISOString(),
+            formattedDate: new Date().toLocaleDateString('id-ID'),
+            icon: category.icon,
+            color: category.color
+        };
+        
+        // Add transaction and update wallet
+        if (type === 'expense') {
+            addExpenseTransaction(transaction);
+        } else {
+            addIncomeTransaction(transaction);
+        }
+        
+        closeTransactionModal();
+        showNotification(`${type === 'expense' ? 'Pengeluaran' : 'Pemasukan'} berhasil ditambahkan`, 'success');
+        
+        // Update displays
+        updateAllDisplays();
+        
+    } catch (error) {
+        console.error('Error submitting transaction:', error);
+        showNotification(`Terjadi kesalahan: ${error.message}`, 'error');
+    }
+}
+
+function addTransfer(event) {
+    event.preventDefault();
+    
+    try {
+        const fromWalletId = document.getElementById('transfer-from').value;
+        const toWalletId = document.getElementById('transfer-to').value;
+        const amount = parseFloat(document.getElementById('transfer-amount').value);
+        const description = document.getElementById('transfer-description').value;
+        
+        if (!fromWalletId || !toWalletId) {
+            showNotification('Pilih wallet asal dan tujuan', 'error');
+            return;
+        }
+        
+        if (fromWalletId === toWalletId) {
+            showNotification('Wallet asal dan tujuan tidak boleh sama', 'error');
+            return;
+        }
+        
+        if (!amount || amount <= 0) {
+            showNotification('Jumlah transfer harus lebih dari 0', 'error');
+            return;
+        }
+        
+        const fromWallet = wallets.find(w => w.id === fromWalletId);
+        const toWallet = wallets.find(w => w.id === toWalletId);
+        
+        if (fromWallet.balance < amount) {
+            showNotification('Saldo wallet tidak mencukupi', 'error');
+            return;
+        }
+        
+        // Create transfer transactions
+        const transferId = Date.now().toString();
+        const transferOut = {
+            id: transferId + '_out',
+            type: 'transfer_out',
+            amount: amount,
+            category: 'Transfer Keluar',
+            wallet: fromWalletId,
+            transferTo: toWalletId,
+            transferToName: toWallet.name,
+            description: description || `Transfer ke ${toWallet.name}`,
+            date: new Date().toISOString(),
+            icon: 'fas fa-arrow-right',
+            color: '#EF4444'
+        };
+        
+        const transferIn = {
+            id: transferId + '_in',
+            type: 'transfer_in',
+            amount: amount,
+            category: 'Transfer Masuk',
+            wallet: toWalletId,
+            transferFrom: fromWalletId,
+            transferFromName: fromWallet.name,
+            description: description || `Transfer dari ${fromWallet.name}`,
+            date: new Date().toISOString(),
+            icon: 'fas fa-arrow-left',
+            color: '#10B981'
+        };
+        
+        // Update wallet balances
+        fromWallet.balance -= amount;
+        toWallet.balance += amount;
+        
+        // Add transactions
+        transactions.push(transferOut, transferIn);
+        
+        // Save data
+        saveData();
+        saveWallets();
+        
+        // Update displays
+        updateAllDisplays();
+        displayTransactions();
+        
+        // Reset form
+        document.getElementById('transfer-from').value = '';
+        document.getElementById('transfer-to').value = '';
+        document.getElementById('transfer-amount').value = '';
+        document.getElementById('transfer-description').value = '';
+        
+        showNotification('Transfer berhasil dilakukan', 'success');
+        
+    } catch (error) {
+        console.error('Error adding transfer:', error);
+        showNotification('Terjadi kesalahan saat melakukan transfer', 'error');
+    }
+}
+
+function showAddCategoryModal(type) {
+    try {
+        const modalHtml = `
+            <div id="add-category-modal" class="modal-container fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md mx-4 p-6 animate-slide-up">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Tambah Kategori ${type === 'expense' ? 'Pengeluaran' : 'Pemasukan'}</h3>
+                        <button onclick="closeAddCategoryModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <form onsubmit="submitNewCategory(event, '${type}')" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Kategori</label>
+                            <input type="text" id="new-category-name" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white" placeholder="Masukkan nama kategori" autofocus>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Icon</label>
+                            <div class="grid grid-cols-6 gap-2" id="icon-selector">
+                                ${getAvailableIcons().map(icon => `
+                                    <button type="button" onclick="selectIcon('${icon}')" class="icon-option p-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                        <i class="${icon} text-lg"></i>
+                                    </button>
+                                `).join('')}
+                            </div>
+                            <input type="hidden" id="selected-icon" value="fas fa-circle">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Warna</label>
+                            <div class="grid grid-cols-6 gap-2" id="color-selector">
+                                ${getAvailableColors().map(color => `
+                                    <button type="button" onclick="selectColor('${color}')" class="color-option w-8 h-8 rounded-full border-2 border-gray-300 hover:border-gray-500 transition-colors duration-200" style="background-color: ${color}"></button>
+                                `).join('')}
+                            </div>
+                            <input type="hidden" id="selected-color" value="#6B7280">
+                        </div>
+                        
+                        <div class="flex space-x-3 pt-4">
+                            <button type="button" onclick="closeAddCategoryModal()" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition duration-200">
+                                Batal
+                            </button>
+                            <button type="submit" class="flex-1 bg-primary text-white py-2 px-4 rounded-md hover:bg-primary/90 transition duration-200">
+                                <i class="fas fa-plus mr-2"></i>Tambah
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // Select first icon and color by default
+        setTimeout(() => {
+            selectIcon('fas fa-circle');
+            selectColor('#6B7280');
+        }, 100);
+        
+    } catch (error) {
+        console.error('Error showing add category modal:', error);
+    }
+}
+
+function closeAddCategoryModal() {
+    try {
+        const modal = document.getElementById('add-category-modal');
+        if (modal) {
+            modal.remove();
+        }
+    } catch (error) {
+        console.error('Error closing add category modal:', error);
+    }
+}
+
+function getAvailableIcons() {
+    return [
+        'fas fa-utensils', 'fas fa-car', 'fas fa-shopping-cart', 'fas fa-home',
+        'fas fa-heart', 'fas fa-gamepad', 'fas fa-book', 'fas fa-coffee',
+        'fas fa-mobile-alt', 'fas fa-gift', 'fas fa-plane', 'fas fa-music',
+        'fas fa-film', 'fas fa-tools', 'fas fa-paint-brush', 'fas fa-dumbbell',
+        'fas fa-bicycle', 'fas fa-bus', 'fas fa-hamburger', 'fas fa-pizza-slice',
+        'fas fa-wine-glass', 'fas fa-tshirt', 'fas fa-shoe-prints', 'fas fa-laptop',
+        'fas fa-briefcase', 'fas fa-coins', 'fas fa-chart-line', 'fas fa-graduation-cap',
+        'fas fa-heartbeat', 'fas fa-paw', 'fas fa-leaf', 'fas fa-lightbulb',
+        'fas fa-fire', 'fas fa-snowflake', 'fas fa-umbrella', 'fas fa-sun'
+    ];
+}
+
+function getAvailableColors() {
+    return [
+        '#EF4444', '#F59E0B', '#10B981', '#3B82F6', 
+        '#8B5CF6', '#EC4899', '#6B7280', '#059669',
+        '#DC2626', '#D97706', '#065F46', '#1D4ED8',
+        '#7C3AED', '#BE185D', '#374151', '#047857'
+    ];
+}
+
+function selectIcon(iconClass) {
+    try {
+        // Get all icon options
+        const iconOptions = document.querySelectorAll('.icon-option');
+        
+        // Remove selected class from all icons
+        iconOptions.forEach(btn => {
+            btn.classList.remove('bg-primary', 'text-white');
+            btn.classList.add('border-gray-300', 'dark:border-gray-600');
+        });
+        
+        // Find and select the clicked icon
+        iconOptions.forEach(btn => {
+            const iconElement = btn.querySelector('i');
+            if (iconElement && iconElement.className.includes(iconClass)) {
+                btn.classList.add('bg-primary', 'text-white');
+                btn.classList.remove('border-gray-300', 'dark:border-gray-600');
+            }
+        });
+        
+        // Set hidden input value
+        const selectedIconInput = document.getElementById('selected-icon');
+        if (selectedIconInput) {
+            selectedIconInput.value = iconClass;
+        }
+    } catch (error) {
+        console.error('Error selecting icon:', error);
+    }
+}
+
+function selectColor(color) {
+    try {
+        // Remove selected class from all colors
+        document.querySelectorAll('.color-option').forEach(btn => {
+            btn.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+        });
+        
+        // Add selected class to clicked color
+        document.querySelectorAll('.color-option').forEach(btn => {
+            if (btn.style.backgroundColor === color) {
+                btn.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+            }
+        });
+        
+        // Set hidden input value
+        const selectedColorInput = document.getElementById('selected-color');
+        if (selectedColorInput) {
+            selectedColorInput.value = color;
+        }
+    } catch (error) {
+        console.error('Error selecting color:', error);
+    }
+}
+
+function submitNewCategory(event, type) {
+    event.preventDefault();
+    
+    try {
+        const name = document.getElementById('new-category-name').value.trim();
+        const icon = document.getElementById('selected-icon').value;
+        const color = document.getElementById('selected-color').value;
+        
+        if (!name) {
+            showNotification('Nama kategori tidak boleh kosong', 'error');
+            return;
+        }
+        
+        // Check if category already exists
+        const existingCategories = type === 'expense' ? customCategories.expense : customCategories.income;
+        if (existingCategories.some(cat => cat.name.toLowerCase() === name.toLowerCase())) {
+            showNotification('Kategori sudah ada', 'error');
+            return;
+        }
+        
+        // Create new category
+        const newCategory = {
+            id: name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now(),
+            name: name,
+            icon: icon,
+            color: color
+        };
+        
+        // Add to categories
+        if (type === 'expense') {
+            customCategories.expense.push(newCategory);
+        } else {
+            customCategories.income.push(newCategory);
+        }
+        
+        // Save categories
+        saveCategories();
+        
+        // Update AI categories to recognize the new custom category
+        if (window.moneyTrackerAI) {
+            window.moneyTrackerAI.updateCategories();
+        }
+        
+        // Refresh transaction categories display
+        populateTransactionCategories(type);
+        
+        // Close modal
+        closeAddCategoryModal();
+        
+        showNotification('Kategori berhasil ditambahkan', 'success');
+        
+    } catch (error) {
+        console.error('Error submitting new category:', error);
+        showNotification('Terjadi kesalahan saat menambah kategori', 'error');
+    }
+}
+
+// Helper functions for transactions
+function addExpenseTransaction(transaction) {
+    try {
+        // Find wallet
+        const wallet = wallets.find(w => w.id === transaction.wallet);
+        
+        if (!wallet) {
+            throw new Error('Wallet tidak ditemukan');
+        }
+        
+        // Check if wallet has enough balance
+        if (wallet.balance < transaction.amount) {
+            throw new Error('Saldo wallet tidak mencukupi');
+        }
+        
+        // Check daily limit if enabled
+        if (dailyLimitSettings && dailyLimitSettings.enabled) {
+            try {
+                const dailySpent = getTodayExpenses();
+                const newTotal = dailySpent + transaction.amount;
+                
+                if (newTotal > dailyLimitSettings.amount) {
+                    if (dailyLimitSettings.blockExceed) {
+                        throw new Error(`Melebihi batas harian: ${formatCurrency(dailyLimitSettings.amount)}`);
+                    } else {
+                        showNotification(`Peringatan: Mendekati batas harian!`, 'warning');
+                    }
+                }
+            } catch (dailyLimitError) {
+                console.error('Error in daily limit check:', dailyLimitError);
+                // Continue with transaction even if daily limit check fails
+            }
+        }
+        
+        // Update wallet balance
+        wallet.balance -= transaction.amount;
+        
+        // Add transaction
+        transactions.push(transaction);
+        
+        // Save data
+        saveData();
+        saveWallets();
+        
+    } catch (error) {
+        throw error;
+    }
+}
+
+function addIncomeTransaction(transaction) {
+    try {
+        // Find wallet
+        const wallet = wallets.find(w => w.id === transaction.wallet);
+        
+        if (!wallet) {
+            throw new Error('Wallet tidak ditemukan');
+        }
+        
+        // Update wallet balance
+        wallet.balance += transaction.amount;
+        
+        // Add transaction
+        transactions.push(transaction);
+        
+        // Save data
+        saveData();
+        saveWallets();
+        
+    } catch (error) {
+        throw error;
+    }
+}
+
+function saveCategories() {
+    try {
+        localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(customCategories));
+    } catch (error) {
+        console.error('Error saving categories:', error);
+    }
+}
+
+// Update all displays after transaction changes
+function updateAllDisplays() {
+    try {
+        updateDashboard();
+        updateWalletDisplay();
+        updateMobileBalanceCards();
+        updateBalanceDisplay();
+        updateTransactionsList();
+        
+        // Update Swiper instances
+        setTimeout(() => {
+            if (typeof balanceSwiper !== 'undefined' && balanceSwiper) balanceSwiper.update();
+            if (typeof walletSwiper !== 'undefined' && walletSwiper) walletSwiper.update();
+        }, 100);
+    } catch (error) {
+        console.error('Error updating displays:', error);
+    }
+}
+
+// Initialize transaction tab when page loads
+function initializeTransactionTabs() {
+    try {
+        // Show expense tab by default and populate categories
+        showTransactionTab('expense');
+    } catch (error) {
+        console.error('Error initializing transaction tabs:', error);
     }
 }

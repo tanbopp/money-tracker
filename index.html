@@ -98,7 +98,7 @@
             
             <!-- Planning -->
             <button onclick="showSection('planning')" class="mobile-nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 active:bg-gray-50 dark:active:bg-gray-700">
-                <i class="fas fa-target text-lg"></i>
+                <i class="fas fa-piggy-bank text-lg"></i>
                 <span class="text-xs font-medium">Planning</span>
             </button>
         </div>
@@ -185,14 +185,54 @@
                         
                         <div class="form-field dropdown-field">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kategori</label>
-                            <select id="quick-category" class="modal-select w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white">
+                            <!-- Mobile-optimized custom dropdown -->
+                            <div class="relative md:hidden">
+                                <button type="button" id="mobile-category-trigger" onclick="openMobileCategoryDropdown()" 
+                                        class="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white bg-white text-left flex items-center justify-between">
+                                    <span id="mobile-category-selected" class="text-gray-500 dark:text-gray-400">Pilih kategori</span>
+                                    <i class="fas fa-chevron-down text-gray-400 transition-transform duration-200" id="mobile-category-arrow"></i>
+                                </button>
+                                
+                                <!-- Mobile Category Dropdown Panel -->
+                                <div id="mobile-category-dropdown" class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-[3000] hidden max-h-60 overflow-y-auto">
+                                    <div class="p-2">
+                                        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 px-3 py-2 uppercase tracking-wide">Pilih Kategori</div>
+                                        <div id="mobile-category-options" class="space-y-1">
+                                            <!-- Options will be populated by JavaScript -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Desktop dropdown (hidden on mobile) -->
+                            <select id="quick-category" class="modal-select hidden md:block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white">
                                 <!-- Options will be populated by JavaScript -->
                             </select>
                         </div>
                         
                         <div class="form-field dropdown-field">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Wallet</label>
-                            <select id="quick-wallet" class="modal-select w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white">
+                            <!-- Mobile-optimized custom dropdown -->
+                            <div class="relative md:hidden">
+                                <button type="button" id="mobile-wallet-trigger" onclick="openMobileWalletDropdown()" 
+                                        class="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white bg-white text-left flex items-center justify-between">
+                                    <span id="mobile-wallet-selected" class="text-gray-500 dark:text-gray-400">Pilih wallet</span>
+                                    <i class="fas fa-chevron-down text-gray-400 transition-transform duration-200" id="mobile-wallet-arrow"></i>
+                                </button>
+                                
+                                <!-- Mobile Wallet Dropdown Panel -->
+                                <div id="mobile-wallet-dropdown" class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-[3000] hidden max-h-60 overflow-y-auto">
+                                    <div class="p-2">
+                                        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 px-3 py-2 uppercase tracking-wide">Pilih Wallet</div>
+                                        <div id="mobile-wallet-options" class="space-y-1">
+                                            <!-- Options will be populated by JavaScript -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Desktop dropdown (hidden on mobile) -->
+                            <select id="quick-wallet" class="modal-select hidden md:block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white">
                                 <!-- Options will be populated by JavaScript -->
                             </select>
                         </div>
@@ -540,85 +580,87 @@
 
         <!-- Transactions Section -->
         <div id="transactions-section" class="section hidden">
-            <!-- Quick Actions (Moved from Dashboard) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4 dark:text-white">Tambah Pemasukan</h2>
-                    <form onsubmit="addIncome(event)">
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Jumlah</label>
-                                <input type="number" id="income-amount" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="0">
-                            </div>
-                            <div>
-                                <div class="flex items-center justify-between mb-1">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Kategori</label>
-                                    <button type="button" onclick="showCategoriesModal()" class="text-xs text-primary hover:text-primary/80 transition duration-200">
-                                        <i class="fas fa-cog mr-1"></i>Kelola Kategori
-                                    </button>
-                                </div>
-                                <select id="income-category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                    <option value="Gaji">Gaji</option>
-                                    <option value="Freelance">Freelance</option>
-                                    <option value="Investasi">Investasi</option>
-                                    <option value="Bonus">Bonus</option>
-                                    <option value="Lainnya">Lainnya</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Wallet</label>
-                                <select id="income-wallet" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                    <!-- Options will be populated by JavaScript -->
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Keterangan</label>
-                                <input type="text" id="income-description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Keterangan (opsional)">
-                            </div>
-                            <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-200">
-                                <i class="fas fa-plus mr-2"></i>Tambah Pemasukan
-                            </button>
-                        </div>
-                    </form>
+            <!-- Header with Tab Buttons -->
+            <div class="mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Catatan Transaksi</h1>
+                    <button onclick="showCategoriesModal()" class="text-sm text-primary hover:text-primary/80 transition duration-200">
+                        <i class="fas fa-cog mr-1"></i>Kelola Kategori
+                    </button>
                 </div>
+                
+                <!-- Tab Navigation -->
+                <div class="flex rounded-lg bg-gray-100 dark:bg-gray-800 p-1">
+                    <button onclick="showTransactionTab('expense')" id="expense-tab" class="flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm">
+                        Pengeluaran
+                    </button>
+                    <button onclick="showTransactionTab('income')" id="income-tab" class="flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors duration-200 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                        Pemasukan
+                    </button>
+                    <button onclick="showTransactionTab('transfer')" id="transfer-tab" class="flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors duration-200 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                        Transfer
+                    </button>
+                </div>
+            </div>
 
-                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4 dark:text-white">Tambah Pengeluaran</h2>
-                    <form onsubmit="addExpense(event)">
+            <!-- Expense Categories Grid -->
+            <div id="expense-categories" class="transaction-tab-content">
+                <div class="grid grid-cols-4 gap-4 mb-6">
+                    <!-- Categories will be populated by JavaScript -->
+                </div>
+                
+                <!-- Add Custom Category Button -->
+                <div class="flex justify-center mb-6">
+                    <button onclick="showAddCategoryModal('expense')" class="flex items-center space-x-2 px-6 py-3 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
+                        <i class="fas fa-plus text-gray-600 dark:text-gray-400"></i>
+                        <span class="text-gray-600 dark:text-gray-400 font-medium">Tambah Kategori</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Income Categories Grid -->
+            <div id="income-categories" class="transaction-tab-content hidden">
+                <div class="grid grid-cols-4 gap-4 mb-6">
+                    <!-- Categories will be populated by JavaScript -->
+                </div>
+                
+                <!-- Add Custom Category Button -->
+                <div class="flex justify-center mb-6">
+                    <button onclick="showAddCategoryModal('income')" class="flex items-center space-x-2 px-6 py-3 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
+                        <i class="fas fa-plus text-gray-600 dark:text-gray-400"></i>
+                        <span class="text-gray-600 dark:text-gray-400 font-medium">Tambah Kategori</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Transfer Content -->
+            <div id="transfer-content" class="transaction-tab-content hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Transfer Antar Wallet</h2>
+                    <form onsubmit="addTransfer(event)">
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Jumlah</label>
-                                <input type="number" id="expense-amount" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="0">
-                            </div>
-                            <div>
-                                <div class="flex items-center justify-between mb-1">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Kategori</label>
-                                    <button type="button" onclick="showCategoriesModal()" class="text-xs text-primary hover:text-primary/80 transition duration-200">
-                                        <i class="fas fa-cog mr-1"></i>Kelola Kategori
-                                    </button>
-                                </div>
-                                <select id="expense-category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                    <option value="Makanan">Makanan</option>
-                                    <option value="Transportasi">Transportasi</option>
-                                    <option value="Belanja">Belanja</option>
-                                    <option value="Tagihan">Tagihan</option>
-                                    <option value="Hiburan">Hiburan</option>
-                                    <option value="Kesehatan">Kesehatan</option>
-                                    <option value="Lainnya">Lainnya</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Wallet</label>
-                                <select id="expense-wallet" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dari Wallet</label>
+                                <select id="transfer-from" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white">
                                     <!-- Options will be populated by JavaScript -->
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Keterangan</label>
-                                <input type="text" id="expense-description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Keterangan (opsional)">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ke Wallet</label>
+                                <select id="transfer-to" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white">
+                                    <!-- Options will be populated by JavaScript -->
+                                </select>
                             </div>
-                            <button type="submit" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200">
-                                <i class="fas fa-minus mr-2"></i>Tambah Pengeluaran
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jumlah</label>
+                                <input type="number" id="transfer-amount" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white" placeholder="0">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Keterangan</label>
+                                <input type="text" id="transfer-description" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white" placeholder="Keterangan (opsional)">
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200">
+                                <i class="fas fa-exchange-alt mr-2"></i>Transfer
                             </button>
                         </div>
                     </form>
@@ -626,21 +668,22 @@
             </div>
 
             <!-- Transaction List -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mt-8">
                 <div class="p-6 border-b border-gray-200 dark:border-gray-700">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-4 sm:mb-0 dark:text-white">Riwayat Transaksi</h2>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 sm:mb-0">Riwayat Transaksi</h2>
                         <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                             <button onclick="exportToExcel()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200">
                                 <i class="fas fa-file-excel mr-2"></i>Export Excel
                             </button>
-                            <select id="filter-type" onchange="filterTransactions()" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                <option value="all">Semua Transaksi</option>
+                            <select id="filter-type" onchange="filterTransactions()" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white">
+                                <option value="">Semua Jenis</option>
                                 <option value="income">Pemasukan</option>
                                 <option value="expense">Pengeluaran</option>
+                                <option value="transfer">Transfer</option>
                             </select>
-                            <select id="filter-category" onchange="filterTransactions()" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                <option value="all">Semua Kategori</option>
+                            <select id="filter-category" onchange="filterTransactions()" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white">
+                                <option value="">Semua Kategori</option>
                             </select>
                         </div>
                     </div>

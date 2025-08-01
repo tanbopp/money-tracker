@@ -2746,3 +2746,248 @@ body {
 #quick-form-container:not(.hidden) select {
     transform: translateZ(0) !important;
 }
+
+/* MOBILE CUSTOM DROPDOWN - Beautiful UI */
+
+/* Mobile dropdown triggers */
+#mobile-category-trigger,
+#mobile-wallet-trigger {
+    background: white !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.dark #mobile-category-trigger,
+.dark #mobile-wallet-trigger {
+    background: #374151 !important;
+    border-color: #4b5563 !important;
+    color: white !important;
+}
+
+#mobile-category-trigger:focus,
+#mobile-wallet-trigger:focus,
+#mobile-category-trigger.active,
+#mobile-wallet-trigger.active {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+#mobile-category-trigger.active #mobile-category-arrow,
+#mobile-wallet-trigger.active #mobile-wallet-arrow {
+    transform: rotate(180deg) !important;
+}
+
+/* Mobile dropdown panels */
+#mobile-category-dropdown,
+#mobile-wallet-dropdown {
+    background: white !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+    z-index: 4000 !important;
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin-top: 8px !important;
+    max-height: 240px !important;
+    overflow-y: auto !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.dark #mobile-category-dropdown,
+.dark #mobile-wallet-dropdown {
+    background: #374151 !important;
+    border-color: #4b5563 !important;
+}
+
+/* Mobile dropdown options */
+.mobile-dropdown-option {
+    display: flex !important;
+    align-items: center !important;
+    padding: 12px 16px !important;
+    margin: 0 4px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    font-size: 15px !important;
+    color: #374151 !important;
+}
+
+.dark .mobile-dropdown-option {
+    color: #d1d5db !important;
+}
+
+.mobile-dropdown-option:hover {
+    background: #f3f4f6 !important;
+    color: #111827 !important;
+}
+
+.dark .mobile-dropdown-option:hover {
+    background: #4b5563 !important;
+    color: #f9fafb !important;
+}
+
+.mobile-dropdown-option.selected {
+    background: #eff6ff !important;
+    color: #1d4ed8 !important;
+    font-weight: 500 !important;
+}
+
+.dark .mobile-dropdown-option.selected {
+    background: #1e3a8a !important;
+    color: #93c5fd !important;
+}
+
+/* Icon styling in dropdown options */
+.mobile-dropdown-option i {
+    width: 20px !important;
+    margin-right: 12px !important;
+    text-align: center !important;
+    font-size: 14px !important;
+}
+
+/* Category specific icons and colors */
+.mobile-dropdown-option[data-category="food"] i {
+    color: #f59e0b !important;
+}
+
+.mobile-dropdown-option[data-category="transport"] i {
+    color: #3b82f6 !important;
+}
+
+.mobile-dropdown-option[data-category="shopping"] i {
+    color: #ec4899 !important;
+}
+
+.mobile-dropdown-option[data-category="entertainment"] i {
+    color: #8b5cf6 !important;
+}
+
+.mobile-dropdown-option[data-category="health"] i {
+    color: #10b981 !important;
+}
+
+.mobile-dropdown-option[data-category="education"] i {
+    color: #f97316 !important;
+}
+
+.mobile-dropdown-option[data-category="bills"] i {
+    color: #ef4444 !important;
+}
+
+.mobile-dropdown-option[data-category="salary"] i {
+    color: #059669 !important;
+}
+
+.mobile-dropdown-option[data-category="business"] i {
+    color: #0891b2 !important;
+}
+
+.mobile-dropdown-option[data-category="investment"] i {
+    color: #7c3aed !important;
+}
+
+.mobile-dropdown-option[data-category="other"] i {
+    color: #6b7280 !important;
+}
+
+/* Wallet specific styling */
+.mobile-dropdown-option[data-wallet] i {
+    color: #059669 !important;
+}
+
+/* Animation for dropdown appearance */
+@keyframes dropdownSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+#mobile-category-dropdown:not(.hidden),
+#mobile-wallet-dropdown:not(.hidden) {
+    animation: dropdownSlideIn 0.2s ease-out !important;
+}
+
+/* Smooth scrollbar for dropdown */
+#mobile-category-dropdown::-webkit-scrollbar,
+#mobile-wallet-dropdown::-webkit-scrollbar {
+    width: 4px !important;
+}
+
+#mobile-category-dropdown::-webkit-scrollbar-track,
+#mobile-wallet-dropdown::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+#mobile-category-dropdown::-webkit-scrollbar-thumb,
+#mobile-wallet-dropdown::-webkit-scrollbar-thumb {
+    background: #d1d5db !important;
+    border-radius: 2px !important;
+}
+
+.dark #mobile-category-dropdown::-webkit-scrollbar-thumb,
+.dark #mobile-wallet-dropdown::-webkit-scrollbar-thumb {
+    background: #6b7280 !important;
+}
+
+/* Mobile specific optimizations */
+@media (max-width: 768px) {
+    /* Ensure dropdowns are above everything */
+    #mobile-category-dropdown,
+    #mobile-wallet-dropdown {
+        z-index: 5000 !important;
+        position: fixed !important;
+        left: 16px !important;
+        right: 16px !important;
+        top: auto !important;
+        bottom: auto !important;
+    }
+    
+    /* Better touch targets */
+    .mobile-dropdown-option {
+        min-height: 48px !important;
+        padding: 16px !important;
+    }
+    
+    /* Backdrop overlay for mobile dropdowns */
+    .mobile-dropdown-backdrop {
+        position: fixed !important;
+        inset: 0 !important;
+        background: rgba(0, 0, 0, 0.1) !important;
+        z-index: 4999 !important;
+        backdrop-filter: blur(2px) !important;
+    }
+}
+
+/* Selected value styling */
+#mobile-category-selected,
+#mobile-wallet-selected {
+    color: #111827 !important;
+    font-weight: 500 !important;
+}
+
+.dark #mobile-category-selected,
+.dark #mobile-wallet-selected {
+    color: #f9fafb !important;
+}
+
+#mobile-category-selected.placeholder,
+#mobile-wallet-selected.placeholder {
+    color: #9ca3af !important;
+    font-weight: 400 !important;
+}
+
+.dark #mobile-category-selected.placeholder,
+.dark #mobile-wallet-selected.placeholder {
+    color: #6b7280 !important;
+}

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Money Tracker</title>
+</head>
+<body>
+    <h1>Debug Money Tracker</h1>
+    <div>
+        <button onclick="checkTransactions()">Check Transactions</button>
+        <button onclick="checkWallets()">Check Wallets</button>
+        <button onclick="addTestTransaction()">Add Test Transaction</button>
+        <button onclick="clearAll()">Clear All Data</button>
+    </div>
+    <div id="output"></div>
+
+    <script>
+        // Load the main script constants and functions
+        const STORAGE_KEYS = {
+            WALLETS: 'moneyTracker_wallets',
+            TRANSACTIONS: 'moneyTracker_transactions',
+            CUSTOM_CATEGORIES: 'moneyTracker_customCategories',
+            SAVINGS: 'moneyTracker_savings',
+            GOALS: 'moneyTracker_goals',
+            THEME: 'moneyTracker_theme',
+            DAILY_LIMIT: 'moneyTracker_dailyLimit',
+            DAILY_SPENDING: 'moneyTracker_dailySpending',
+            LAST_RESET_DATE: 'moneyTracker_lastResetDate'
+        };
+
+        function log(message) {
+            const output = document.getElementById('output');
+            output.innerHTML += '<div>' + JSON.stringify(message, null, 2) + '</div>';
+            console.log(message);
+        }
+
+        function loadData() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEYS.TRANSACTIONS);
+                return data ? JSON.parse(data) : [];
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+                return [];
+            }
+        }
+
+        function checkTransactions() {
+            const transactions = loadData();
+            log('Total transactions found: ' + transactions.length);
+            log('Transactions:');
+            transactions.forEach((transaction, index) => {
+                log(`${index + 1}. ${transaction.type} - ${transaction.amount} - ${transaction.description} - ${transaction.date}`);
+            });
+        }
+
+        function checkWallets() {
+            try {
+                const wallets = localStorage.getItem(STORAGE_KEYS.WALLETS);
+                const parsedWallets = wallets ? JSON.parse(wallets) : [];
+                log('Total wallets found: ' + parsedWallets.length);
+                log('Wallets:');
+                parsedWallets.forEach((wallet, index) => {
+                    log(`${index + 1}. ${wallet.name} - Balance: ${wallet.balance}`);
+                });
+            } catch (error) {
+                log('Error loading wallets: ' + error.message);
+            }
+        }
+
+        function addTestTransaction() {
+            try {
+                const transactions = loadData();
+                const testTransaction = {
+                    id: Date.now(),
+                    type: 'expense',
+                    amount: 50000,
+                    description: 'Test Transaction',
+                    category: 'food',
+                    wallet: 'main',
+                    date: new Date().toISOString().split('T')[0],
+                    formattedDate: new Date().toLocaleDateString('id-ID', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    }),
+                    timestamp: Date.now()
+                };
+                
+                transactions.push(testTransaction);
+                localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(transactions));
+                log('Test transaction added successfully');
+                log('New transaction: ' + JSON.stringify(testTransaction, null, 2));
+            } catch (error) {
+                log('Error adding test transaction: ' + error.message);
+            }
+        }
+
+        function clearAll() {
+            Object.values(STORAGE_KEYS).forEach(key => {
+                localStorage.removeItem(key);
+            });
+            log('All data cleared from localStorage');
+        }
+    </script>
+</body>
+</html>
