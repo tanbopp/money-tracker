@@ -1,5 +1,753 @@
-/* Custom styles for Money Tracker */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Z-Index Management untuk mencegah overlapping */
+nav {
+    z-index: 30;
+}
+
+/* Mobile bottom navigation - highest priority untuk mobile */
+.md\:hidden.fixed.bottom-0 {
+    z-index: 50 !important;
+}
+
+/* Modal layers - above everything else */
+#mobile-menu-modal,
+#quick-add-modal,
+#manage-categories-modal,
+#stats-settings-modal,
+#add-stock-modal {
+    z-index: 100 !important;
+}
+
+/* Dropdown panels dalam modal */
+#mobile-category-dropdown,
+#mobile-wallet-dropdown {
+    z-index: 200 !important;
+}
+
+/* Notification should be above modals */
+.notification {
+    z-index: 300 !important;
+}
+
+/* Content layers */
+.main-container {
+    z-index: 1;
+}
+
+.section {
+    z-index: 1;
+    position: relative;
+}
+
+.swiper {
+    z-index: 1;
+    position: relative;
+}
+
+.wallet-card,
+.bg-white.rounded-lg {
+    z-index: 1;
+    position: relative;
+}
+
+/* Form elements dalam modal */
+.modal form,
+.modal select,
+.modal input,
+.modal button {
+    z-index: 5;
+    position: relative;
+}
+
+/* Dropdown options */
+select option {
+    z-index: 10;
+}
+
+/* Enhanced Mobile Spacing dan Positioning */
+@media (max-width: 768px) {
+    /* Memastikan tidak ada element yang overlap dengan bottom navigation */
+    .section:last-child {
+        margin-bottom: 20px;
+    }
+    
+    .mb-8 {
+        margin-bottom: 20px !important;
+    }
+    
+    .mb-6 {
+        margin-bottom: 16px !important;
+    }
+    
+    .mb-4 {
+        margin-bottom: 12px !important;
+    }
+    
+    /* Swiper pagination spacing */
+    .swiper-pagination {
+        padding-bottom: 12px;
+        margin-top: 16px;
+    }
+    
+    /* Grid spacing yang konsisten */
+    .grid {
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    
+    /* Card spacing yang konsisten */
+    .wallet-card,
+    .bg-white.rounded-lg.shadow-sm {
+        margin-bottom: 12px;
+        padding: 16px;
+    }
+    
+    /* Statistics section spacing */
+    #statistics-section .grid {
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+    
+    /* Planning section spacing */
+    #planning-section .grid {
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+    
+    /* Investment section spacing */
+    #investment-section .grid {
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+    
+    /* Settings section spacing */
+    #settings-section .space-y-6 > * {
+        margin-bottom: 16px;
+    }
+    
+    /* Balance cards spacing */
+    .balance-swiper,
+    .wallet-swiper {
+        margin-bottom: 20px;
+    }
+    
+    /* AI Chat widget spacing */
+    #dashboard-chat-widget {
+        margin-bottom: 20px;
+    }
+    
+    /* Daily spending card spacing */
+    #daily-spending-card {
+        margin-bottom: 16px;
+    }
+}
+
+/* Prevent any absolute positioned elements from overlapping */
+.absolute {
+    z-index: auto;
+}
+
+/* Ensure dropdown visibility on mobile */
+@media (max-width: 768px) {
+    .relative {
+        z-index: auto;
+    }
+    
+    .relative > .absolute {
+        z-index: 200;
+    }
+    
+    /* Modal dropdown panels */
+    #quick-add-modal .relative > .absolute {
+        z-index: 300;
+    }
+}
+
+/* Mobile-First Responsive Design Improvements */
+
+/* Safe area support for modern mobile devices */
+.safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pb-safe {
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}
+
+/* Touch-friendly interactions */
+.touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    min-height: 44px; /* iOS minimum touch target */
+    min-width: 44px;
+}
+
+/* Enhanced mobile navigation with better z-index management */
+@media (max-width: 768px) {
+    /* Main content needs adequate bottom padding to avoid bottom nav overlap */
+    .main-container {
+        padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Bottom navigation with safe area support */
+    .md\:hidden.fixed.bottom-0 {
+        z-index: 50 !important;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    html.dark .md\:hidden.fixed.bottom-0 {
+        background: rgba(31, 41, 55, 0.95);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Mobile navigation buttons with better touch targets */
+    .mobile-nav-btn {
+        min-height: 64px;
+        min-width: 60px;
+        padding: 8px 4px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    
+    .mobile-nav-btn:active {
+        transform: scale(0.95);
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    html.dark .mobile-nav-btn:active {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    /* Center floating action button */
+    .mobile-nav-btn + button[onclick*="showTransactionsWithAnimation"] {
+        padding: 8px;
+    }
+    
+    .mobile-nav-btn + button[onclick*="showTransactionsWithAnimation"] > div {
+        min-width: 48px;
+        min-height: 48px;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+    
+    /* Improved modal positioning for mobile */
+    .modal-container {
+        padding: 16px;
+        align-items: flex-end;
+    }
+    
+    .modal-content {
+        max-height: 90vh;
+        overflow-y: auto;
+        border-radius: 24px 24px 0 0;
+        margin-bottom: 0;
+        animation: slideUpFromBottom 0.3s ease-out;
+    }
+    
+    @keyframes slideUpFromBottom {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    /* Enhanced form elements for mobile */
+    input, select, textarea, button[type="button"] {
+        min-height: 48px;
+        font-size: 16px; /* Prevent zoom on iOS */
+        border-radius: 12px;
+        padding: 12px 16px;
+    }
+    
+    /* Custom dropdown improvements */
+    #mobile-category-dropdown,
+    #mobile-wallet-dropdown {
+        z-index: 1000 !important;
+        max-height: 240px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    #mobile-category-dropdown .p-2,
+    #mobile-wallet-dropdown .p-2 {
+        padding: 8px;
+    }
+    
+    /* Touch-friendly dropdown options */
+    .dropdown-option {
+        min-height: 48px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        transition: background-color 0.2s ease;
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+    }
+    
+    .dropdown-option:active {
+        background-color: rgba(79, 70, 229, 0.1);
+    }
+    
+    /* Card spacing improvements */
+    .wallet-card,
+    .bg-white.rounded-lg {
+        margin-bottom: 16px;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    /* Swiper pagination spacing */
+    .swiper-pagination {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    
+    /* Grid spacing improvements */
+    .grid {
+        gap: 16px;
+    }
+    
+    /* Section spacing */
+    .section {
+        padding-bottom: 24px;
+    }
+    
+    /* Text size improvements for mobile */
+    .text-2xl {
+        font-size: 1.75rem;
+        line-height: 1.2;
+    }
+    
+    .text-lg {
+        font-size: 1.125rem;
+        line-height: 1.3;
+    }
+    
+    /* Button improvements */
+    button {
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        min-height: 44px;
+    }
+    
+    button:active {
+        transform: scale(0.98);
+    }
+    
+    /* Form field spacing */
+    .form-field {
+        margin-bottom: 20px;
+    }
+    
+    .form-field label {
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-size: 14px;
+    }
+    
+    /* Quick action buttons in modal */
+    .quick-add-btn {
+        padding: 20px 16px;
+        min-height: 120px;
+        border-radius: 16px;
+    }
+    
+    .quick-add-btn:active {
+        transform: scale(0.98);
+    }
+    
+    /* Mobile menu modal improvements */
+    #mobile-menu-modal .bg-white {
+        border-radius: 24px 24px 0 0;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    
+    /* Statistics and charts mobile optimization */
+    .chart-container {
+        height: 250px;
+        margin-bottom: 20px;
+    }
+    
+    /* Wallet swiper improvements */
+    .wallet-swiper .swiper-slide,
+    .balance-swiper .swiper-slide {
+        padding: 4px;
+    }
+    
+    /* AI Chat widget mobile optimization */
+    #dashboard-chat-widget {
+        margin-bottom: 24px;
+    }
+    
+    #dashboard-chat-messages {
+        max-height: 300px;
+        overflow-y: auto;
+        padding: 16px;
+        border-radius: 12px;
+    }
+    
+    /* Daily limit card mobile optimization */
+    #daily-spending-card {
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 16px;
+    }
+    
+    /* Transaction list mobile optimization */
+    #transactions-list {
+        margin-bottom: 24px;
+    }
+    
+    .transaction-item {
+        padding: 16px;
+        margin-bottom: 8px;
+        border-radius: 12px;
+        min-height: 72px;
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Modal backdrop improvements */
+    .fixed.inset-0.bg-black {
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    }
+    
+    /* Prevent horizontal scroll */
+    body {
+        overflow-x: hidden;
+    }
+    
+    /* Improved tap highlights */
+    button, a, [onclick] {
+        -webkit-tap-highlight-color: rgba(79, 70, 229, 0.1);
+    }
+}
+
+/* Tablet landscape optimization */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .main-container {
+        padding-bottom: 32px !important;
+    }
+    
+    .grid-cols-1.md\:grid-cols-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .chart-container {
+        height: 320px;
+    }
+}
+
+/* Enhanced Mobile Modal and Dropdown Improvements */
+@media (max-width: 768px) {
+    /* Modal container improvements */
+    .modal-container {
+        align-items: flex-end !important;
+        padding: 0 !important;
+    }
+    
+    .modal-content {
+        border-radius: 24px 24px 0 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 90vh !important;
+        overflow-y: auto !important;
+        position: relative !important;
+    }
+    
+    /* Prevent modal from going under bottom nav */
+    #quick-add-modal .modal-content,
+    #mobile-menu-modal .bg-white {
+        margin-bottom: 0 !important;
+        padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)) !important;
+    }
+    
+    /* Dropdown positioning within modals */
+    .modal-content .relative .absolute {
+        z-index: 1000 !important;
+        position: fixed !important;
+        left: 16px !important;
+        right: 16px !important;
+    }
+    
+    /* Form field spacing in modals */
+    .modal-content .form-field {
+        margin-bottom: 20px !important;
+    }
+    
+    .modal-content .form-field:last-child {
+        margin-bottom: 24px !important;
+    }
+    
+    /* Button spacing in modals */
+    .modal-content .flex.space-x-3 {
+        margin-top: 24px !important;
+        padding-top: 20px !important;
+        border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    html.dark .modal-content .flex.space-x-3 {
+        border-top-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* Ensure proper content spacing */
+    .section {
+        padding: 16px 0 !important;
+        margin-bottom: 20px !important;
+    }
+    
+    .section:last-child {
+        margin-bottom: 40px !important;
+    }
+    
+    /* Wallet cards responsive improvements */
+    .wallet-swiper .swiper-slide {
+        padding: 8px !important;
+    }
+    
+    .balance-swiper .swiper-slide {
+        padding: 8px !important;
+    }
+    
+    /* Chart responsive improvements */
+    .chart-container {
+        margin: 16px 0 !important;
+        padding: 8px !important;
+    }
+    
+    /* Statistics section improvements */
+    #statistics-section {
+        padding-bottom: 40px !important;
+    }
+    
+    /* Planning section improvements */
+    #planning-section {
+        padding-bottom: 40px !important;
+    }
+    
+    /* Investment section improvements */
+    #investment-section {
+        padding-bottom: 40px !important;
+    }
+    
+    /* Settings section improvements */
+    #settings-section {
+        padding-bottom: 40px !important;
+    }
+    
+    /* Books section improvements */
+    #books-section {
+        padding-bottom: 40px !important;
+    }
+    
+    /* Prevent horizontal overflow */
+    .main-container {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+    }
+    
+    /* Improve touch target sizes */
+    button, a, [onclick] {
+        min-height: 44px !important;
+        min-width: 44px !important;
+    }
+    
+    /* Quick action buttons in modal */
+    .quick-add-btn {
+        min-height: 100px !important;
+        padding: 16px !important;
+    }
+    
+    /* Mobile navigation center button */
+    button[onclick*="showTransactionsWithAnimation"] > div {
+        min-width: 52px !important;
+        min-height: 52px !important;
+        box-shadow: 0 4px 16px rgba(79, 70, 229, 0.4) !important;
+    }
+    
+    /* Dropdown option styling */
+    .dropdown-option,
+    #mobile-category-options > *,
+    #mobile-wallet-options > * {
+        min-height: 48px !important;
+        padding: 12px 16px !important;
+        border-radius: 8px !important;
+        transition: background-color 0.2s ease !important;
+        display: flex !important;
+        align-items: center !important;
+        font-size: 16px !important;
+        cursor: pointer !important;
+    }
+    
+    .dropdown-option:hover,
+    #mobile-category-options > *:hover,
+    #mobile-wallet-options > *:hover {
+        background-color: rgba(79, 70, 229, 0.05) !important;
+    }
+    
+    html.dark .dropdown-option:hover,
+    html.dark #mobile-category-options > *:hover,
+    html.dark #mobile-wallet-options > *:hover {
+        background-color: rgba(79, 70, 229, 0.1) !important;
+    }
+    
+    /* Input focus improvements */
+    input:focus, select:focus, textarea:focus, button:focus {
+        outline: none !important;
+        box-shadow: 0 0 0 2px #4F46E5 !important;
+        border-color: #4F46E5 !important;
+    }
+    
+    /* Swiper pagination improvements */
+    .swiper-pagination {
+        position: static !important;
+        margin-top: 16px !important;
+        padding-bottom: 12px !important;
+    }
+    
+    .swiper-pagination-bullet {
+        width: 8px !important;
+        height: 8px !important;
+        margin: 0 4px !important;
+    }
+    
+    /* AI Chat widget mobile improvements */
+    #dashboard-chat-widget {
+        padding: 16px !important;
+        margin-bottom: 24px !important;
+    }
+    
+    #dashboard-chat-messages {
+        max-height: 280px !important;
+        padding: 16px !important;
+        margin-bottom: 16px !important;
+    }
+    
+    /* Daily spending card improvements */
+    #daily-spending-card {
+        margin-bottom: 20px !important;
+        padding: 20px !important;
+    }
+    
+    /* Grid gap consistency */
+    .grid {
+        gap: 12px !important;
+    }
+    
+    .grid.gap-6 {
+        gap: 16px !important;
+    }
+    
+    .grid.gap-4 {
+        gap: 12px !important;
+    }
+    
+    /* Prevent text selection on UI elements */
+    .mobile-nav-btn,
+    .quick-add-btn,
+    button,
+    .touch-manipulation {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+    }
+    
+    /* Improve scroll behavior */
+    .modal-content,
+    .max-h-60,
+    .overflow-y-auto {
+        -webkit-overflow-scrolling: touch !important;
+        scroll-behavior: smooth !important;
+    }
+}
+
+/* Tablet specific improvements (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .main-container {
+        padding: 24px 20px 40px 20px !important;
+    }
+    
+    .wallet-card,
+    .bg-white.rounded-lg {
+        padding: 24px !important;
+        margin-bottom: 16px !important;
+    }
+    
+    .chart-container {
+        height: 320px !important;
+    }
+    
+    /* Adjust grid for tablet */
+    .grid-cols-1.md\\:grid-cols-3 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* Large screen improvements */
+@media (min-width: 1025px) {
+    .main-container {
+        padding: 32px 24px 48px 24px !important;
+    }
+    
+    /* Hover effects for large screens */
+    .wallet-card:hover,
+    .bg-white.rounded-lg:hover {
+        transform: translateY(-4px) !important;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    button:hover {
+        transform: translateY(-1px) !important;
+        transition: all 0.2s ease !important;
+    }
+}
+
+/* Safe area support for devices with notches */
+@supports (padding: env(safe-area-inset-bottom)) {
+    @media (max-width: 768px) {
+        .safe-area-bottom {
+            padding-bottom: env(safe-area-inset-bottom) !important;
+        }
+        
+        .pb-safe {
+            padding-bottom: max(1.5rem, env(safe-area-inset-bottom)) !important;
+        }
+        
+        .main-container {
+            padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+        }
+        
+        .modal-content {
+            padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)) !important;
+        }
+    }
+}
+
+/* High DPI screen optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .wallet-card,
+    .bg-white.rounded-lg {
+        border-width: 0.5px !important;
+    }
+    
+    .mobile-nav-btn {
+        border-width: 0.5px !important;
+    }
+}
 
 * {
     font-family: 'Inter', sans-serif;

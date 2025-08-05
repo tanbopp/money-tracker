@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <link href="styles.css" rel="stylesheet">
+    <script src="mobile-enhancements.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -69,35 +70,35 @@
     </nav>
 
     <!-- Mobile Bottom Navigation -->
-    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-40 shadow-lg">
-        <div class="grid grid-cols-5 h-16">
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-50 shadow-lg safe-area-bottom">
+        <div class="grid grid-cols-5 h-16 max-w-md mx-auto">
             <!-- Dashboard -->
-            <button onclick="showSection('dashboard')" class="mobile-nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 active:bg-gray-50 dark:active:bg-gray-700">
+            <button onclick="showSection('dashboard')" class="mobile-nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 active:bg-gray-50 dark:active:bg-gray-700 touch-manipulation">
                 <i class="fas fa-home text-lg"></i>
                 <span class="text-xs font-medium">Dashboard</span>
             </button>
             
             <!-- Books -->
-            <button onclick="showSection('books')" class="mobile-nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 active:bg-gray-50 dark:active:bg-gray-700">
+            <button onclick="showSection('books')" class="mobile-nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 active:bg-gray-50 dark:active:bg-gray-700 touch-manipulation">
                 <i class="fas fa-book text-lg"></i>
                 <span class="text-xs font-medium">Buku</span>
             </button>
             
             <!-- Add Transaction (Center Button) -->
-            <button onclick="showTransactionsWithAnimation()" class="flex flex-col items-center justify-center">
+            <button onclick="showTransactionsWithAnimation()" class="flex flex-col items-center justify-center touch-manipulation">
                 <div class="bg-primary text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-primary/90 transition-all duration-200 transform hover:scale-105 active:scale-95">
                     <i class="fas fa-list-alt text-xl"></i>
                 </div>
             </button>
             
             <!-- Statistics -->
-            <button onclick="showSection('statistics')" class="mobile-nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 active:bg-gray-50 dark:active:bg-gray-700">
+            <button onclick="showSection('statistics')" class="mobile-nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 active:bg-gray-50 dark:active:bg-gray-700 touch-manipulation">
                 <i class="fas fa-chart-bar text-lg"></i>
                 <span class="text-xs font-medium">Grafik</span>
             </button>
             
             <!-- Planning -->
-            <button onclick="showSection('planning')" class="mobile-nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 active:bg-gray-50 dark:active:bg-gray-700">
+            <button onclick="showSection('planning')" class="mobile-nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 active:bg-gray-50 dark:active:bg-gray-700 touch-manipulation">
                 <i class="fas fa-piggy-bank text-lg"></i>
                 <span class="text-xs font-medium">Planning</span>
             </button>
@@ -105,21 +106,21 @@
     </div>
 
     <!-- Mobile Menu Modal for Additional Options -->
-    <div id="mobile-menu-modal" class="md:hidden fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-t-3xl w-full max-w-md mx-4 pb-8 animate-slide-up">
+    <div id="mobile-menu-modal" class="md:hidden fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-[100] hidden touch-manipulation">
+        <div class="bg-white dark:bg-gray-800 rounded-t-3xl w-full max-w-md mx-4 pb-safe animate-slide-up">
             <div class="p-6">
                 <!-- Handle bar -->
                 <div class="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-6"></div>
                 
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Menu Lainnya</h3>
-                    <button onclick="hideMobileMenu()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <button onclick="hideMobileMenu()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-2 -mr-2 touch-manipulation">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
                 
                 <div class="space-y-3">
-                    <button onclick="showSection('investment'); hideMobileMenu();" class="w-full flex items-center space-x-4 p-4 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-colors duration-200">
+                    <button onclick="showSection('investment'); hideMobileMenu();" class="w-full flex items-center space-x-4 p-4 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-colors duration-200 touch-manipulation">
                         <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
                             <i class="fas fa-chart-line text-green-600 dark:text-green-400 text-lg"></i>
                         </div>
@@ -130,7 +131,7 @@
                         <i class="fas fa-chevron-right text-gray-400"></i>
                     </button>
                     
-                    <button onclick="showSection('settings'); hideMobileMenu();" class="w-full flex items-center space-x-4 p-4 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-colors duration-200">
+                    <button onclick="showSection('settings'); hideMobileMenu();" class="w-full flex items-center space-x-4 p-4 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-colors duration-200 touch-manipulation">
                         <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
                             <i class="fas fa-cog text-blue-600 dark:text-blue-400 text-lg"></i>
                         </div>
@@ -146,18 +147,18 @@
     </div>
 
     <!-- Quick Add Modal -->
-    <div id="quick-add-modal" class="modal-container fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md mx-4 p-6 animate-slide-up">
+    <div id="quick-add-modal" class="modal-container fixed inset-0 bg-black bg-opacity-50 flex items-center md:items-center items-end justify-center z-[100] hidden touch-manipulation">
+        <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl md:rounded-2xl rounded-t-3xl w-full max-w-md mx-4 p-6 pb-safe animate-slide-up max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Tambah Transaksi</h3>
-                <button onclick="hideQuickAddModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <button onclick="hideQuickAddModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-2 -mr-2 touch-manipulation">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
             
             <!-- Quick Action Buttons -->
             <div class="grid grid-cols-2 gap-4 mb-6">
-                <button onclick="showQuickIncomeForm()" class="quick-add-btn bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 rounded-xl p-4 text-center hover:bg-green-100 dark:hover:bg-green-900/30 transition-all duration-200">
+                <button onclick="showQuickIncomeForm()" class="quick-add-btn bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 rounded-xl p-4 text-center hover:bg-green-100 dark:hover:bg-green-900/30 transition-all duration-200 touch-manipulation">
                     <div class="w-12 h-12 bg-green-100 dark:bg-green-900/40 rounded-full flex items-center justify-center mx-auto mb-2">
                         <i class="fas fa-plus text-green-600 dark:text-green-400 text-xl"></i>
                     </div>
@@ -165,7 +166,7 @@
                     <p class="text-xs opacity-75">Tambah pendapatan</p>
                 </button>
                 
-                <button onclick="showQuickExpenseForm()" class="quick-add-btn bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 rounded-xl p-4 text-center hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-200">
+                <button onclick="showQuickExpenseForm()" class="quick-add-btn bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 rounded-xl p-4 text-center hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-200 touch-manipulation">
                     <div class="w-12 h-12 bg-red-100 dark:bg-red-900/40 rounded-full flex items-center justify-center mx-auto mb-2">
                         <i class="fas fa-minus text-red-600 dark:text-red-400 text-xl"></i>
                     </div>
@@ -180,21 +181,21 @@
                     <div class="space-y-4 form-fields">
                         <div class="form-field">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jumlah</label>
-                            <input type="number" id="quick-amount" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white" placeholder="0">
+                            <input type="number" id="quick-amount" required class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white text-lg touch-manipulation" placeholder="0">
                         </div>
                         
                         <div class="form-field dropdown-field">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kategori</label>
                             <!-- Mobile-optimized custom dropdown -->
-                            <div class="relative md:hidden">
+                            <div class="relative">
                                 <button type="button" id="mobile-category-trigger" onclick="openMobileCategoryDropdown()" 
-                                        class="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white bg-white text-left flex items-center justify-between">
+                                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white bg-white text-left flex items-center justify-between touch-manipulation">
                                     <span id="mobile-category-selected" class="text-gray-500 dark:text-gray-400">Pilih kategori</span>
                                     <i class="fas fa-chevron-down text-gray-400 transition-transform duration-200" id="mobile-category-arrow"></i>
                                 </button>
                                 
                                 <!-- Mobile Category Dropdown Panel -->
-                                <div id="mobile-category-dropdown" class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-[3000] hidden max-h-60 overflow-y-auto">
+                                <div id="mobile-category-dropdown" class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-[200] hidden max-h-60 overflow-y-auto">
                                     <div class="p-2">
                                         <div class="text-xs font-medium text-gray-500 dark:text-gray-400 px-3 py-2 uppercase tracking-wide">Pilih Kategori</div>
                                         <div id="mobile-category-options" class="space-y-1">
@@ -203,50 +204,40 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- Desktop dropdown (hidden on mobile) -->
-                            <select id="quick-category" class="modal-select hidden md:block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white">
-                                <!-- Options will be populated by JavaScript -->
-                            </select>
                         </div>
                         
                         <div class="form-field dropdown-field">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Wallet</label>
                             <!-- Mobile-optimized custom dropdown -->
-                            <div class="relative md:hidden">
+                            <div class="relative">
                                 <button type="button" id="mobile-wallet-trigger" onclick="openMobileWalletDropdown()" 
-                                        class="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white bg-white text-left flex items-center justify-between">
+                                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white bg-white text-left flex items-center justify-between touch-manipulation">
                                     <span id="mobile-wallet-selected" class="text-gray-500 dark:text-gray-400">Pilih wallet</span>
                                     <i class="fas fa-chevron-down text-gray-400 transition-transform duration-200" id="mobile-wallet-arrow"></i>
                                 </button>
                                 
                                 <!-- Mobile Wallet Dropdown Panel -->
-                                <div id="mobile-wallet-dropdown" class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-[3000] hidden max-h-60 overflow-y-auto">
+                                <div id="mobile-wallet-dropdown" class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-[200] hidden max-h-60 overflow-y-auto">
                                     <div class="p-2">
-                                        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 px-3 py-2 uppercase tracking-wide">Pilih Wallet</div>
-                                        <div id="mobile-wallet-options" class="space-y-1">
-                                            <!-- Options will be populated by JavaScript -->
-                                        </div>
+                                        <!-- Options will be populated by JavaScript -->
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- Desktop dropdown (hidden on mobile) -->
-                            <select id="quick-wallet" class="modal-select hidden md:block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white">
+                        </div>
                                 <!-- Options will be populated by JavaScript -->
                             </select>
                         </div>
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Keterangan</label>
-                            <input type="text" id="quick-description" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white" placeholder="Keterangan (opsional)">
+                            <input type="text" id="quick-description" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white touch-manipulation" placeholder="Keterangan (opsional)">
                         </div>
                         
                         <div class="flex space-x-3 pt-4">
-                            <button type="button" onclick="hideQuickAddModal()" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition duration-200">
+                            <button type="button" onclick="hideQuickAddModal()" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-3 px-4 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition duration-200 font-medium touch-manipulation">
                                 Batal
                             </button>
-                            <button type="submit" id="quick-submit-btn" class="flex-1 bg-primary text-white py-2 px-4 rounded-md hover:bg-primary/90 transition duration-200">
+                            <button type="submit" id="quick-submit-btn" class="flex-1 bg-primary text-white py-3 px-4 rounded-lg hover:bg-primary/90 transition duration-200 font-medium touch-manipulation">
                                 Tambah
                             </button>
                         </div>
@@ -256,7 +247,7 @@
         </div>
     </div>
 
-    <div class="main-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white dark:bg-gray-900 transition-colors duration-300 mt-4">
+    <div class="main-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8 bg-white dark:bg-gray-900 transition-colors duration-300 mt-4 pb-20 md:pb-8">
         <!-- Dashboard Section -->
         <div id="dashboard-section" class="section"
              style="display: block;">
