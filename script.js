@@ -110,7 +110,7 @@ const categoryKeywords = {
 
     // EXPENSE CATEGORIES
     'makanan': {
-        keywords: ['makan', 'makanan', 'nasi', 'ayam', 'sate', 'gudeg', 'rendang', 'soto', 'bakso', 'mie', 'burger', 'pizza', 'sushi', 'padang', 'warteg', 'resto', 'restoran', 'cafe', 'food', 'lunch', 'dinner', 'breakfast', 'sarapan', 'makan siang', 'makan malam'],
+        keywords: ['makan', 'makanan', 'nasi', 'ayam', 'sate', 'gudeg', 'rendang', 'soto', 'bakso', 'mie', 'burger', 'pizza', 'sushi', 'padang', 'warteg', 'resto', 'restoran', 'cafe', 'food', 'lunch', 'dinner', 'breakfast', 'sarapan', 'makan siang', 'makan malam', 'jajan', 'jajanan', 'gorengan', 'snack', 'snacks', 'fast food'],
         type: 'expense'
     },
     'minuman': {
@@ -118,7 +118,7 @@ const categoryKeywords = {
         type: 'expense'
     },
     'makanan-ringan': {
-        keywords: ['snack', 'cemilan', 'keripik', 'biskuit', 'coklat', 'permen', 'ice cream', 'es krim', 'donat', 'roti', 'cake', 'kue', 'cookies', 'crackers', 'nuts', 'kacang'],
+        keywords: ['snack', 'cemilan', 'keripik', 'biskuit', 'coklat', 'permen', 'ice cream', 'es krim', 'donat', 'roti', 'cake', 'kue', 'cookies', 'crackers', 'nuts', 'kacang', 'jajan', 'jajanan', 'camilan'],
         type: 'expense'
     },
     'transportasi': {
@@ -957,13 +957,21 @@ function populateQuickWallets() {
         const select = document.getElementById('quick-wallet');
         if (!select) return;
         
-        const wallets = getWallets();
+        const availableWallets = getWallets();
         select.innerHTML = '';
         
-        wallets.forEach(wallet => {
+        // Add default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Pilih wallet';
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+        select.appendChild(defaultOption);
+        
+        availableWallets.forEach(wallet => {
             const option = document.createElement('option');
-            option.value = wallet.name;
-            option.textContent = wallet.name;
+            option.value = wallet.name; // Keep using name for now to match existing logic
+            option.textContent = `${wallet.name} (${formatCurrency(wallet.balance)})`;
             select.appendChild(option);
         });
     } catch (error) {
@@ -979,42 +987,82 @@ function submitQuickTransaction(event) {
         const type = form.getAttribute('data-type');
         
         const amount = parseFloat(document.getElementById('quick-amount').value);
-        const category = document.getElementById('quick-category').value;
-        const wallet = document.getElementById('quick-wallet').value;
+        const categoryId = document.getElementById('quick-category').value;
+        const walletName = document.getElementById('quick-wallet').value;
         const description = document.getElementById('quick-description').value;
         
-        if (amount <= 0) {
+        if (!amount || amount <= 0) {
             showNotification('Jumlah harus lebih dari 0', 'error');
             return;
         }
         
+        if (!categoryId) {
+            showNotification('Pilih kategori terlebih dahulu', 'error');
+            return;
+        }
+        
+        if (!walletName) {
+            showNotification('Pilih wallet terlebih dahulu', 'error');
+            return;
+        }
+        
+        // Find category and wallet
+        const categories = type === 'income' ? customCategories.income : customCategories.expense;
+        const category = categories.find(cat => cat.id === categoryId);
+        const wallet = wallets.find(w => w.name === walletName);
+        
+        if (!category) {
+            showNotification('Kategori tidak ditemukan', 'error');
+            return;
+        }
+        
+        if (!wallet) {
+            showNotification('Wallet tidak ditemukan', 'error');
+            return;
+        }
+        
+        // Check wallet balance for expenses
+        if (type === 'expense' && wallet.balance < amount) {
+            showNotification('Saldo wallet tidak mencukupi', 'error');
+            return;
+        }
+        
         const transaction = {
-            id: Date.now(),
+            id: Date.now().toString(),
             type: type,
             amount: amount,
-            category: category,
-            wallet: wallet,
-            description: description,
-            date: new Date().toISOString().split('T')[0],
-            timestamp: new Date().toISOString()
+            category: category.name,
+            categoryId: categoryId,
+            wallet: wallet.id,
+            walletName: wallet.name,
+            description: description || '',
+            date: new Date().toISOString(),
+            formattedDate: new Date().toLocaleDateString('id-ID'),
+            icon: category.icon,
+            color: category.color
         };
         
-        // Add transaction
-        transactions.push(transaction);
-        saveTransactions();
-        
         // Update wallet balance
-        updateWalletBalance(wallet, type === 'income' ? amount : -amount);
+        if (type === 'expense') {
+            wallet.balance -= amount;
+        } else {
+            wallet.balance += amount;
+        }
+        
+        // Add transaction to the beginning (newest first)
+        transactions.unshift(transaction);
+        
+        // Save data
+        saveData();
+        saveWallets();
         
         // Update displays
-        updateWalletDisplay();
-        updateDashboard();
-        updateTransactionsList();
+        updateAllDisplays();
         
         // Show success notification
         const message = type === 'income' ? 
-            `Pemasukan Rp ${formatCurrency(amount)} berhasil ditambahkan` :
-            `Pengeluaran Rp ${formatCurrency(amount)} berhasil ditambahkan`;
+            `Pemasukan ${formatCurrency(amount)} berhasil ditambahkan` :
+            `Pengeluaran ${formatCurrency(amount)} berhasil ditambahkan`;
         showNotification(message, 'success');
         
         // Close modal
@@ -1314,10 +1362,22 @@ function updateDashboard() {
         const totalSavingsAmount = savings.reduce((sum, s) => sum + s.amount, 0);
         const portfolioValue = getPortfolioValue();
         
-        const cashBalance = totalIncome - totalExpense - totalSavingsAmount;
-        const totalBalance = cashBalance + portfolioValue;
+        // Calculate total balance from wallet balances for consistency
+        const walletsTotalBalance = wallets.reduce((sum, wallet) => sum + (wallet.balance || 0), 0);
+        const totalBalance = walletsTotalBalance + portfolioValue + totalSavingsAmount;
         
-        console.log('Dashboard values:', { totalIncome, totalExpense, totalSavingsAmount, portfolioValue, cashBalance, totalBalance });
+        // Cash balance is the sum of all wallet balances
+        const cashBalance = walletsTotalBalance;
+        
+        console.log('Dashboard values:', { 
+            totalIncome, 
+            totalExpense, 
+            totalSavingsAmount, 
+            portfolioValue, 
+            walletsTotalBalance,
+            cashBalance, 
+            totalBalance 
+        });
         
         // Update desktop displays with safety checks
         const totalBalanceEl = document.getElementById('total-balance');
@@ -1575,10 +1635,8 @@ function removeCustomCategory(type, categoryName) {
 // Wallet management functions
 function updateWalletBalances() {
     wallets.forEach(wallet => {
-        const walletTransactions = transactions.filter(t => t.wallet === wallet.id);
-        const income = walletTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-        const expense = walletTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-        wallet.balance = income - expense;
+        // Use the same logic as calculateWalletBalance for consistency
+        wallet.balance = calculateWalletBalance(wallet.id);
     });
     
     // Update wallets in localStorage as well
@@ -3408,7 +3466,7 @@ class MoneyTrackerAI {
         this.patterns = {
             // Transaction patterns
             expense: {
-                keywords: ['beli', 'bayar', 'belanja', 'buat', 'untuk', 'keluar', 'habis', 'spend', 'buat beli', 'utk', 'byr', 'bli', 'blnja', 'keluarin', 'pake', 'pakai', 'pkai'],
+                keywords: ['beli', 'bayar', 'belanja', 'buat', 'untuk', 'keluar', 'habis', 'spend', 'buat beli', 'utk', 'byr', 'bli', 'blnja', 'keluarin', 'pake', 'pakai', 'pkai', 'jajan', 'jajanan', 'membeli', 'purchase', 'buy', 'shopping'],
                 // Dynamic categories will be loaded after customCategories is available
                 categories: {}
             },
@@ -3699,7 +3757,7 @@ class MoneyTrackerAI {
     }
 
     detectActionType(message) {
-        const words = message.split(' ');
+        const words = message.split(' ').map(w => w.toLowerCase());
         
         // Check for savings first (higher priority)
         if (this.containsAny(words, this.patterns.savings.keywords)) {
@@ -3711,17 +3769,17 @@ class MoneyTrackerAI {
             return 'withdraw';
         }
         
-        // Check for income
-        if (this.containsAny(words, this.patterns.income.keywords)) {
-            return 'income';
-        }
-        
-        // Default to expense (most common)
+        // Check for expense keywords first (beli, bayar, etc.)
         if (this.containsAny(words, this.patterns.expense.keywords)) {
             return 'expense';
         }
         
-        // If no explicit keywords, assume expense
+        // Check for income (only if no expense keywords found)
+        if (this.containsAny(words, this.patterns.income.keywords)) {
+            return 'income';
+        }
+        
+        // If no explicit keywords, assume expense (most common for spending)
         return 'expense';
     }
 
@@ -4899,12 +4957,22 @@ function updateWalletDisplay() {
         // Update global wallets variable
         wallets = currentWallets;
         
-        // Calculate balances for each wallet
+        // Always prioritize stored wallet balances over calculated ones
         currentWallets.forEach(wallet => {
             try {
-                wallet.balance = calculateWalletBalance(wallet.id);
+                // If wallet has a stored balance, use it (even if 0)
+                if (typeof wallet.balance === 'number') {
+                    console.log(`Using stored balance for ${wallet.name}: ${wallet.balance}`);
+                } else {
+                    // Only calculate from transactions if balance is completely missing
+                    wallet.balance = calculateWalletBalance(wallet.id);
+                    console.log(`Calculated balance for ${wallet.name}: ${wallet.balance}`);
+                    
+                    // Save the calculated balance back to storage
+                    saveWallets();
+                }
             } catch (error) {
-                console.error(`Error calculating balance for wallet ${wallet.id}:`, error);
+                console.error(`Error processing balance for wallet ${wallet.id}:`, error);
                 wallet.balance = 0;
             }
         });
@@ -5257,9 +5325,27 @@ function initializeDefaultWallets() {
 function calculateWalletBalance(walletId) {
     try {
         const walletTransactions = transactions.filter(t => t.wallet === walletId);
-        const income = walletTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-        const expense = walletTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-        return income - expense;
+        
+        let balance = 0;
+        
+        walletTransactions.forEach(transaction => {
+            if (transaction.type === 'income') {
+                balance += transaction.amount;
+            } else if (transaction.type === 'expense') {
+                balance -= transaction.amount;
+            } else if (transaction.type === 'transfer') {
+                // Handle transfer transactions
+                if (transaction.category === 'Transfer Masuk' || transaction.transferFrom) {
+                    // Transfer incoming - add to balance
+                    balance += transaction.amount;
+                } else if (transaction.category === 'Transfer Keluar' || transaction.transferTo) {
+                    // Transfer outgoing - subtract from balance
+                    balance -= transaction.amount;
+                }
+            }
+        });
+        
+        return balance;
     } catch (error) {
         console.error('Error calculating wallet balance:', error);
         return 0;
@@ -7604,8 +7690,10 @@ function updateMobileBalanceCards() {
         const totalSavingsAmount = savings.reduce((sum, s) => sum + s.amount, 0);
         const portfolioValue = getPortfolioValue();
         
-        const cashBalance = totalIncome - totalExpense - totalSavingsAmount;
-        const totalBalance = cashBalance + portfolioValue;
+        // Use wallet balances for consistency with desktop version
+        const walletsTotalBalance = wallets.reduce((sum, wallet) => sum + (wallet.balance || 0), 0);
+        const totalBalance = walletsTotalBalance + portfolioValue + totalSavingsAmount;
+        const cashBalance = walletsTotalBalance;
         
         const totalBalanceEl = document.getElementById('total-balance-mobile');
         const totalIncomeEl = document.getElementById('total-income-mobile');
@@ -8530,13 +8618,21 @@ function populateTransferWalletOptions() {
         
         if (!fromSelect || !toSelect) return;
         
+        // Get fresh wallet data from localStorage and update global variable
+        const currentWallets = getWallets();
+        wallets = currentWallets; // Sync global variable
+        console.log('Populating transfer options with wallets:', currentWallets);
+        
         fromSelect.innerHTML = '<option value="">Pilih wallet</option>';
         toSelect.innerHTML = '<option value="">Pilih wallet</option>';
         
-        wallets.forEach(wallet => {
+        currentWallets.forEach(wallet => {
+            // Ensure balance is a number
+            const balance = parseFloat(wallet.balance) || 0;
+            
             const fromOption = document.createElement('option');
             fromOption.value = wallet.id;
-            fromOption.textContent = `${wallet.name} (${formatCurrency(wallet.balance)})`;
+            fromOption.textContent = `${wallet.name} (${formatCurrency(balance)})`;
             fromSelect.appendChild(fromOption);
             
             const toOption = document.createElement('option');
@@ -8894,6 +8990,8 @@ function addTransfer(event) {
         const amount = parseFloat(document.getElementById('transfer-amount').value);
         const description = document.getElementById('transfer-description').value;
         
+        console.log('Transfer attempt:', { fromWalletId, toWalletId, amount, description });
+        
         if (!fromWalletId || !toWalletId) {
             showNotification('Pilih wallet asal dan tujuan', 'error');
             return;
@@ -8909,58 +9007,101 @@ function addTransfer(event) {
             return;
         }
         
+        // Get fresh wallet data from localStorage
+        wallets = getWallets();
+        
         const fromWallet = wallets.find(w => w.id === fromWalletId);
         const toWallet = wallets.find(w => w.id === toWalletId);
         
-        if (fromWallet.balance < amount) {
-            showNotification('Saldo wallet tidak mencukupi', 'error');
+        console.log('Found wallets:', { fromWallet, toWallet });
+        console.log('All wallets:', wallets);
+        
+        if (!fromWallet) {
+            showNotification('Wallet asal tidak ditemukan', 'error');
+            console.error('From wallet not found:', fromWalletId);
             return;
         }
         
+        if (!toWallet) {
+            showNotification('Wallet tujuan tidak ditemukan', 'error');
+            console.error('To wallet not found:', toWalletId);
+            return;
+        }
+        
+        if (fromWallet.balance < amount) {
+            showNotification(`Saldo wallet ${fromWallet.name} tidak mencukupi. Saldo: ${formatCurrency(fromWallet.balance)}`, 'error');
+            return;
+        }
+        
+        // Log balances before transfer
+        console.log('Before transfer - From wallet balance:', fromWallet.balance, 'To wallet balance:', toWallet.balance);
+        
+        // Update wallet balances
+        fromWallet.balance = parseFloat((fromWallet.balance - amount).toFixed(2));
+        toWallet.balance = parseFloat((toWallet.balance + amount).toFixed(2));
+        
+        // Log balances after transfer
+        console.log('After transfer - From wallet balance:', fromWallet.balance, 'To wallet balance:', toWallet.balance);
+        
         // Create transfer transactions
         const transferId = Date.now().toString();
+        const currentDate = new Date().toISOString();
+        const formattedDate = new Date().toLocaleDateString('id-ID');
+        
         const transferOut = {
             id: transferId + '_out',
-            type: 'transfer_out',
+            type: 'transfer',
             amount: amount,
             category: 'Transfer Keluar',
             wallet: fromWalletId,
+            walletName: fromWallet.name,
             transferTo: toWalletId,
             transferToName: toWallet.name,
             description: description || `Transfer ke ${toWallet.name}`,
-            date: new Date().toISOString(),
+            date: currentDate,
+            formattedDate: formattedDate,
             icon: 'fas fa-arrow-right',
             color: '#EF4444'
         };
         
         const transferIn = {
             id: transferId + '_in',
-            type: 'transfer_in',
+            type: 'transfer',
             amount: amount,
             category: 'Transfer Masuk',
             wallet: toWalletId,
+            walletName: toWallet.name,
             transferFrom: fromWalletId,
             transferFromName: fromWallet.name,
             description: description || `Transfer dari ${fromWallet.name}`,
-            date: new Date().toISOString(),
+            date: currentDate,
+            formattedDate: formattedDate,
             icon: 'fas fa-arrow-left',
             color: '#10B981'
         };
         
-        // Update wallet balances
-        fromWallet.balance -= amount;
-        toWallet.balance += amount;
+        // Add transactions to the beginning (newest first)
+        transactions.unshift(transferOut, transferIn);
         
-        // Add transactions
-        transactions.push(transferOut, transferIn);
-        
-        // Save data
-        saveData();
+        // Save data - IMPORTANT: Save wallets first, then transactions
         saveWallets();
+        saveData();
         
-        // Update displays
-        updateAllDisplays();
-        displayTransactions();
+        console.log('Data saved successfully');
+        
+        // Update global wallets variable with fresh data
+        wallets = getWallets();
+        console.log('Global wallets updated after transfer:', wallets);
+        
+        // Update displays carefully - wallet display should use stored balances
+        updateWalletDisplay();
+        updateTransactionsList();
+        updateBalanceDisplay();
+        updateDashboard();
+        updateMobileBalanceCards();
+        
+        // Refresh transfer wallet options to show updated balances
+        populateTransferWalletOptions();
         
         // Reset form
         document.getElementById('transfer-from').value = '';
@@ -8968,11 +9109,11 @@ function addTransfer(event) {
         document.getElementById('transfer-amount').value = '';
         document.getElementById('transfer-description').value = '';
         
-        showNotification('Transfer berhasil dilakukan', 'success');
+        showNotification(`Transfer ${formatCurrency(amount)} dari ${fromWallet.name} ke ${toWallet.name} berhasil`, 'success');
         
     } catch (error) {
         console.error('Error adding transfer:', error);
-        showNotification('Terjadi kesalahan saat melakukan transfer', 'error');
+        showNotification(`Terjadi kesalahan saat melakukan transfer: ${error.message}`, 'error');
     }
 }
 
@@ -9224,12 +9365,15 @@ function addExpenseTransaction(transaction) {
         // Update wallet balance
         wallet.balance -= transaction.amount;
         
-        // Add transaction
-        transactions.push(transaction);
+        // Add transaction to the beginning of the array (newest first)
+        transactions.unshift(transaction);
         
         // Save data
         saveData();
         saveWallets();
+        
+        // Update transaction list immediately
+        updateTransactionsList();
         
     } catch (error) {
         throw error;
@@ -9248,12 +9392,15 @@ function addIncomeTransaction(transaction) {
         // Update wallet balance
         wallet.balance += transaction.amount;
         
-        // Add transaction
-        transactions.push(transaction);
+        // Add transaction to the beginning of the array (newest first)
+        transactions.unshift(transaction);
         
         // Save data
         saveData();
         saveWallets();
+        
+        // Update transaction list immediately
+        updateTransactionsList();
         
     } catch (error) {
         throw error;
