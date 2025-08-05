@@ -7,7 +7,11 @@ const STORAGE_KEYS = {
     CATEGORIES: 'moneyTracker_categories',
     STATISTICS_CONFIG: 'moneyTracker_statisticsConfig',
     WALLETS: 'moneyTracker_wallets',
-    PORTFOLIO: 'moneyTracker_portfolio'
+    PORTFOLIO: 'moneyTracker_portfolio',
+    CLASS_BOOK: 'moneyTracker_classBook',
+    BUSINESS_BOOK: 'moneyTracker_businessBook',
+    DEBT_BOOK: 'moneyTracker_debtBook',
+    STUDENTS: 'moneyTracker_students'
 };
 
 // Global variables
@@ -15,6 +19,10 @@ let transactions = [];
 let goals = [];
 let savings = [];
 let portfolio = []; // Portfolio saham user
+let classBookTransactions = [];
+let businessBookTransactions = [];
+let debtBookTransactions = [];
+let students = []; // Students list for class management
 let dailyLimitSettings = {
     enabled: false,
     amount: 50000,
@@ -38,6 +46,8 @@ let customCategories = {
         { id: 'freelance', name: 'Freelance', icon: 'fas fa-laptop-code', color: '#3B82F6' },
         { id: 'bonus', name: 'Bonus', icon: 'fas fa-gift', color: '#F59E0B' },
         { id: 'investasi', name: 'Investasi', icon: 'fas fa-chart-line', color: '#8B5CF6' },
+        { id: 'penarikan-target', name: 'Penarikan Target', icon: 'fas fa-bullseye', color: '#10B981' },
+        { id: 'penarikan-tabungan', name: 'Penarikan Tabungan', icon: 'fas fa-piggy-bank', color: '#10B981' },
         { id: 'lainnya-income', name: 'Lainnya', icon: 'fas fa-coins', color: '#6B7280' }
     ],
     expense: [
@@ -68,6 +78,8 @@ let customCategories = {
         { id: 'anak-anak', name: 'Anak-anak', icon: 'fas fa-baby', color: '#EC4899' },
         { id: 'sayur-mayur', name: 'Sayur-mayur', icon: 'fas fa-carrot', color: '#10B981' },
         { id: 'buah', name: 'Buah', icon: 'fas fa-apple-alt', color: '#10B981' },
+        { id: 'target-goal', name: 'Target/Goal', icon: 'fas fa-bullseye', color: '#8B5CF6' },
+        { id: 'tabungan', name: 'Tabungan', icon: 'fas fa-piggy-bank', color: '#3B82F6' },
         { id: 'lainnya-expense', name: 'Lainnya', icon: 'fas fa-ellipsis-h', color: '#6B7280' }
     ]
 };
@@ -212,6 +224,24 @@ const categoryKeywords = {
     'buah': {
         keywords: ['buah', 'fruit', 'apel', 'apple', 'pisang', 'banana', 'jeruk', 'orange', 'mangga', 'mango', 'anggur', 'grape', 'semangka', 'watermelon', 'melon', 'strawberry', 'durian', 'rambutan'],
         type: 'expense'
+    },
+    
+    // TARGET AND SAVINGS CATEGORIES
+    'target-goal': {
+        keywords: ['target', 'goal', 'kontribusi', 'contribution', 'menabung untuk', 'saving for', 'tabungan target', 'saving goal'],
+        type: 'expense'
+    },
+    'tabungan': {
+        keywords: ['tabungan', 'saving', 'menabung', 'deposit', 'simpan', 'celengan'],
+        type: 'expense'
+    },
+    'penarikan-target': {
+        keywords: ['penarikan target', 'withdraw goal', 'ambil target', 'cairkan target'],
+        type: 'income'
+    },
+    'penarikan-tabungan': {
+        keywords: ['penarikan tabungan', 'withdraw saving', 'ambil tabungan', 'cairkan tabungan'],
+        type: 'income'
     }
 };
 
@@ -377,6 +407,1651 @@ let charts = {
     dailyActivity: null
 };
 
+// Book Categories
+const bookCategories = {
+    class: {
+        income: [
+            { id: 'iuran-siswa', name: 'Iuran Siswa', icon: 'fas fa-users', color: '#10B981' },
+            { id: 'kas-mingguan', name: 'Kas Mingguan', icon: 'fas fa-calendar-week', color: '#3B82F6' },
+            { id: 'kas-bulanan', name: 'Kas Bulanan', icon: 'fas fa-calendar', color: '#8B5CF6' },
+            { id: 'fundraising', name: 'Fundraising', icon: 'fas fa-hand-holding-heart', color: '#F59E0B' },
+            { id: 'denda', name: 'Denda', icon: 'fas fa-exclamation-triangle', color: '#EF4444' },
+            { id: 'lainnya-class-income', name: 'Lainnya', icon: 'fas fa-coins', color: '#6B7280' }
+        ],
+        expense: [
+            { id: 'perlengkapan-kelas', name: 'Perlengkapan Kelas', icon: 'fas fa-pen', color: '#EF4444' },
+            { id: 'acara-kelas', name: 'Acara Kelas', icon: 'fas fa-birthday-cake', color: '#F59E0B' },
+            { id: 'kebersihan', name: 'Kebersihan', icon: 'fas fa-broom', color: '#10B981' },
+            { id: 'dekorasi', name: 'Dekorasi', icon: 'fas fa-palette', color: '#8B5CF6' },
+            { id: 'snack-rapat', name: 'Snack Rapat', icon: 'fas fa-cookie-bite', color: '#F59E0B' },
+            { id: 'transport-kegiatan', name: 'Transport Kegiatan', icon: 'fas fa-bus', color: '#3B82F6' },
+            { id: 'lainnya-class-expense', name: 'Lainnya', icon: 'fas fa-ellipsis-h', color: '#6B7280' }
+        ]
+    },
+    business: {
+        income: [
+            { id: 'penjualan', name: 'Penjualan', icon: 'fas fa-cash-register', color: '#10B981' },
+            { id: 'jasa', name: 'Pendapatan Jasa', icon: 'fas fa-handshake', color: '#3B82F6' },
+            { id: 'komisi', name: 'Komisi', icon: 'fas fa-percentage', color: '#8B5CF6' },
+            { id: 'bunga-bank', name: 'Bunga Bank', icon: 'fas fa-university', color: '#F59E0B' },
+            { id: 'lainnya-business-income', name: 'Lainnya', icon: 'fas fa-coins', color: '#6B7280' }
+        ],
+        expense: [
+            { id: 'pembelian-bahan', name: 'Pembelian Bahan Baku', icon: 'fas fa-boxes', color: '#EF4444' },
+            { id: 'gaji-karyawan', name: 'Gaji Karyawan', icon: 'fas fa-users', color: '#F59E0B' },
+            { id: 'sewa-tempat', name: 'Sewa Tempat', icon: 'fas fa-home', color: '#8B5CF6' },
+            { id: 'listrik-air', name: 'Listrik & Air', icon: 'fas fa-bolt', color: '#3B82F6' },
+            { id: 'marketing', name: 'Marketing & Promosi', icon: 'fas fa-bullhorn', color: '#10B981' },
+            { id: 'transport-bisnis', name: 'Transport', icon: 'fas fa-truck', color: '#EF4444' },
+            { id: 'pajak-bisnis', name: 'Pajak & Administrasi', icon: 'fas fa-file-invoice', color: '#6B7280' },
+            { id: 'lainnya-business-expense', name: 'Lainnya', icon: 'fas fa-ellipsis-h', color: '#6B7280' }
+        ]
+    }
+};
+
+// ===============================================
+// BOOKS SYSTEM FUNCTIONS
+// ===============================================
+
+// Book Tab Navigation
+function showBookTab(tabName) {
+    // Hide all book tab contents
+    document.querySelectorAll('.book-tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    
+    // Remove active class from all tabs
+    document.querySelectorAll('[id$="-book-tab"]').forEach(tab => {
+        tab.classList.remove('bg-white', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+        tab.classList.add('text-gray-600', 'dark:text-gray-400');
+    });
+    
+    // Show selected content
+    const contentId = `${tabName}-book-content`;
+    const content = document.getElementById(contentId);
+    if (content) {
+        content.classList.remove('hidden');
+    }
+    
+    // Set active tab
+    const tabId = `${tabName}-book-tab`;
+    const tab = document.getElementById(tabId);
+    if (tab) {
+        tab.classList.add('bg-white', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+        tab.classList.remove('text-gray-600', 'dark:text-gray-400');
+    }
+    
+    // Initialize content based on tab
+    switch(tabName) {
+        case 'class':
+            initializeClassBook();
+            break;
+        case 'business':
+            initializeBusinessBook();
+            break;
+        case 'debt':
+            initializeDebtBook();
+            break;
+    }
+}
+
+// ===============================================
+// CLASS BOOK FUNCTIONS
+// ===============================================
+
+function initializeClassBook() {
+    // Set today's date
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('class-date');
+    if (dateInput) {
+        dateInput.value = today;
+    }
+    
+    // Populate categories
+    populateClassCategories();
+    updateClassBookDisplay();
+    
+    // Initialize students data
+    loadStudentsData();
+    updateStudentsDisplay();
+}
+
+function populateClassCategories() {
+    const typeSelect = document.getElementById('class-type');
+    const categorySelect = document.getElementById('class-category');
+    
+    if (!typeSelect || !categorySelect) return;
+    
+    typeSelect.addEventListener('change', function() {
+        const selectedType = this.value;
+        const categories = bookCategories.class[selectedType] || [];
+        
+        categorySelect.innerHTML = '<option value="">Pilih Kategori</option>';
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            option.dataset.icon = category.icon;
+            option.dataset.color = category.color;
+            categorySelect.appendChild(option);
+        });
+    });
+    
+    // Trigger initial population
+    typeSelect.dispatchEvent(new Event('change'));
+}
+
+function addClassTransaction(event) {
+    event.preventDefault();
+    
+    try {
+        const type = document.getElementById('class-type').value;
+        const categoryId = document.getElementById('class-category').value;
+        const amount = parseFloat(document.getElementById('class-amount').value);
+        const date = document.getElementById('class-date').value;
+        const description = document.getElementById('class-description').value.trim();
+        
+        if (!type || !categoryId || !amount || amount <= 0 || !date) {
+            showNotification('Mohon lengkapi semua field yang wajib diisi', 'error');
+            return;
+        }
+        
+        // Find category details
+        const categories = bookCategories.class[type] || [];
+        const category = categories.find(cat => cat.id === categoryId);
+        
+        if (!category) {
+            showNotification('Kategori tidak ditemukan', 'error');
+            return;
+        }
+        
+        const transaction = {
+            id: Date.now().toString(),
+            type: type,
+            categoryId: categoryId,
+            categoryName: category.name,
+            icon: category.icon,
+            color: category.color,
+            amount: amount,
+            date: date,
+            description: description || '',
+            formattedDate: new Date(date).toLocaleDateString('id-ID'),
+            createdAt: new Date().toISOString()
+        };
+        
+        classBookTransactions.unshift(transaction);
+        saveBookData();
+        updateClassBookDisplay();
+        
+        // Reset form
+        document.getElementById('class-amount').value = '';
+        document.getElementById('class-description').value = '';
+        
+        showNotification(`Transaksi kas kelas berhasil ditambahkan: ${formatCurrency(amount)}`, 'success');
+        
+    } catch (error) {
+        console.error('Error adding class transaction:', error);
+        showNotification('Terjadi kesalahan saat menambah transaksi', 'error');
+    }
+}
+
+function updateClassBookDisplay() {
+    updateClassBookSummary();
+    updateClassBookTransactionsList();
+}
+
+function updateClassBookSummary() {
+    const totalIncome = classBookTransactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    const totalExpense = classBookTransactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    const balance = totalIncome - totalExpense;
+    
+    const incomeEl = document.getElementById('class-total-income');
+    const expenseEl = document.getElementById('class-total-expense');
+    const balanceEl = document.getElementById('class-balance');
+    
+    if (incomeEl) incomeEl.textContent = formatCurrency(totalIncome);
+    if (expenseEl) expenseEl.textContent = formatCurrency(totalExpense);
+    if (balanceEl) {
+        balanceEl.textContent = formatCurrency(balance);
+        balanceEl.className = `text-xl font-bold ${balance >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'}`;
+    }
+}
+
+function updateClassBookTransactionsList() {
+    const container = document.getElementById('class-transactions-list');
+    if (!container) return;
+    
+    if (classBookTransactions.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+                <i class="fas fa-book text-4xl mb-2"></i>
+                <p>Belum ada transaksi kas kelas</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = classBookTransactions.map(transaction => `
+        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+            <div class="flex items-center space-x-4">
+                <div class="p-2 rounded-lg" style="background-color: ${transaction.color}20">
+                    <i class="${transaction.icon}" style="color: ${transaction.color}"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900 dark:text-white">${transaction.categoryName}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">${transaction.description}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-500">${transaction.formattedDate}</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="font-semibold ${transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">
+                    ${transaction.type === 'income' ? '+' : '-'}${formatCurrency(transaction.amount)}
+                </p>
+                <button onclick="deleteClassTransaction('${transaction.id}')" class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1 mt-1">
+                    <i class="fas fa-trash text-xs"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function deleteClassTransaction(id) {
+    if (confirm('Hapus transaksi ini dari buku kas kelas?')) {
+        classBookTransactions = classBookTransactions.filter(t => t.id !== id);
+        saveBookData();
+        updateClassBookDisplay();
+        showNotification('Transaksi berhasil dihapus', 'success');
+    }
+}
+
+function exportClassBook() {
+    if (classBookTransactions.length === 0) {
+        showNotification('Tidak ada data untuk diekspor', 'warning');
+        return;
+    }
+    
+    // Create CSV content
+    const headers = ['Tanggal', 'Jenis', 'Kategori', 'Keterangan', 'Jumlah'];
+    const csvContent = [
+        headers.join(','),
+        ...classBookTransactions.map(t => [
+            t.formattedDate,
+            t.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
+            t.categoryName,
+            `"${t.description}"`,
+            t.amount
+        ].join(','))
+    ].join('\n');
+    
+    // Download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `buku-kas-kelas-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    showNotification('Data kas kelas berhasil diekspor', 'success');
+}
+
+function printClassBook() {
+    if (classBookTransactions.length === 0) {
+        showNotification('Tidak ada data untuk dicetak', 'warning');
+        return;
+    }
+    
+    const printWindow = window.open('', '_blank');
+    const totalIncome = classBookTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+    const totalExpense = classBookTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    const balance = totalIncome - totalExpense;
+    
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Buku Kas Kelas</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+                .summary { margin: 20px 0; }
+                .summary div { margin: 5px 0; }
+                .income { color: green; }
+                .expense { color: red; }
+                .balance { font-weight: bold; color: ${balance >= 0 ? 'blue' : 'red'}; }
+            </style>
+        </head>
+        <body>
+            <h1>📋 Buku Kas Kelas</h1>
+            <p>Dicetak pada: ${new Date().toLocaleDateString('id-ID')}</p>
+            
+            <div class="summary">
+                <div class="income">Total Pemasukan: ${formatCurrency(totalIncome)}</div>
+                <div class="expense">Total Pengeluaran: ${formatCurrency(totalExpense)}</div>
+                <div class="balance">Saldo: ${formatCurrency(balance)}</div>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Jenis</th>
+                        <th>Kategori</th>
+                        <th>Keterangan</th>
+                        <th>Jumlah</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${classBookTransactions.map(t => `
+                        <tr>
+                            <td>${t.formattedDate}</td>
+                            <td>${t.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}</td>
+                            <td>${t.categoryName}</td>
+                            <td>${t.description}</td>
+                            <td class="${t.type}">${formatCurrency(t.amount)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.print();
+}
+
+// ===============================================
+// STUDENT MANAGEMENT FUNCTIONS
+// ===============================================
+
+function showAddStudentModal() {
+    const modal = document.getElementById('add-student-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        // Focus on name input
+        const nameInput = document.getElementById('student-name');
+        if (nameInput) {
+            setTimeout(() => nameInput.focus(), 100);
+        }
+    }
+}
+
+function hideAddStudentModal() {
+    const modal = document.getElementById('add-student-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        // Reset form
+        const form = document.getElementById('add-student-form');
+        if (form) form.reset();
+        // Reset kas amount to default
+        const kasAmountInput = document.getElementById('student-kas-amount');
+        if (kasAmountInput) kasAmountInput.value = '10000';
+    }
+}
+
+function addStudent(event) {
+    event.preventDefault();
+    
+    try {
+        const name = document.getElementById('student-name').value.trim();
+        const number = parseInt(document.getElementById('student-number').value) || null;
+        const kasAmount = parseFloat(document.getElementById('student-kas-amount').value) || 10000;
+        const note = document.getElementById('student-note').value.trim();
+        
+        if (!name) {
+            showNotification('Nama siswa harus diisi', 'error');
+            return;
+        }
+        
+        // Check if student name already exists
+        const existingStudent = students.find(s => s.name.toLowerCase() === name.toLowerCase());
+        if (existingStudent) {
+            showNotification('Nama siswa sudah ada dalam daftar', 'error');
+            return;
+        }
+        
+        // Check if student number already exists (if provided)
+        if (number && students.find(s => s.number === number)) {
+            showNotification('Nomor absen sudah digunakan siswa lain', 'error');
+            return;
+        }
+        
+        const student = {
+            id: Date.now().toString(),
+            name: name,
+            number: number,
+            kasAmount: kasAmount,
+            note: note || '',
+            isPaid: false,
+            paidAmount: 0,
+            paidDate: null,
+            createdAt: new Date().toISOString(),
+            paymentHistory: []
+        };
+        
+        students.push(student);
+        saveStudentsData();
+        updateStudentsDisplay();
+        updateClassBookSummary(); // Update summary with student payment data
+        
+        hideAddStudentModal();
+        showNotification(`Siswa ${name} berhasil ditambahkan`, 'success');
+        
+    } catch (error) {
+        console.error('Error adding student:', error);
+        showNotification('Terjadi kesalahan saat menambah siswa', 'error');
+    }
+}
+
+function updateStudentsDisplay() {
+    updateStudentsSummary();
+    updateStudentsList();
+}
+
+function updateStudentsSummary() {
+    const totalStudents = students.length;
+    const paidStudents = students.filter(s => s.isPaid).length;
+    const unpaidStudents = totalStudents - paidStudents;
+    const totalCollected = students.reduce((sum, s) => sum + s.paidAmount, 0);
+    
+    const totalEl = document.getElementById('total-students');
+    const paidEl = document.getElementById('students-paid');
+    const unpaidEl = document.getElementById('students-unpaid');
+    const collectedEl = document.getElementById('total-collected');
+    
+    if (totalEl) totalEl.textContent = totalStudents.toString();
+    if (paidEl) paidEl.textContent = paidStudents.toString();
+    if (unpaidEl) unpaidEl.textContent = unpaidStudents.toString();
+    if (collectedEl) collectedEl.textContent = formatCurrency(totalCollected);
+}
+
+function updateStudentsList() {
+    const container = document.getElementById('students-list');
+    if (!container) return;
+    
+    if (students.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+                <i class="fas fa-users text-4xl mb-2"></i>
+                <p>Belum ada siswa dalam daftar</p>
+                <button onclick="showAddStudentModal()" class="mt-3 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200">
+                    <i class="fas fa-user-plus mr-2"></i>Tambah Siswa Pertama
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    // Sort students by number (if available) then by name
+    const sortedStudents = [...students].sort((a, b) => {
+        if (a.number && b.number) return a.number - b.number;
+        if (a.number && !b.number) return -1;
+        if (!a.number && b.number) return 1;
+        return a.name.localeCompare(b.name);
+    });
+    
+    container.innerHTML = sortedStudents.map(student => {
+        const statusClass = student.isPaid ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+        const statusIcon = student.isPaid ? 'fas fa-check-circle' : 'fas fa-times-circle';
+        const statusText = student.isPaid ? 'Lunas' : 'Belum Bayar';
+        
+        return `
+            <div class="flex items-center justify-between p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 ${!student.isPaid ? 'border-l-4 border-l-red-500' : 'border-l-4 border-l-green-500'}">
+                <div class="flex items-center space-x-4">
+                    <div class="flex-shrink-0">
+                        ${student.number ? `
+                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                                <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">${student.number}</span>
+                            </div>
+                        ` : `
+                            <div class="w-10 h-10 bg-gray-100 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-gray-600 dark:text-gray-400"></i>
+                            </div>
+                        `}
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-900 dark:text-white">${student.name}</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            Kas: ${formatCurrency(student.kasAmount)}
+                            ${student.note ? ` • ${student.note}` : ''}
+                        </p>
+                        ${student.isPaid && student.paidDate ? `
+                            <p class="text-xs text-green-600 dark:text-green-400">
+                                Dibayar: ${new Date(student.paidDate).toLocaleDateString('id-ID')}
+                            </p>
+                        ` : ''}
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="text-right">
+                        <div class="flex items-center ${statusClass}">
+                            <i class="${statusIcon} mr-1"></i>
+                            <span class="font-medium">${statusText}</span>
+                        </div>
+                        ${student.paidAmount > 0 ? `
+                            <div class="text-sm text-gray-600 dark:text-gray-400">
+                                ${formatCurrency(student.paidAmount)}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="flex space-x-1">
+                        ${!student.isPaid ? `
+                            <button onclick="markStudentPaid('${student.id}')" class="bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition duration-200" title="Tandai Lunas">
+                                <i class="fas fa-check text-sm"></i>
+                            </button>
+                            <button onclick="partialPayment('${student.id}')" class="bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 transition duration-200" title="Bayar Sebagian">
+                                <i class="fas fa-coins text-sm"></i>
+                            </button>
+                        ` : `
+                            <button onclick="markStudentUnpaid('${student.id}')" class="bg-orange-600 text-white p-2 rounded-md hover:bg-orange-700 transition duration-200" title="Batalkan Pembayaran">
+                                <i class="fas fa-undo text-sm"></i>
+                            </button>
+                        `}
+                        <button onclick="editStudent('${student.id}')" class="bg-gray-600 text-white p-2 rounded-md hover:bg-gray-700 transition duration-200" title="Edit Siswa">
+                            <i class="fas fa-edit text-sm"></i>
+                        </button>
+                        <button onclick="deleteStudent('${student.id}')" class="bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition duration-200" title="Hapus Siswa">
+                            <i class="fas fa-trash text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function markStudentPaid(studentId) {
+    const student = students.find(s => s.id === studentId);
+    if (!student) return;
+    
+    const currentPreset = document.getElementById('kas-amount-preset').value;
+    const amount = currentPreset ? parseFloat(currentPreset) : student.kasAmount;
+    
+    if (confirm(`Tandai ${student.name} sebagai lunas dengan pembayaran ${formatCurrency(amount)}?`)) {
+        student.isPaid = true;
+        student.paidAmount = amount;
+        student.paidDate = new Date().toISOString();
+        
+        // Add to payment history
+        student.paymentHistory.push({
+            id: Date.now().toString(),
+            amount: amount,
+            date: new Date().toISOString(),
+            type: 'full',
+            note: 'Pembayaran penuh'
+        });
+        
+        // Add transaction to class book
+        addKasTransaction(student.name, amount);
+        
+        saveStudentsData();
+        updateStudentsDisplay();
+        updateClassBookDisplay();
+        
+        showNotification(`${student.name} berhasil ditandai lunas`, 'success');
+    }
+}
+
+function markStudentUnpaid(studentId) {
+    const student = students.find(s => s.id === studentId);
+    if (!student) return;
+    
+    if (confirm(`Batalkan pembayaran ${student.name}? Data pembayaran akan dihapus.`)) {
+        student.isPaid = false;
+        student.paidAmount = 0;
+        student.paidDate = null;
+        student.paymentHistory = [];
+        
+        saveStudentsData();
+        updateStudentsDisplay();
+        
+        showNotification(`Pembayaran ${student.name} berhasil dibatalkan`, 'success');
+    }
+}
+
+function partialPayment(studentId) {
+    const student = students.find(s => s.id === studentId);
+    if (!student) return;
+    
+    const amount = parseFloat(prompt(`Masukkan jumlah pembayaran untuk ${student.name}:\n(Kas: ${formatCurrency(student.kasAmount)})`));
+    
+    if (!amount || amount <= 0) {
+        showNotification('Jumlah pembayaran tidak valid', 'error');
+        return;
+    }
+    
+    if (amount > student.kasAmount) {
+        showNotification('Jumlah pembayaran melebihi kas yang ditentukan', 'error');
+        return;
+    }
+    
+    student.paidAmount += amount;
+    
+    // Check if now fully paid
+    if (student.paidAmount >= student.kasAmount) {
+        student.isPaid = true;
+        student.paidDate = new Date().toISOString();
+    }
+    
+    // Add to payment history
+    student.paymentHistory.push({
+        id: Date.now().toString(),
+        amount: amount,
+        date: new Date().toISOString(),
+        type: 'partial',
+        note: `Pembayaran sebagian (${formatCurrency(amount)})`
+    });
+    
+    // Add transaction to class book
+    addKasTransaction(student.name, amount);
+    
+    saveStudentsData();
+    updateStudentsDisplay();
+    updateClassBookDisplay();
+    
+    showNotification(`Pembayaran ${formatCurrency(amount)} dari ${student.name} berhasil dicatat`, 'success');
+}
+
+function addKasTransaction(studentName, amount) {
+    // Find the "Iuran Kelas" category
+    const kasCategory = bookCategories.class.income.find(cat => cat.id === 'iuran-kelas');
+    if (!kasCategory) return;
+    
+    const transaction = {
+        id: Date.now().toString(),
+        type: 'income',
+        categoryId: kasCategory.id,
+        categoryName: kasCategory.name,
+        icon: kasCategory.icon,
+        color: kasCategory.color,
+        amount: amount,
+        date: new Date().toISOString().split('T')[0],
+        description: `Kas dari ${studentName}`,
+        formattedDate: new Date().toLocaleDateString('id-ID'),
+        createdAt: new Date().toISOString()
+    };
+    
+    classBookTransactions.unshift(transaction);
+    saveBookData();
+}
+
+function deleteStudent(studentId) {
+    const student = students.find(s => s.id === studentId);
+    if (!student) return;
+    
+    if (confirm(`Hapus ${student.name} dari daftar siswa? Data pembayaran juga akan terhapus.`)) {
+        students = students.filter(s => s.id !== studentId);
+        saveStudentsData();
+        updateStudentsDisplay();
+        showNotification(`${student.name} berhasil dihapus dari daftar`, 'success');
+    }
+}
+
+function editStudent(studentId) {
+    const student = students.find(s => s.id === studentId);
+    if (!student) return;
+    
+    // Simple edit with prompts (can be enhanced with modal later)
+    const newName = prompt('Nama siswa:', student.name);
+    if (!newName || newName.trim() === '') return;
+    
+    const newNumber = prompt('Nomor absen (kosongkan jika tidak ada):', student.number || '');
+    const newKasAmount = parseFloat(prompt('Nominal kas:', student.kasAmount));
+    const newNote = prompt('Keterangan:', student.note || '');
+    
+    if (newName.trim() !== student.name) {
+        // Check if new name already exists
+        const existingStudent = students.find(s => s.id !== studentId && s.name.toLowerCase() === newName.trim().toLowerCase());
+        if (existingStudent) {
+            showNotification('Nama siswa sudah ada dalam daftar', 'error');
+            return;
+        }
+    }
+    
+    student.name = newName.trim();
+    student.number = newNumber ? parseInt(newNumber) : null;
+    student.kasAmount = newKasAmount || student.kasAmount;
+    student.note = newNote || '';
+    
+    saveStudentsData();
+    updateStudentsDisplay();
+    showNotification(`Data ${student.name} berhasil diperbarui`, 'success');
+}
+
+function markAllPaid() {
+    const currentPreset = document.getElementById('kas-amount-preset').value;
+    if (!currentPreset) {
+        showNotification('Pilih nominal kas terlebih dahulu', 'error');
+        return;
+    }
+    
+    const amount = parseFloat(currentPreset);
+    const unpaidStudents = students.filter(s => !s.isPaid);
+    
+    if (unpaidStudents.length === 0) {
+        showNotification('Semua siswa sudah lunas', 'info');
+        return;
+    }
+    
+    if (confirm(`Tandai ${unpaidStudents.length} siswa sebagai lunas dengan nominal ${formatCurrency(amount)}?`)) {
+        unpaidStudents.forEach(student => {
+            student.isPaid = true;
+            student.paidAmount = amount;
+            student.paidDate = new Date().toISOString();
+            
+            // Add to payment history
+            student.paymentHistory.push({
+                id: Date.now().toString(),
+                amount: amount,
+                date: new Date().toISOString(),
+                type: 'bulk',
+                note: 'Pembayaran massal'
+            });
+            
+            // Add transaction to class book
+            addKasTransaction(student.name, amount);
+        });
+        
+        saveStudentsData();
+        updateStudentsDisplay();
+        updateClassBookDisplay();
+        
+        showNotification(`${unpaidStudents.length} siswa berhasil ditandai lunas`, 'success');
+    }
+}
+
+function resetAllPayments() {
+    const paidStudents = students.filter(s => s.isPaid);
+    
+    if (paidStudents.length === 0) {
+        showNotification('Tidak ada pembayaran untuk direset', 'info');
+        return;
+    }
+    
+    if (confirm(`Reset pembayaran ${paidStudents.length} siswa? Semua data pembayaran akan dihapus.`)) {
+        students.forEach(student => {
+            student.isPaid = false;
+            student.paidAmount = 0;
+            student.paidDate = null;
+            student.paymentHistory = [];
+        });
+        
+        saveStudentsData();
+        updateStudentsDisplay();
+        
+        showNotification('Semua pembayaran berhasil direset', 'success');
+    }
+}
+
+function generatePaymentReport() {
+    if (students.length === 0) {
+        showNotification('Tidak ada data siswa untuk membuat laporan', 'warning');
+        return;
+    }
+    
+    const totalStudents = students.length;
+    const paidStudents = students.filter(s => s.isPaid).length;
+    const unpaidStudents = totalStudents - paidStudents;
+    const totalCollected = students.reduce((sum, s) => sum + s.paidAmount, 0);
+    const expectedTotal = students.reduce((sum, s) => sum + s.kasAmount, 0);
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Laporan Pembayaran Kas Kelas</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+                h1 { color: #2563eb; text-align: center; border-bottom: 2px solid #2563eb; padding-bottom: 10px; }
+                h2 { color: #374151; margin-top: 30px; }
+                .summary { background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+                .summary-item { text-align: center; padding: 10px; background: white; border-radius: 6px; }
+                .summary-item h3 { margin: 0; font-size: 24px; }
+                .summary-item p { margin: 5px 0 0 0; color: #6b7280; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th, td { border: 1px solid #d1d5db; padding: 12px; text-align: left; }
+                th { background: #f9fafb; font-weight: 600; }
+                .paid { color: #059669; font-weight: 600; }
+                .unpaid { color: #dc2626; font-weight: 600; }
+                .partial { color: #d97706; font-weight: 600; }
+                @media print { body { margin: 0; } }
+            </style>
+        </head>
+        <body>
+            <h1>📊 Laporan Pembayaran Kas Kelas</h1>
+            <p><strong>Tanggal Laporan:</strong> ${new Date().toLocaleDateString('id-ID')}</p>
+            
+            <div class="summary">
+                <h2>Ringkasan Pembayaran</h2>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <h3>${totalStudents}</h3>
+                        <p>Total Siswa</p>
+                    </div>
+                    <div class="summary-item">
+                        <h3 class="paid">${paidStudents}</h3>
+                        <p>Sudah Bayar</p>
+                    </div>
+                    <div class="summary-item">
+                        <h3 class="unpaid">${unpaidStudents}</h3>
+                        <p>Belum Bayar</p>
+                    </div>
+                    <div class="summary-item">
+                        <h3>${formatCurrency(totalCollected)}</h3>
+                        <p>Kas Terkumpul</p>
+                    </div>
+                    <div class="summary-item">
+                        <h3>${formatCurrency(expectedTotal)}</h3>
+                        <p>Target Total</p>
+                    </div>
+                    <div class="summary-item">
+                        <h3>${Math.round((totalCollected / expectedTotal) * 100)}%</h3>
+                        <p>Persentase Terkumpul</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h2>Daftar Detail Siswa</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Siswa</th>
+                        <th>Absen</th>
+                        <th>Kas</th>
+                        <th>Dibayar</th>
+                        <th>Status</th>
+                        <th>Tanggal Bayar</th>
+                        <th>Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${students.map((student, index) => {
+                        const status = student.isPaid ? 'Lunas' : 
+                                     student.paidAmount > 0 ? 'Sebagian' : 'Belum Bayar';
+                        const statusClass = student.isPaid ? 'paid' : 
+                                          student.paidAmount > 0 ? 'partial' : 'unpaid';
+                        
+                        return `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${student.name}</td>
+                                <td>${student.number || '-'}</td>
+                                <td>${formatCurrency(student.kasAmount)}</td>
+                                <td>${formatCurrency(student.paidAmount)}</td>
+                                <td class="${statusClass}">${status}</td>
+                                <td>${student.paidDate ? new Date(student.paidDate).toLocaleDateString('id-ID') : '-'}</td>
+                                <td>${student.note || '-'}</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+            
+            ${unpaidStudents > 0 ? `
+                <h2>Daftar Siswa Belum Bayar</h2>
+                <ul>
+                    ${students.filter(s => !s.isPaid).map(s => `
+                        <li>${s.name} ${s.number ? `(${s.number})` : ''} - ${formatCurrency(s.kasAmount)}</li>
+                    `).join('')}
+                </ul>
+            ` : ''}
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.print();
+}
+
+function saveStudentsData() {
+    try {
+        localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(students));
+    } catch (error) {
+        console.error('Error saving students data:', error);
+        throw error;
+    }
+}
+
+function loadStudentsData() {
+    try {
+        const studentsData = localStorage.getItem(STORAGE_KEYS.STUDENTS);
+        students = studentsData ? JSON.parse(studentsData) : [];
+        
+        console.log('Students data loaded:', students.length);
+    } catch (error) {
+        console.error('Error loading students data:', error);
+        students = [];
+    }
+}
+
+// ===============================================
+// BUSINESS BOOK FUNCTIONS
+// ===============================================
+
+function initializeBusinessBook() {
+    // Set today's date
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('business-date');
+    if (dateInput) {
+        dateInput.value = today;
+    }
+    
+    // Populate categories
+    populateBusinessCategories();
+    updateBusinessBookDisplay();
+}
+
+function populateBusinessCategories() {
+    const typeSelect = document.getElementById('business-type');
+    const categorySelect = document.getElementById('business-category');
+    
+    if (!typeSelect || !categorySelect) return;
+    
+    typeSelect.addEventListener('change', function() {
+        const selectedType = this.value;
+        const categories = bookCategories.business[selectedType] || [];
+        
+        categorySelect.innerHTML = '<option value="">Pilih Kategori</option>';
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            option.dataset.icon = category.icon;
+            option.dataset.color = category.color;
+            categorySelect.appendChild(option);
+        });
+    });
+    
+    // Trigger initial population
+    typeSelect.dispatchEvent(new Event('change'));
+}
+
+function addBusinessTransaction(event) {
+    event.preventDefault();
+    
+    try {
+        const type = document.getElementById('business-type').value;
+        const categoryId = document.getElementById('business-category').value;
+        const amount = parseFloat(document.getElementById('business-amount').value);
+        const date = document.getElementById('business-date').value;
+        const description = document.getElementById('business-description').value.trim();
+        
+        if (!type || !categoryId || !amount || amount <= 0 || !date) {
+            showNotification('Mohon lengkapi semua field yang wajib diisi', 'error');
+            return;
+        }
+        
+        // Find category details
+        const categories = bookCategories.business[type] || [];
+        const category = categories.find(cat => cat.id === categoryId);
+        
+        if (!category) {
+            showNotification('Kategori tidak ditemukan', 'error');
+            return;
+        }
+        
+        const transaction = {
+            id: Date.now().toString(),
+            type: type,
+            categoryId: categoryId,
+            categoryName: category.name,
+            icon: category.icon,
+            color: category.color,
+            amount: amount,
+            date: date,
+            description: description || '',
+            formattedDate: new Date(date).toLocaleDateString('id-ID'),
+            createdAt: new Date().toISOString()
+        };
+        
+        businessBookTransactions.unshift(transaction);
+        saveBookData();
+        updateBusinessBookDisplay();
+        
+        // Reset form
+        document.getElementById('business-amount').value = '';
+        document.getElementById('business-description').value = '';
+        
+        showNotification(`Transaksi bisnis berhasil ditambahkan: ${formatCurrency(amount)}`, 'success');
+        
+    } catch (error) {
+        console.error('Error adding business transaction:', error);
+        showNotification('Terjadi kesalahan saat menambah transaksi', 'error');
+    }
+}
+
+function updateBusinessBookDisplay() {
+    updateBusinessBookSummary();
+    updateBusinessBookTransactionsList();
+}
+
+function updateBusinessBookSummary() {
+    const totalIncome = businessBookTransactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    const totalExpense = businessBookTransactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    const profitLoss = totalIncome - totalExpense;
+    const margin = totalIncome > 0 ? ((profitLoss / totalIncome) * 100) : 0;
+    
+    const incomeEl = document.getElementById('business-total-income');
+    const expenseEl = document.getElementById('business-total-expense');
+    const profitLossEl = document.getElementById('business-profit-loss');
+    const marginEl = document.getElementById('business-margin');
+    
+    if (incomeEl) incomeEl.textContent = formatCurrency(totalIncome);
+    if (expenseEl) expenseEl.textContent = formatCurrency(totalExpense);
+    if (profitLossEl) {
+        profitLossEl.textContent = formatCurrency(profitLoss);
+        profitLossEl.className = `text-xl font-bold ${profitLoss >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'}`;
+    }
+    if (marginEl) {
+        marginEl.textContent = `${margin.toFixed(1)}%`;
+        marginEl.className = `text-xl font-bold ${margin >= 0 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'}`;
+    }
+}
+
+function updateBusinessBookTransactionsList() {
+    const container = document.getElementById('business-transactions-list');
+    if (!container) return;
+    
+    if (businessBookTransactions.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+                <i class="fas fa-briefcase text-4xl mb-2"></i>
+                <p>Belum ada transaksi bisnis</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = businessBookTransactions.map(transaction => `
+        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+            <div class="flex items-center space-x-4">
+                <div class="p-2 rounded-lg" style="background-color: ${transaction.color}20">
+                    <i class="${transaction.icon}" style="color: ${transaction.color}"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900 dark:text-white">${transaction.categoryName}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">${transaction.description}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-500">${transaction.formattedDate}</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="font-semibold ${transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">
+                    ${transaction.type === 'income' ? '+' : '-'}${formatCurrency(transaction.amount)}
+                </p>
+                <button onclick="deleteBusinessTransaction('${transaction.id}')" class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1 mt-1">
+                    <i class="fas fa-trash text-xs"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function deleteBusinessTransaction(id) {
+    if (confirm('Hapus transaksi ini dari buku bisnis?')) {
+        businessBookTransactions = businessBookTransactions.filter(t => t.id !== id);
+        saveBookData();
+        updateBusinessBookDisplay();
+        showNotification('Transaksi berhasil dihapus', 'success');
+    }
+}
+
+function exportBusinessBook() {
+    if (businessBookTransactions.length === 0) {
+        showNotification('Tidak ada data untuk diekspor', 'warning');
+        return;
+    }
+    
+    // Create CSV content
+    const headers = ['Tanggal', 'Jenis', 'Kategori', 'Keterangan', 'Jumlah'];
+    const csvContent = [
+        headers.join(','),
+        ...businessBookTransactions.map(t => [
+            t.formattedDate,
+            t.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
+            t.categoryName,
+            `"${t.description}"`,
+            t.amount
+        ].join(','))
+    ].join('\n');
+    
+    // Download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `buku-bisnis-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    showNotification('Data bisnis berhasil diekspor', 'success');
+}
+
+function generateProfitLossReport() {
+    if (businessBookTransactions.length === 0) {
+        showNotification('Tidak ada data untuk membuat laporan', 'warning');
+        return;
+    }
+    
+    const totalIncome = businessBookTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+    const totalExpense = businessBookTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    const profitLoss = totalIncome - totalExpense;
+    
+    // Group by category
+    const incomeByCategory = {};
+    const expenseByCategory = {};
+    
+    businessBookTransactions.forEach(t => {
+        if (t.type === 'income') {
+            incomeByCategory[t.categoryName] = (incomeByCategory[t.categoryName] || 0) + t.amount;
+        } else {
+            expenseByCategory[t.categoryName] = (expenseByCategory[t.categoryName] || 0) + t.amount;
+        }
+    });
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Laporan Laba Rugi</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+                .income { color: green; }
+                .expense { color: red; }
+                .total { font-weight: bold; border-top: 2px solid #333; }
+                .profit { color: ${profitLoss >= 0 ? 'green' : 'red'}; font-weight: bold; font-size: 18px; }
+            </style>
+        </head>
+        <body>
+            <h1>💼 Laporan Laba Rugi</h1>
+            <p>Periode: ${businessBookTransactions[businessBookTransactions.length - 1]?.formattedDate} - ${businessBookTransactions[0]?.formattedDate}</p>
+            <p>Dicetak pada: ${new Date().toLocaleDateString('id-ID')}</p>
+            
+            <h2>PENDAPATAN</h2>
+            <table>
+                ${Object.entries(incomeByCategory).map(([category, amount]) => `
+                    <tr>
+                        <td>${category}</td>
+                        <td class="income">${formatCurrency(amount)}</td>
+                    </tr>
+                `).join('')}
+                <tr class="total">
+                    <td>TOTAL PENDAPATAN</td>
+                    <td class="income">${formatCurrency(totalIncome)}</td>
+                </tr>
+            </table>
+            
+            <h2>BIAYA OPERASIONAL</h2>
+            <table>
+                ${Object.entries(expenseByCategory).map(([category, amount]) => `
+                    <tr>
+                        <td>${category}</td>
+                        <td class="expense">${formatCurrency(amount)}</td>
+                    </tr>
+                `).join('')}
+                <tr class="total">
+                    <td>TOTAL BIAYA</td>
+                    <td class="expense">${formatCurrency(totalExpense)}</td>
+                </tr>
+            </table>
+            
+            <h2>HASIL USAHA</h2>
+            <table>
+                <tr>
+                    <td>Total Pendapatan</td>
+                    <td class="income">${formatCurrency(totalIncome)}</td>
+                </tr>
+                <tr>
+                    <td>Total Biaya</td>
+                    <td class="expense">${formatCurrency(totalExpense)}</td>
+                </tr>
+                <tr class="total">
+                    <td>${profitLoss >= 0 ? 'LABA BERSIH' : 'RUGI BERSIH'}</td>
+                    <td class="profit">${formatCurrency(Math.abs(profitLoss))}</td>
+                </tr>
+            </table>
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.print();
+}
+
+// ===============================================
+// DEBT BOOK FUNCTIONS
+// ===============================================
+
+function initializeDebtBook() {
+    // Set tomorrow's date as default due date
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 30); // 30 days from now
+    const dueDateInput = document.getElementById('debt-due-date');
+    if (dueDateInput) {
+        dueDateInput.value = tomorrow.toISOString().split('T')[0];
+    }
+    
+    updateDebtBookDisplay();
+}
+
+function addDebtTransaction(event) {
+    event.preventDefault();
+    
+    try {
+        const type = document.getElementById('debt-type').value;
+        const person = document.getElementById('debt-person').value.trim();
+        const amount = parseFloat(document.getElementById('debt-amount').value);
+        const dueDate = document.getElementById('debt-due-date').value;
+        const description = document.getElementById('debt-description').value.trim();
+        
+        if (!type || !person || !amount || amount <= 0) {
+            showNotification('Mohon lengkapi semua field yang wajib diisi', 'error');
+            return;
+        }
+        
+        const transaction = {
+            id: Date.now().toString(),
+            type: type, // 'debt' or 'credit'
+            person: person,
+            amount: amount,
+            dueDate: dueDate || null,
+            description: description || '',
+            status: 'active', // 'active', 'paid', 'partial'
+            paidAmount: 0,
+            createdAt: new Date().toISOString(),
+            formattedDate: new Date().toLocaleDateString('id-ID'),
+            formattedDueDate: dueDate ? new Date(dueDate).toLocaleDateString('id-ID') : null,
+            payments: [] // History of payments
+        };
+        
+        debtBookTransactions.unshift(transaction);
+        saveBookData();
+        updateDebtBookDisplay();
+        
+        // Reset form  
+        document.getElementById('debt-person').value = '';
+        document.getElementById('debt-amount').value = '';
+        document.getElementById('debt-description').value = '';
+        
+        const message = type === 'debt' ? 
+            `Hutang kepada ${person} sebesar ${formatCurrency(amount)} berhasil dicatat` :
+            `Piutang dari ${person} sebesar ${formatCurrency(amount)} berhasil dicatat`;
+        
+        showNotification(message, 'success');
+        
+    } catch (error) {
+        console.error('Error adding debt transaction:', error);
+        showNotification('Terjadi kesalahan saat menambah catatan', 'error');
+    }
+}
+
+function updateDebtBookDisplay() {
+    updateDebtBookSummary();
+    updateDebtBookTransactionsList();
+}
+
+function updateDebtBookSummary() {
+    const totalDebt = debtBookTransactions
+        .filter(t => t.type === 'debt' && t.status === 'active')
+        .reduce((sum, t) => sum + (t.amount - t.paidAmount), 0);
+    
+    const totalCredit = debtBookTransactions
+        .filter(t => t.type === 'credit' && t.status === 'active')
+        .reduce((sum, t) => sum + (t.amount - t.paidAmount), 0);
+    
+    // Count due soon (within 7 days)
+    const today = new Date();
+    const sevenDaysFromNow = new Date(today.getTime() + (7 * 24 * 60 * 60 * 1000));
+    
+    const dueSoonCount = debtBookTransactions.filter(t => {
+        if (!t.dueDate || t.status !== 'active') return false;
+        const dueDate = new Date(t.dueDate);
+        return dueDate <= sevenDaysFromNow && dueDate >= today;
+    }).length;
+    
+    const debtEl = document.getElementById('total-debt');
+    const creditEl = document.getElementById('total-credit');
+    const dueSoonEl = document.getElementById('due-soon-count');
+    
+    if (debtEl) debtEl.textContent = formatCurrency(totalDebt);
+    if (creditEl) creditEl.textContent = formatCurrency(totalCredit);
+    if (dueSoonEl) {
+        dueSoonEl.textContent = dueSoonCount.toString();
+        dueSoonEl.className = `text-xl font-bold ${dueSoonCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400'}`;
+    }
+}
+
+function updateDebtBookTransactionsList() {
+    const container = document.getElementById('debt-transactions-list');
+    if (!container) return;
+    
+    if (debtBookTransactions.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+                <i class="fas fa-file-contract text-4xl mb-2"></i>
+                <p>Belum ada catatan hutang/piutang</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = debtBookTransactions.map(transaction => {
+        const remainingAmount = transaction.amount - transaction.paidAmount;
+        const statusColor = transaction.status === 'paid' ? 'green' : 
+                           transaction.status === 'partial' ? 'yellow' : 'red';
+        const statusText = transaction.status === 'paid' ? 'Lunas' :
+                          transaction.status === 'partial' ? 'Sebagian' : 'Belum Lunas';
+        
+        const isOverdue = transaction.dueDate && new Date(transaction.dueDate) < new Date() && transaction.status === 'active';
+        
+        return `
+            <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 ${isOverdue ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''}">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 rounded-lg ${transaction.type === 'debt' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-green-100 dark:bg-green-900/30'}">
+                            <i class="fas ${transaction.type === 'debt' ? 'fa-hand-holding-usd text-red-600 dark:text-red-400' : 'fa-coins text-green-600 dark:text-green-400'}"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900 dark:text-white">
+                                ${transaction.type === 'debt' ? 'Hutang ke' : 'Piutang dari'} ${transaction.person}
+                            </p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">${transaction.description}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-semibold ${transaction.type === 'debt' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}">
+                            ${formatCurrency(remainingAmount)}
+                        </p>
+                        <span class="text-xs px-2 py-1 rounded-full" style="background-color: ${statusColor}20; color: ${statusColor}">
+                            ${statusText}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-3">
+                    <span>Dibuat: ${transaction.formattedDate}</span>
+                    ${transaction.dueDate ? `<span class="${isOverdue ? 'text-red-600 font-semibold' : ''}">Jatuh tempo: ${transaction.formattedDueDate}</span>` : ''}
+                </div>
+                
+                <div class="flex space-x-2">
+                    ${transaction.status === 'active' ? `
+                        <button onclick="makePayment('${transaction.id}')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                            <i class="fas fa-money-bill mr-1"></i>Bayar
+                        </button>
+                        <button onclick="markAsPaid('${transaction.id}')" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
+                            <i class="fas fa-check mr-1"></i>Lunas
+                        </button>
+                    ` : ''}
+                    <button onclick="viewPaymentHistory('${transaction.id}')" class="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700">
+                        <i class="fas fa-history mr-1"></i>History
+                    </button>
+                    <button onclick="deleteDebtTransaction('${transaction.id}')" class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">
+                        <i class="fas fa-trash mr-1"></i>Hapus
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function makePayment(id) {
+    const transaction = debtBookTransactions.find(t => t.id === id);
+    if (!transaction) return;
+    
+    const remainingAmount = transaction.amount - transaction.paidAmount;
+    const paymentAmount = parseFloat(prompt(`Masukkan jumlah pembayaran (Sisa: ${formatCurrency(remainingAmount)}):`));
+    
+    if (!paymentAmount || paymentAmount <= 0) {
+        showNotification('Jumlah pembayaran tidak valid', 'error');
+        return;
+    }
+    
+    if (paymentAmount > remainingAmount) {
+        showNotification('Jumlah pembayaran melebihi sisa hutang/piutang', 'error');
+        return;
+    }
+    
+    // Add payment to history
+    const payment = {
+        id: Date.now().toString(),
+        amount: paymentAmount,
+        date: new Date().toISOString(),
+        formattedDate: new Date().toLocaleDateString('id-ID'),
+        note: ''
+    };
+    
+    transaction.payments.push(payment);
+    transaction.paidAmount += paymentAmount;
+    
+    // Update status
+    if (transaction.paidAmount >= transaction.amount) {
+        transaction.status = 'paid';
+    } else if (transaction.paidAmount > 0) {
+        transaction.status = 'partial';
+    }
+    
+    saveBookData();
+    updateDebtBookDisplay();
+    
+    showNotification(`Pembayaran ${formatCurrency(paymentAmount)} berhasil dicatat`, 'success');
+}
+
+function markAsPaid(id) {
+    const transaction = debtBookTransactions.find(t => t.id === id);
+    if (!transaction) return;
+    
+    if (confirm(`Tandai sebagai lunas? Sisa: ${formatCurrency(transaction.amount - transaction.paidAmount)}`)) {
+        const remainingAmount = transaction.amount - transaction.paidAmount;
+        
+        if (remainingAmount > 0) {
+            // Add final payment
+            const payment = {
+                id: Date.now().toString(),
+                amount: remainingAmount,
+                date: new Date().toISOString(),
+                formattedDate: new Date().toLocaleDateString('id-ID'),
+                note: 'Pelunasan'
+            };
+            
+            transaction.payments.push(payment);
+            transaction.paidAmount = transaction.amount;
+        }
+        
+        transaction.status = 'paid';
+        
+        saveBookData();
+        updateDebtBookDisplay();
+        
+        showNotification('Hutang/piutang telah ditandai sebagai lunas', 'success');
+    }
+}
+
+function viewPaymentHistory(id) {
+    const transaction = debtBookTransactions.find(t => t.id === id);
+    if (!transaction) return;
+    
+    const historyWindow = window.open('', '_blank', 'width=600,height=400');
+    historyWindow.document.write(`
+        <html>
+        <head>
+            <title>History Pembayaran</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+            </style>
+        </head>
+        <body>
+            <h2>History Pembayaran</h2>
+            <p><strong>${transaction.type === 'debt' ? 'Hutang ke' : 'Piutang dari'}:</strong> ${transaction.person}</p>
+            <p><strong>Total:</strong> ${formatCurrency(transaction.amount)}</p>
+            <p><strong>Sudah dibayar:</strong> ${formatCurrency(transaction.paidAmount)}</p>
+            <p><strong>Sisa:</strong> ${formatCurrency(transaction.amount - transaction.paidAmount)}</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Jumlah</th>
+                        <th>Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${transaction.payments.map(payment => `
+                        <tr>
+                            <td>${payment.formattedDate}</td>
+                            <td>${formatCurrency(payment.amount)}</td>
+                            <td>${payment.note || '-'}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </body>
+        </html>
+    `);
+    
+    historyWindow.document.close();
+}
+
+function deleteDebtTransaction(id) {
+    if (confirm('Hapus catatan hutang/piutang ini?')) {
+        debtBookTransactions = debtBookTransactions.filter(t => t.id !== id);
+        saveBookData();
+        updateDebtBookDisplay();
+        showNotification('Catatan berhasil dihapus', 'success');
+    }
+}
+
+function exportDebtBook() {
+    if (debtBookTransactions.length === 0) {
+        showNotification('Tidak ada data untuk diekspor', 'warning');
+        return;
+    }
+    
+    // Create CSV content
+    const headers = ['Jenis', 'Nama', 'Jumlah', 'Sudah Dibayar', 'Sisa', 'Status', 'Jatuh Tempo', 'Keterangan'];
+    const csvContent = [
+        headers.join(','),
+        ...debtBookTransactions.map(t => [
+            t.type === 'debt' ? 'Hutang' : 'Piutang',
+            `"${t.person}"`,
+            t.amount,
+            t.paidAmount,
+            t.amount - t.paidAmount,
+            t.status === 'paid' ? 'Lunas' : t.status === 'partial' ? 'Sebagian' : 'Belum Lunas',
+            t.formattedDueDate || '',
+            `"${t.description}"`
+        ].join(','))
+    ].join('\n');
+    
+    // Download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `buku-hutang-piutang-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    showNotification('Data hutang/piutang berhasil diekspor', 'success');
+}
+
+function checkDueDates() {
+    const today = new Date();
+    const dueSoon = debtBookTransactions.filter(t => {
+        if (!t.dueDate || t.status !== 'active') return false;
+        const dueDate = new Date(t.dueDate);
+        const diffTime = dueDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays <= 7 && diffDays >= 0;
+    });
+    
+    const overdue = debtBookTransactions.filter(t => {
+        if (!t.dueDate || t.status !== 'active') return false;
+        return new Date(t.dueDate) < today;
+    });
+    
+    let message = '';
+    if (dueSoon.length > 0) {
+        message += `📅 ${dueSoon.length} hutang/piutang akan jatuh tempo dalam 7 hari\n`;
+        dueSoon.forEach(t => {
+            const daysLeft = Math.ceil((new Date(t.dueDate) - today) / (1000 * 60 * 60 * 24));
+            message += `• ${t.person}: ${formatCurrency(t.amount - t.paidAmount)} (${daysLeft} hari lagi)\n`;
+        });
+    }
+    
+    if (overdue.length > 0) {
+        message += `\n⚠️ ${overdue.length} hutang/piutang sudah jatuh tempo\n`;
+        overdue.forEach(t => {
+            const daysOverdue = Math.floor((today - new Date(t.dueDate)) / (1000 * 60 * 60 * 24));
+            message += `• ${t.person}: ${formatCurrency(t.amount - t.paidAmount)} (terlambat ${daysOverdue} hari)\n`;
+        });
+    }
+    
+    if (message) {
+        alert(message);
+    } else {
+        showNotification('Tidak ada hutang/piutang yang akan jatuh tempo', 'success');
+    }
+}
+
+// ===============================================
+// BOOK DATA MANAGEMENT
+// ===============================================
+
+function saveBookData() {
+    try {
+        localStorage.setItem(STORAGE_KEYS.CLASS_BOOK, JSON.stringify(classBookTransactions));
+        localStorage.setItem(STORAGE_KEYS.BUSINESS_BOOK, JSON.stringify(businessBookTransactions));
+        localStorage.setItem(STORAGE_KEYS.DEBT_BOOK, JSON.stringify(debtBookTransactions));
+    } catch (error) {
+        console.error('Error saving book data:', error);
+        throw error;
+    }
+}
+
+function loadBookData() {
+    try {
+        const classData = localStorage.getItem(STORAGE_KEYS.CLASS_BOOK);
+        const businessData = localStorage.getItem(STORAGE_KEYS.BUSINESS_BOOK);
+        const debtData = localStorage.getItem(STORAGE_KEYS.DEBT_BOOK);
+        
+        classBookTransactions = classData ? JSON.parse(classData) : [];
+        businessBookTransactions = businessData ? JSON.parse(businessData) : [];
+        debtBookTransactions = debtData ? JSON.parse(debtData) : [];
+        
+        console.log('Book data loaded:', {
+            class: classBookTransactions.length,
+            business: businessBookTransactions.length,
+            debt: debtBookTransactions.length
+        });
+    } catch (error) {
+        console.error('Error loading book data:', error);
+        classBookTransactions = [];
+        businessBookTransactions = [];
+        debtBookTransactions = [];
+    }
+}
+
 // Initialize application
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing app...');
@@ -444,6 +2119,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Apply custom categories and statistics settings
             updateCategorySelects();
             applyStatisticsSettings();
+            
+            // Initialize Books components
+            loadBookData();
+            initializeClassBook();
+            initializeBusinessBook();
+            initializeDebtBook();
             
             console.log('All components updated successfully');
             
@@ -764,6 +2445,14 @@ function showSection(sectionName) {
                 updateTransactionsList();
                 updateFilterCategories();
             }, 100);
+        } else if (sectionName === 'books') {
+            // Initialize books section and default to class book tab
+            setTimeout(() => {
+                showBookTab('class');
+                initializeClassBook();
+                initializeBusinessBook();
+                initializeDebtBook();
+            }, 100);
         }
         
         // Close mobile menu if open
@@ -815,18 +2504,35 @@ function hideMobileMenu() {
     }
 }
 
-// Quick Add Modal Functions
-function showQuickAddModal() {
-    try {
-        // Open add transaction modal directly
-        const modal = document.getElementById('quick-add-modal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            resetQuickAddModal();
-        }
-    } catch (error) {
-        console.error('Error showing quick add modal:', error);
+// Center Button Functions - Direct to Transactions with Slide Up Animation
+function showTransactionsWithAnimation() {
+    // Add slide-up animation class
+    const transactionSection = document.getElementById('transactions-section');
+    if (transactionSection) {
+        // First show the section
+        showSection('transactions');
+        
+        // Add slide-up animation
+        transactionSection.style.transform = 'translateY(100%)';
+        transactionSection.style.transition = 'transform 0.3s ease-out';
+        
+        // Trigger animation
+        setTimeout(() => {
+            transactionSection.style.transform = 'translateY(0)';
+        }, 10);
+        
+        // Clean up after animation
+        setTimeout(() => {
+            transactionSection.style.transform = '';
+            transactionSection.style.transition = '';
+        }, 350);
     }
+}
+
+// Quick Add Modal Functions (kept for backward compatibility but not used by center button)
+function showQuickAddModal() {
+    // Redirect to transactions section instead
+    showTransactionsWithAnimation();
 }
 
 function hideQuickAddModal() {
@@ -1775,45 +3481,65 @@ function contributeToGoal(goalId) {
         return;
     }
     
-    // Check if user has enough balance
-    const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-    const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-    const totalSavingsAmount = savings.reduce((sum, s) => sum + s.amount, 0);
-    const currentBalance = totalIncome - totalExpense - totalSavingsAmount;
+    // Show wallet selection modal
+    showWalletSelectionModal(amount, 'goal-contribution', goalId);
+}
+
+function processGoalContribution(goalId, amount, selectedWallet) {
+    const goal = goals.find(g => g.id === goalId);
+    const wallet = wallets.find(w => w.id === selectedWallet);
     
-    if (amount > currentBalance) {
-        showNotification('Saldo tidak mencukupi untuk kontribusi ini', 'error');
+    if (!goal) {
+        showNotification('Target tidak ditemukan', 'error');
         return;
     }
     
-    const goal = goals.find(g => g.id === goalId);
-    if (goal) {
-        goal.savedAmount += amount;
-        
-        // Add as expense transaction
-        const transaction = {
-            id: Date.now().toString(),
-            type: 'expense',
-            amount: amount,
-            category: 'Target/Goal',
-            description: `Kontribusi untuk ${goal.name}`,
-            date: new Date().toISOString(),
-            formattedDate: new Date().toLocaleDateString('id-ID')
-        };
-        
-        transactions.unshift(transaction);
-        saveData();
-        updateGoalsList();
-        updateDashboard();
-        updateTransactionsList();
-        
-        input.value = '';
-        
-        if (goal.savedAmount >= goal.amount) {
-            showNotification(`Selamat! Target "${goal.name}" telah tercapai!`, 'success');
-        } else {
-            showNotification('Kontribusi berhasil ditambahkan!', 'success');
-        }
+    if (!wallet) {
+        showNotification('Wallet tidak ditemukan', 'error');
+        return;
+    }
+    
+    // Check wallet balance
+    if (wallet.balance < amount) {
+        showNotification(`Saldo ${wallet.name} tidak mencukupi untuk kontribusi ini`, 'error');
+        return;
+    }
+    
+    // Update wallet balance
+    wallet.balance -= amount;
+    
+    // Update goal
+    goal.savedAmount += amount;
+    
+    // Add as expense transaction
+    const transaction = {
+        id: Date.now().toString(),
+        type: 'expense',
+        amount: amount,
+        category: 'Target/Goal',
+        categoryId: 'target-goal',
+        wallet: wallet.id,
+        walletName: wallet.name,
+        description: `Kontribusi untuk ${goal.name}`,
+        date: new Date().toISOString(),
+        formattedDate: new Date().toLocaleDateString('id-ID'),
+        icon: 'fas fa-bullseye',
+        color: '#8B5CF6'
+    };
+    
+    transactions.unshift(transaction);
+    saveData();
+    saveWallets();
+    updateAllDisplays();
+    
+    // Clear input
+    const input = document.getElementById(`contribute-${goalId}`);
+    if (input) input.value = '';
+    
+    if (goal.savedAmount >= goal.amount) {
+        showNotification(`🎉 Selamat! Target "${goal.name}" telah tercapai!`, 'success');
+    } else {
+        showNotification(`Kontribusi ${formatCurrency(amount)} dari ${wallet.name} berhasil ditambahkan!`, 'success');
     }
 }
 
@@ -1826,33 +3552,58 @@ function withdrawFromGoal(goalId) {
     
     const isCompleted = goal.savedAmount >= goal.amount;
     const message = isCompleted ? 
-        `Kembalikan semua dana (${formatCurrency(goal.savedAmount)}) dari target "${goal.name}" ke saldo?` :
-        `Tarik semua dana (${formatCurrency(goal.savedAmount)}) dari target "${goal.name}"?`;
+        `Kembalikan semua dana (${formatCurrency(goal.savedAmount)}) dari target "${goal.name}" ke wallet?` :
+        `Tarik semua dana (${formatCurrency(goal.savedAmount)}) dari target "${goal.name}" ke wallet?`;
     
     if (confirm(message)) {
-        const withdrawAmount = goal.savedAmount;
-        
-        // Add as income transaction (money back to balance)
-        const transaction = {
-            id: Date.now().toString(),
-            type: 'income',
-            amount: withdrawAmount,
-            category: 'Penarikan Target',
-            description: `Penarikan dari ${goal.name}`,
-            date: new Date().toISOString(),
-            formattedDate: new Date().toLocaleDateString('id-ID')
-        };
-        
-        transactions.unshift(transaction);
-        goal.savedAmount = 0;
-        
-        saveData();
-        updateGoalsList();
-        updateDashboard();
-        updateTransactionsList();
-        
-        showNotification(`${formatCurrency(withdrawAmount)} berhasil dikembalikan ke saldo!`, 'success');
+        // Show wallet selection modal for withdrawal
+        showWalletSelectionModal(goal.savedAmount, 'goal-withdrawal', goalId);
     }
+}
+
+function processGoalWithdrawal(goalId, amount, selectedWallet) {
+    const goal = goals.find(g => g.id === goalId);
+    const wallet = wallets.find(w => w.id === selectedWallet);
+    
+    if (!goal) {
+        showNotification('Target tidak ditemukan', 'error');
+        return;
+    }
+    
+    if (!wallet) {
+        showNotification('Wallet tidak ditemukan', 'error');
+        return;
+    }
+    
+    const withdrawAmount = goal.savedAmount;
+    
+    // Update wallet balance (add money back)
+    wallet.balance += withdrawAmount;
+    
+    // Add as income transaction (money back to wallet)
+    const transaction = {
+        id: Date.now().toString(),
+        type: 'income',
+        amount: withdrawAmount,
+        category: 'Penarikan Target',
+        categoryId: 'penarikan-target',
+        wallet: wallet.id,
+        walletName: wallet.name,
+        description: `Penarikan dari ${goal.name}`,
+        date: new Date().toISOString(),
+        formattedDate: new Date().toLocaleDateString('id-ID'),
+        icon: 'fas fa-bullseye',
+        color: '#10B981'
+    };
+    
+    transactions.unshift(transaction);
+    goal.savedAmount = 0;
+    
+    saveData();
+    saveWallets();
+    updateAllDisplays();
+    
+    showNotification(`${formatCurrency(withdrawAmount)} berhasil dikembalikan ke ${wallet.name}!`, 'success');
 }
 
 function partialWithdrawFromGoal(goalId) {
@@ -1874,26 +3625,51 @@ function partialWithdrawFromGoal(goalId) {
         return;
     }
     
-    // Add as income transaction (money back to balance)
+    // Show wallet selection modal for partial withdrawal
+    showWalletSelectionModal(withdrawAmount, 'goal-partial-withdrawal', goalId);
+}
+
+function processGoalPartialWithdrawal(goalId, amount, selectedWallet) {
+    const goal = goals.find(g => g.id === goalId);
+    const wallet = wallets.find(w => w.id === selectedWallet);
+    
+    if (!goal) {
+        showNotification('Target tidak ditemukan', 'error');
+        return;
+    }
+    
+    if (!wallet) {
+        showNotification('Wallet tidak ditemukan', 'error');
+        return;
+    }
+    
+    // Update wallet balance (add money back)
+    wallet.balance += amount;
+    
+    // Add as income transaction (money back to wallet)
     const transaction = {
         id: Date.now().toString(),
         type: 'income',
-        amount: withdrawAmount,
+        amount: amount,
         category: 'Penarikan Target',
+        categoryId: 'penarikan-target',
+        wallet: wallet.id,
+        walletName: wallet.name,
         description: `Penarikan sebagian dari ${goal.name}`,
         date: new Date().toISOString(),
-        formattedDate: new Date().toLocaleDateString('id-ID')
+        formattedDate: new Date().toLocaleDateString('id-ID'),
+        icon: 'fas fa-bullseye',
+        color: '#10B981'
     };
     
     transactions.unshift(transaction);
-    goal.savedAmount -= withdrawAmount;
+    goal.savedAmount -= amount;
     
     saveData();
-    updateGoalsList();
-    updateDashboard();
-    updateTransactionsList();
+    saveWallets();
+    updateAllDisplays();
     
-    showNotification(`${formatCurrency(withdrawAmount)} berhasil ditarik dari target!`, 'success');
+    showNotification(`${formatCurrency(amount)} berhasil ditarik ke ${wallet.name}!`, 'success');
 }
 
 function deleteGoal(id) {
@@ -1917,16 +3693,26 @@ function addSavings(event) {
         return;
     }
     
-    // Check if user has enough balance
-    const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-    const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-    const totalSavingsAmount = savings.reduce((sum, s) => sum + s.amount, 0);
-    const currentBalance = totalIncome - totalExpense - totalSavingsAmount;
+    // Show wallet selection modal
+    showWalletSelectionModal(amount, 'savings-deposit', null, description);
+}
+
+function processSavingsDeposit(amount, selectedWallet, description) {
+    const wallet = wallets.find(w => w.id === selectedWallet);
     
-    if (amount > currentBalance) {
-        showNotification('Saldo tidak mencukupi untuk menabung', 'error');
+    if (!wallet) {
+        showNotification('Wallet tidak ditemukan', 'error');
         return;
     }
+    
+    // Check wallet balance
+    if (wallet.balance < amount) {
+        showNotification(`Saldo ${wallet.name} tidak mencukupi untuk menabung`, 'error');
+        return;
+    }
+    
+    // Update wallet balance
+    wallet.balance -= amount;
     
     const savingEntry = {
         id: Date.now().toString(),
@@ -1934,19 +3720,38 @@ function addSavings(event) {
         amount: amount,
         description: description || 'Menabung',
         date: new Date().toISOString(),
-        formattedDate: new Date().toLocaleDateString('id-ID')
+        formattedDate: new Date().toLocaleDateString('id-ID'),
+        wallet: selectedWallet,
+        walletName: wallet.name
+    };
+    
+    // Add as expense transaction
+    const transaction = {
+        id: Date.now().toString(),
+        type: 'expense',
+        amount: amount,
+        category: 'Tabungan',
+        categoryId: 'tabungan',
+        wallet: wallet.id,
+        walletName: wallet.name,
+        description: description || 'Menabung',
+        date: new Date().toISOString(),
+        formattedDate: new Date().toLocaleDateString('id-ID'),
+        icon: 'fas fa-piggy-bank',
+        color: '#3B82F6'
     };
     
     savings.unshift(savingEntry);
+    transactions.unshift(transaction);
     saveData();
-    updateSavingsDisplay();
-    updateDashboard();
+    saveWallets();
+    updateAllDisplays();
     
     // Reset form
     document.getElementById('savings-amount').value = '';
     document.getElementById('savings-description').value = '';
     
-    showNotification('Berhasil menambah tabungan!', 'success');
+    showNotification(`Berhasil menabung ${formatCurrency(amount)} dari ${wallet.name}!`, 'success');
 }
 
 function withdrawSavings(event) {
@@ -1967,25 +3772,59 @@ function withdrawSavings(event) {
         return;
     }
     
+    // Show wallet selection modal for withdrawal
+    showWalletSelectionModal(amount, 'savings-withdrawal', null, description);
+}
+
+function processSavingsWithdrawal(amount, selectedWallet, description) {
+    const wallet = wallets.find(w => w.id === selectedWallet);
+    
+    if (!wallet) {
+        showNotification('Wallet tidak ditemukan', 'error');
+        return;
+    }
+    
+    // Update wallet balance (add money back)
+    wallet.balance += amount;
+    
     const savingEntry = {
         id: Date.now().toString(),
         type: 'withdrawal',
         amount: -amount,
         description: description || 'Penarikan tabungan',
         date: new Date().toISOString(),
-        formattedDate: new Date().toLocaleDateString('id-ID')
+        formattedDate: new Date().toLocaleDateString('id-ID'),
+        wallet: selectedWallet,
+        walletName: wallet.name
+    };
+    
+    // Add as income transaction
+    const transaction = {
+        id: Date.now().toString(),
+        type: 'income',
+        amount: amount,
+        category: 'Penarikan Tabungan',
+        categoryId: 'penarikan-tabungan',
+        wallet: wallet.id,
+        walletName: wallet.name,
+        description: description || 'Penarikan tabungan',
+        date: new Date().toISOString(),
+        formattedDate: new Date().toLocaleDateString('id-ID'),
+        icon: 'fas fa-piggy-bank',
+        color: '#10B981'
     };
     
     savings.unshift(savingEntry);
+    transactions.unshift(transaction);
     saveData();
-    updateSavingsDisplay();
-    updateDashboard();
+    saveWallets();
+    updateAllDisplays();
     
     // Reset form
     document.getElementById('withdraw-amount').value = '';
     document.getElementById('withdraw-description').value = '';
     
-    showNotification('Berhasil menarik dari tabungan!', 'success');
+    showNotification(`Berhasil menarik ${formatCurrency(amount)} ke ${wallet.name}!`, 'success');
 }
 
 function updateSavingsDisplay() {
@@ -2366,6 +4205,33 @@ function setupEventListeners() {
     
     // Initialize category dropdowns
     updateCategoryDropdowns();
+    
+    // Book forms event listeners
+    const classBookForm = document.getElementById('class-book-form');
+    const businessBookForm = document.getElementById('business-book-form');
+    const debtBookForm = document.getElementById('debt-book-form');
+    
+    if (classBookForm) {
+        classBookForm.addEventListener('submit', addClassTransaction);
+    }
+    
+    if (businessBookForm) {
+        businessBookForm.addEventListener('submit', addBusinessTransaction);
+    }
+    
+    if (debtBookForm) {
+        debtBookForm.addEventListener('submit', addDebtTransaction);
+    }
+    
+    // Add student modal event listeners
+    const addStudentModal = document.getElementById('add-student-modal');
+    if (addStudentModal) {
+        addStudentModal.addEventListener('click', function(e) {
+            if (e.target === addStudentModal) {
+                hideAddStudentModal();
+            }
+        });
+    }
 }
 
 // Statistics Functions
@@ -9415,6 +11281,96 @@ function saveCategories() {
     }
 }
 
+// Wallet Selection Modal Functions
+function showWalletSelectionModal(amount, action, goalId = null, description = '') {
+    // Create modal HTML dynamically
+    const modalHTML = `
+        <div id="wallet-selection-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Pilih Wallet</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        ${getActionDescription(action)} ${formatCurrency(amount)}
+                    </p>
+                </div>
+                
+                <div class="space-y-2 mb-6">
+                    ${wallets.map(wallet => `
+                        <button onclick="selectWallet('${wallet.id}', ${amount}, '${action}', ${goalId ? `'${goalId}'` : 'null'}, '${description}')" 
+                                class="w-full p-3 text-left bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg border border-gray-200 dark:border-gray-600 transition-colors">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white">${wallet.name}</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Saldo: ${formatCurrency(wallet.balance)}</p>
+                                </div>
+                                <div class="w-4 h-4 rounded-full" style="background-color: ${wallet.color}"></div>
+                            </div>
+                        </button>
+                    `).join('')}
+                </div>
+                
+                <div class="flex gap-2">
+                    <button onclick="hideWalletSelectionModal()" 
+                            class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition duration-200">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+function hideWalletSelectionModal() {
+    const modal = document.getElementById('wallet-selection-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function getActionDescription(action) {
+    switch(action) {
+        case 'goal-contribution':
+            return 'Kontribusi target sebesar';
+        case 'goal-withdrawal':
+            return 'Penarikan target sebesar';
+        case 'goal-partial-withdrawal':
+            return 'Penarikan sebagian target sebesar';
+        case 'savings-deposit':
+            return 'Menabung sebesar';
+        case 'savings-withdrawal':
+            return 'Penarikan tabungan sebesar';
+        default:
+            return 'Transaksi sebesar';
+    }
+}
+
+function selectWallet(walletId, amount, action, goalId = null, description = '') {
+    hideWalletSelectionModal();
+    
+    switch(action) {
+        case 'goal-contribution':
+            processGoalContribution(goalId, amount, walletId);
+            break;
+        case 'goal-withdrawal':
+            processGoalWithdrawal(goalId, amount, walletId);
+            break;
+        case 'goal-partial-withdrawal':
+            processGoalPartialWithdrawal(goalId, amount, walletId);
+            break;
+        case 'savings-deposit':
+            processSavingsDeposit(amount, walletId, description);
+            break;
+        case 'savings-withdrawal':
+            processSavingsWithdrawal(amount, walletId, description);
+            break;
+        default:
+            console.error('Unknown action:', action);
+    }
+}
+
 // Update all displays after transaction changes
 function updateAllDisplays() {
     try {
@@ -9423,6 +11379,8 @@ function updateAllDisplays() {
         updateMobileBalanceCards();
         updateBalanceDisplay();
         updateTransactionsList();
+        updateGoalsList();
+        updateSavingsDisplay();
         
         // Update Swiper instances
         setTimeout(() => {
