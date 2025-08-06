@@ -580,6 +580,9 @@ function addClassTransaction(event) {
         };
         
         classBookTransactions.unshift(transaction);
+        console.log('New class transaction added:', transaction);
+        console.log('Total class transactions now:', classBookTransactions.length);
+        
         saveBookData();
         updateClassBookDisplay();
         
@@ -596,11 +599,14 @@ function addClassTransaction(event) {
 }
 
 function updateClassBookDisplay() {
+    console.log('updateClassBookDisplay called with', classBookTransactions.length, 'transactions');
     updateClassBookSummary();
     updateClassBookTransactionsList();
 }
 
 function updateClassBookSummary() {
+    console.log('Updating class book summary...');
+    
     const totalIncome = classBookTransactions
         .filter(t => t.type === 'income')
         .reduce((sum, t) => sum + t.amount, 0);
@@ -611,9 +617,17 @@ function updateClassBookSummary() {
     
     const balance = totalIncome - totalExpense;
     
+    console.log('Class book summary calculated:', { totalIncome, totalExpense, balance });
+    
     const incomeEl = document.getElementById('class-total-income');
     const expenseEl = document.getElementById('class-total-expense');
     const balanceEl = document.getElementById('class-balance');
+    
+    console.log('Summary elements found:', {
+        income: !!incomeEl,
+        expense: !!expenseEl,
+        balance: !!balanceEl
+    });
     
     if (incomeEl) incomeEl.textContent = formatCurrency(totalIncome);
     if (expenseEl) expenseEl.textContent = formatCurrency(totalExpense);
@@ -624,10 +638,17 @@ function updateClassBookSummary() {
 }
 
 function updateClassBookTransactionsList() {
+    console.log('Updating class book transactions list...');
+    
     const container = document.getElementById('class-transactions-list');
+    console.log('Transactions list container found:', !!container);
+    
     if (!container) return;
     
+    console.log('Number of class transactions to display:', classBookTransactions.length);
+    
     if (classBookTransactions.length === 0) {
+        console.log('No transactions found, showing empty state');
         container.innerHTML = `
             <div class="text-center text-gray-500 dark:text-gray-400 py-8">
                 <i class="fas fa-book text-4xl mb-2"></i>
@@ -636,6 +657,8 @@ function updateClassBookTransactionsList() {
         `;
         return;
     }
+    
+    console.log('Rendering', classBookTransactions.length, 'class transactions');
     
     container.innerHTML = classBookTransactions.map(transaction => `
         <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
@@ -659,6 +682,8 @@ function updateClassBookTransactionsList() {
             </div>
         </div>
     `).join('');
+    
+    console.log('Class transactions list updated successfully');
 }
 
 function deleteClassTransaction(id) {
@@ -1048,6 +1073,7 @@ function saveAutoResetSettings() {
         dayOfWeek: document.getElementById('reset-day-week')?.value || '1',
         dateOfMonth: document.getElementById('reset-date-month')?.value || '1',
         notification: document.getElementById('reset-notification')?.checked || true,
+        resetClassHistory: document.getElementById('auto-reset-class-history')?.checked || false,
         lastReset: localStorage.getItem('lastAutoReset') || null,
         nextReset: calculateNextResetDate(document.getElementById('reset-frequency')?.value || 'monthly').toISOString()
     };
@@ -1068,12 +1094,14 @@ function loadAutoResetSettings() {
         const dayOfWeekSelect = document.getElementById('reset-day-week');
         const dateOfMonthSelect = document.getElementById('reset-date-month');
         const notificationCheckbox = document.getElementById('reset-notification');
+        const autoResetClassHistoryCheckbox = document.getElementById('auto-reset-class-history');
         
         if (enabledCheckbox) enabledCheckbox.checked = settings.enabled;
         if (frequencySelect) frequencySelect.value = settings.frequency;
         if (dayOfWeekSelect) dayOfWeekSelect.value = settings.dayOfWeek;
         if (dateOfMonthSelect) dateOfMonthSelect.value = settings.dateOfMonth;
         if (notificationCheckbox) notificationCheckbox.checked = settings.notification;
+        if (autoResetClassHistoryCheckbox) autoResetClassHistoryCheckbox.checked = settings.resetClassHistory || false;
         
         // Update UI state
         if (settings.enabled) {
@@ -1129,6 +1157,9 @@ function checkAutoReset() {
 function executeAutoReset() {
     const settings = JSON.parse(localStorage.getItem('autoResetSettings') || '{}');
     
+    // Store statistics for notification
+    const classTransactionsCount = classBookTransactions.length;
+    
     // Reset all student payments
     students.forEach(student => {
         student.isPaid = false;
@@ -1136,6 +1167,14 @@ function executeAutoReset() {
         student.paidDate = null;
         student.paymentHistory = [];
     });
+    
+    // Reset class history if enabled in settings
+    if (settings.resetClassHistory) {
+        console.log('Auto reset: Resetting class book transactions...');
+        classBookTransactions.length = 0; // Clear array
+        saveBookData();
+        updateClassBookDisplay();
+    }
     
     // Save data
     saveStudentsData();
@@ -1154,10 +1193,17 @@ function executeAutoReset() {
     
     // Show notification if enabled
     if (settings.notification) {
-        showNotification(`✨ Kas siswa berhasil direset otomatis (${settings.frequency})`, 'info');
+        let notificationMessage = `✨ Kas siswa berhasil direset otomatis (${settings.frequency})`;
+        
+        if (settings.resetClassHistory) {
+            notificationMessage += `\n📋 ${classTransactionsCount} transaksi kas kelas juga telah dihapus`;
+        }
+        
+        showNotification(notificationMessage, 'info');
     }
     
     console.log('Auto reset executed:', new Date().toLocaleString('id-ID'));
+    console.log('Class history auto reset:', settings.resetClassHistory);
 }
 
 // Manual Reset Functions
@@ -1195,10 +1241,15 @@ function hideResetConfirmationModal() {
         
         // Reset form
         const checkbox = document.getElementById('reset-confirmation-check');
+        const resetClassHistoryCheck = document.getElementById('reset-class-history-check');
         const confirmBtn = document.getElementById('confirm-reset-btn');
         
         if (checkbox) checkbox.checked = false;
+        if (resetClassHistoryCheck) resetClassHistoryCheck.checked = false;
         if (confirmBtn) confirmBtn.disabled = true;
+        
+        // Reset warning text
+        updateResetWarning();
     }
 }
 
@@ -1218,8 +1269,24 @@ function updateResetModalStats() {
     totalAmountEl.textContent = formatCurrency(totalAmount);
 }
 
+// Update reset warning text based on selected options
+function updateResetWarning() {
+    const resetClassHistoryCheck = document.getElementById('reset-class-history-check');
+    const classHistoryWarningText = document.getElementById('class-history-warning-text');
+    
+    if (!resetClassHistoryCheck || !classHistoryWarningText) return;
+    
+    if (resetClassHistoryCheck.checked) {
+        classHistoryWarningText.innerHTML = '• Data di "Riwayat Kas Kelas" <span class="font-semibold text-red-600">akan dihapus semua</span>';
+    } else {
+        classHistoryWarningText.innerHTML = '• Data di "Riwayat Kas Kelas" <span class="font-semibold">tetap tersimpan</span>';
+    }
+}
+
 function executeResetAllPayments() {
     const checkbox = document.getElementById('reset-confirmation-check');
+    const resetClassHistoryCheck = document.getElementById('reset-class-history-check');
+    
     if (!checkbox?.checked) {
         showNotification('Harap centang kotak konfirmasi terlebih dahulu', 'warning');
         return;
@@ -1228,6 +1295,8 @@ function executeResetAllPayments() {
     // Store statistics for notification
     const paidStudents = students.filter(s => s.isPaid).length;
     const totalAmount = students.reduce((sum, s) => sum + (s.paidAmount || 0), 0);
+    const shouldResetClassHistory = resetClassHistoryCheck?.checked || false;
+    const classTransactionsCount = classBookTransactions.length;
     
     // Reset all student payments
     students.forEach(student => {
@@ -1237,6 +1306,14 @@ function executeResetAllPayments() {
         student.paymentHistory = [];
     });
     
+    // Reset class history if selected
+    if (shouldResetClassHistory) {
+        console.log('Resetting class book transactions...');
+        classBookTransactions.length = 0; // Clear array
+        saveBookData();
+        updateClassBookDisplay();
+    }
+    
     // Save data
     saveStudentsData();
     updateStudentsDisplay();
@@ -1245,12 +1322,16 @@ function executeResetAllPayments() {
     hideResetConfirmationModal();
     
     // Show success notification
-    showNotification(
-        `✅ Reset berhasil! ${paidStudents} siswa direset (Total: ${formatCurrency(totalAmount)})`, 
-        'success'
-    );
+    let notificationMessage = `✅ Reset siswa berhasil! ${paidStudents} siswa direset (Total: ${formatCurrency(totalAmount)})`;
+    
+    if (shouldResetClassHistory) {
+        notificationMessage += `\n📋 ${classTransactionsCount} transaksi kas kelas juga telah dihapus`;
+    }
+    
+    showNotification(notificationMessage, 'success');
     
     console.log('Manual reset executed:', new Date().toLocaleString('id-ID'));
+    console.log('Class history reset:', shouldResetClassHistory);
 }
 
 function addStudent(event) {
@@ -2034,7 +2115,9 @@ function generatePaymentReport() {
 
 function saveStudentsData() {
     try {
+        console.log('Saving students data:', students.length, 'students');
         localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(students));
+        console.log('Students data saved successfully');
     } catch (error) {
         console.error('Error saving students data:', error);
         throw error;
@@ -2043,10 +2126,14 @@ function saveStudentsData() {
 
 function loadStudentsData() {
     try {
+        console.log('Loading students data from localStorage...');
         const studentsData = localStorage.getItem(STORAGE_KEYS.STUDENTS);
         students = studentsData ? JSON.parse(studentsData) : [];
         
-        console.log('Students data loaded:', students.length);
+        console.log('Students data loaded successfully:', students.length, 'students');
+        if (students.length > 0) {
+            console.log('Sample student:', students[0]);
+        }
     } catch (error) {
         console.error('Error loading students data:', error);
         students = [];
@@ -2739,9 +2826,17 @@ function checkDueDates() {
 
 function saveBookData() {
     try {
+        console.log('Saving book data:', {
+            class: classBookTransactions.length,
+            business: businessBookTransactions.length,
+            debt: debtBookTransactions.length
+        });
+        
         localStorage.setItem(STORAGE_KEYS.CLASS_BOOK, JSON.stringify(classBookTransactions));
         localStorage.setItem(STORAGE_KEYS.BUSINESS_BOOK, JSON.stringify(businessBookTransactions));
         localStorage.setItem(STORAGE_KEYS.DEBT_BOOK, JSON.stringify(debtBookTransactions));
+        
+        console.log('Book data saved successfully');
     } catch (error) {
         console.error('Error saving book data:', error);
         throw error;
@@ -2750,25 +2845,165 @@ function saveBookData() {
 
 function loadBookData() {
     try {
+        console.log('Loading book data from localStorage...');
+        
         const classData = localStorage.getItem(STORAGE_KEYS.CLASS_BOOK);
         const businessData = localStorage.getItem(STORAGE_KEYS.BUSINESS_BOOK);
         const debtData = localStorage.getItem(STORAGE_KEYS.DEBT_BOOK);
+        
+        console.log('Raw data from storage:', {
+            class: classData ? classData.length : 0,
+            business: businessData ? businessData.length : 0,
+            debt: debtData ? debtData.length : 0
+        });
         
         classBookTransactions = classData ? JSON.parse(classData) : [];
         businessBookTransactions = businessData ? JSON.parse(businessData) : [];
         debtBookTransactions = debtData ? JSON.parse(debtData) : [];
         
-        console.log('Book data loaded:', {
+        console.log('Book data loaded successfully:', {
             class: classBookTransactions.length,
             business: businessBookTransactions.length,
             debt: debtBookTransactions.length
         });
+        
+        // Verify data integrity
+        if (classBookTransactions.length > 0) {
+            console.log('Sample class transaction:', classBookTransactions[0]);
+        }
+        
     } catch (error) {
         console.error('Error loading book data:', error);
         classBookTransactions = [];
         businessBookTransactions = [];
         debtBookTransactions = [];
     }
+}
+
+// Function to backup and restore book data
+function createBookDataBackup() {
+    const backup = {
+        timestamp: new Date().toISOString(),
+        classBookTransactions: [...classBookTransactions],
+        businessBookTransactions: [...businessBookTransactions],
+        debtBookTransactions: [...debtBookTransactions],
+        students: [...students]
+    };
+    
+    try {
+        localStorage.setItem('moneyTracker_bookBackup', JSON.stringify(backup));
+        console.log('Book data backup created successfully');
+        return true;
+    } catch (error) {
+        console.error('Failed to create backup:', error);
+        return false;
+    }
+}
+
+function restoreBookDataFromBackup() {
+    try {
+        const backupData = localStorage.getItem('moneyTracker_bookBackup');
+        if (!backupData) {
+            console.log('No backup data found');
+            return false;
+        }
+        
+        const backup = JSON.parse(backupData);
+        classBookTransactions = backup.classBookTransactions || [];
+        businessBookTransactions = backup.businessBookTransactions || [];
+        debtBookTransactions = backup.debtBookTransactions || [];
+        students = backup.students || [];
+        
+        // Save restored data
+        saveBookData();
+        saveStudentsData();
+        
+        console.log('Book data restored from backup:', backup.timestamp);
+        return true;
+    } catch (error) {
+        console.error('Failed to restore from backup:', error);
+        return false;
+    }
+}
+
+// Debug function to check data status
+function debugBookData() {
+    console.log('=== BOOK DATA DEBUG REPORT ===');
+    
+    // Check localStorage contents
+    console.log('localStorage keys:', Object.keys(localStorage).filter(key => key.startsWith('moneyTracker')));
+    
+    // Check memory data
+    console.log('Memory data status:', {
+        classTransactions: classBookTransactions.length,
+        businessTransactions: businessBookTransactions.length,
+        debtTransactions: debtBookTransactions.length,
+        students: students.length
+    });
+    
+    // Check recent transactions
+    if (classBookTransactions.length > 0) {
+        console.log('Latest class transactions:', classBookTransactions.slice(-3));
+        console.log('Class balance calculation:', calculateClassBalance());
+    }
+    
+    // Check localStorage data
+    const stored = {
+        class: localStorage.getItem(STORAGE_KEYS.CLASS_BOOK),
+        business: localStorage.getItem(STORAGE_KEYS.BUSINESS_BOOK),
+        debt: localStorage.getItem(STORAGE_KEYS.DEBT_BOOK),
+        students: localStorage.getItem(STORAGE_KEYS.STUDENTS)
+    };
+    
+    console.log('Stored data sizes:', {
+        class: stored.class ? stored.class.length : 0,
+        business: stored.business ? stored.business.length : 0,
+        debt: stored.debt ? stored.debt.length : 0,
+        students: stored.students ? stored.students.length : 0
+    });
+    
+    // Force update display
+    console.log('Forcing display updates...');
+    updateClassBookDisplay();
+    updateBusinessBookDisplay();
+    updateDebtBookDisplay();
+    
+    alert('Debug information logged to console. Check browser console for details.');
+}
+
+// Force refresh all book displays
+function forceRefreshAllDisplays() {
+    console.log('Force refreshing all book displays...');
+    
+    // Reload data from localStorage
+    loadBookData();
+    loadStudentsData();
+    
+    // Wait a moment for data to load, then update displays
+    setTimeout(() => {
+        updateClassBookDisplay();
+        updateBusinessBookDisplay();
+        updateDebtBookDisplay();
+        console.log('All displays force refreshed');
+        showNotification('Data berhasil dimuat ulang', 'success');
+    }, 100);
+}
+
+// Calculate class balance for debugging
+function calculateClassBalance() {
+    const totalIncome = classBookTransactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    const totalExpense = classBookTransactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    return {
+        totalIncome,
+        totalExpense,
+        balance: totalIncome - totalExpense
+    };
 }
 
 // Initialize application
@@ -2829,6 +3064,12 @@ document.addEventListener('DOMContentLoaded', function() {
             notificationCheckbox.addEventListener('change', saveAutoResetSettings);
         }
         
+        // Add event listener for auto reset class history checkbox
+        const autoResetClassHistoryCheckbox = document.getElementById('auto-reset-class-history');
+        if (autoResetClassHistoryCheckbox) {
+            autoResetClassHistoryCheckbox.addEventListener('change', saveAutoResetSettings);
+        }
+        
         // Initialize Swiper
         initializeSwiper();
         
@@ -2875,6 +3116,15 @@ document.addEventListener('DOMContentLoaded', function() {
             initializeClassBook();
             initializeBusinessBook();
             initializeDebtBook();
+            
+            // Update book displays after loading data
+            updateClassBookDisplay();
+            updateBusinessBookDisplay();
+            updateDebtBookDisplay();
+            
+            // Force update students data and display
+            loadStudentsData();
+            updateStudentsDisplay();
             
             console.log('All components updated successfully');
             
@@ -3022,6 +3272,7 @@ function loadData() {
 // Save data to localStorage
 function saveData() {
     try {
+        console.log('Saving data - transactions count:', transactions.length);
         localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(transactions));
         localStorage.setItem(STORAGE_KEYS.GOALS, JSON.stringify(goals));
         localStorage.setItem(STORAGE_KEYS.SAVINGS, JSON.stringify(savings));
@@ -3029,6 +3280,7 @@ function saveData() {
         localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(customCategories));
         localStorage.setItem(STORAGE_KEYS.STATISTICS_CONFIG, JSON.stringify(statisticsConfig));
         localStorage.setItem(STORAGE_KEYS.WALLETS, JSON.stringify(wallets));
+        console.log('Data saved successfully');
     } catch (error) {
         console.error('Error saving data:', error);
         throw error;
@@ -3661,14 +3913,32 @@ function addExpense(event) {
         formattedDate: new Date().toLocaleDateString('id-ID')
     };
     
+    console.log('Adding new expense transaction:', transaction);
+    
     transactions.unshift(transaction);
     updateWalletBalances();
     saveData();
     updateDashboard();
     updateTransactionsList();
     updateFilterCategories();
-    updateDailyLimitDisplay();
+    updateDailyLimitDisplay(); // Update daily limit display immediately
     updateWalletDisplay(); // Add this to update wallet display
+    
+    // Force update daily stats if daily limit is enabled
+    if (dailyLimitSettings.enabled) {
+        updateDailyStats();
+    }
+    
+    // Force refresh of daily spending display with a small delay
+    setTimeout(() => {
+        updateDailyLimitDisplay();
+        console.log('Forced daily limit display update completed');
+        
+        // Also force manual update for better reliability
+        if (typeof forceUpdateDailyLimit === 'function') {
+            forceUpdateDailyLimit();
+        }
+    }, 100);
     
     // Update statistics if visible
     if (!document.getElementById('statistics-section').classList.contains('hidden')) {
@@ -3852,6 +4122,11 @@ function updateDashboard() {
         
         // Update mobile balance cards
         updateMobileBalanceCards();
+        
+        // Update daily limit display
+        if (dailyLimitSettings && dailyLimitSettings.enabled) {
+            updateDailyLimitDisplay();
+        }
         
         console.log('Dashboard updated successfully');
         
@@ -4634,7 +4909,11 @@ function deleteSaving(id) {
 // Daily Limit Functions
 function getTodayExpenses() {
     try {
-        const today = new Date().toDateString();
+        const today = new Date();
+        const todayString = today.toDateString();
+        const todayFormatted = today.toLocaleDateString('id-ID');
+        
+        console.log('Getting today expenses for:', todayString, 'and', todayFormatted);
         
         const todayExpenses = transactions
             .filter(t => {
@@ -4642,15 +4921,40 @@ function getTodayExpenses() {
                 
                 // Handle both formattedDate and date fields
                 let transactionDate;
+                let matchesDate = false;
+                
+                // Try formattedDate first (Indonesian format)
                 if (t.formattedDate) {
-                    transactionDate = new Date(t.formattedDate).toDateString();
-                } else if (t.date) {
-                    transactionDate = new Date(t.date).toDateString();
-                } else {
-                    return false;
+                    try {
+                        const parts = t.formattedDate.split('/');
+                        if (parts.length === 3) {
+                            // Assuming dd/mm/yyyy format
+                            const parsedDate = new Date(parts[2], parts[1] - 1, parts[0]);
+                            transactionDate = parsedDate.toDateString();
+                            matchesDate = transactionDate === todayString;
+                        }
+                        
+                        if (!matchesDate) {
+                            // Try direct comparison
+                            matchesDate = t.formattedDate === todayFormatted;
+                        }
+                    } catch (error) {
+                        console.warn('Error parsing formattedDate:', t.formattedDate, error);
+                    }
                 }
                 
-                if (transactionDate !== today) return false;
+                // Try ISO date if formattedDate didn't work
+                if (!matchesDate && t.date) {
+                    try {
+                        transactionDate = new Date(t.date).toDateString();
+                        matchesDate = transactionDate === todayString;
+                    } catch (error) {
+                        console.warn('Error parsing date:', t.date, error);
+                        return false;
+                    }
+                }
+                
+                if (!matchesDate) return false;
                 
                 // Exclude savings from daily limit if setting is enabled
                 if (dailyLimitSettings && dailyLimitSettings.excludeSavings && t.category === 'Tabungan') return false;
@@ -4661,15 +4965,14 @@ function getTodayExpenses() {
                 return true;
             })
             .reduce((sum, t) => sum + t.amount, 0);
-            
+        
+        console.log('Today expenses calculated:', todayExpenses);
         return todayExpenses;
     } catch (error) {
         console.error('Error getting today expenses:', error);
         return 0;
     }
-}
-
-function checkDailyLimitReset() {
+}function checkDailyLimitReset() {
     if (!dailyLimitSettings.enabled) return;
     
     const now = new Date();
@@ -4699,12 +5002,13 @@ function checkDailyLimitReset() {
 }
 
 function updateDailyLimitDisplay() {
+    console.log('updateDailyLimitDisplay called');
     const dailySpentCard = document.getElementById('daily-spending-card');
     const dailyAlert = document.getElementById('daily-limit-alert');
     
-    if (!dailyLimitSettings.enabled) {
-        dailySpentCard.classList.add('hidden');
-        dailyAlert.classList.add('hidden');
+    if (!dailyLimitSettings || !dailyLimitSettings.enabled) {
+        if (dailySpentCard) dailySpentCard.classList.add('hidden');
+        if (dailyAlert) dailyAlert.classList.add('hidden');
         return;
     }
     
@@ -4712,51 +5016,89 @@ function updateDailyLimitDisplay() {
     const remaining = Math.max(0, dailyLimitSettings.amount - dailySpent);
     const percentage = Math.min(100, (dailySpent / dailyLimitSettings.amount) * 100);
     
+    console.log('Daily limit display update:', { dailySpent, remaining, percentage });
+    
     // Update spending card
-    dailySpentCard.classList.remove('hidden');
-    document.getElementById('daily-spent-amount').textContent = formatCurrency(dailySpent);
-    document.getElementById('daily-limit-amount').textContent = formatCurrency(dailyLimitSettings.amount);
-    document.getElementById('daily-remaining-amount').textContent = formatCurrency(remaining);
-    document.getElementById('daily-progress-percentage').textContent = `${percentage.toFixed(1)}%`;
+    if (dailySpentCard) {
+        dailySpentCard.classList.remove('hidden');
+        
+        const dailySpentAmountEl = document.getElementById('daily-spent-amount');
+        const dailyLimitAmountEl = document.getElementById('daily-limit-amount');
+        const dailyRemainingAmountEl = document.getElementById('daily-remaining-amount');
+        const dailyProgressPercentageEl = document.getElementById('daily-progress-percentage');
+        
+        if (dailySpentAmountEl) dailySpentAmountEl.textContent = formatCurrency(dailySpent);
+        if (dailyLimitAmountEl) dailyLimitAmountEl.textContent = formatCurrency(dailyLimitSettings.amount);
+        if (dailyRemainingAmountEl) dailyRemainingAmountEl.textContent = formatCurrency(remaining);
+        if (dailyProgressPercentageEl) dailyProgressPercentageEl.textContent = `${percentage.toFixed(1)}%`;
+    }
     
     // Update progress bar
     const progressBar = document.getElementById('daily-progress-bar');
-    progressBar.style.width = `${percentage}%`;
-    
-    // Change color based on percentage
-    if (percentage >= 90) {
-        progressBar.className = 'h-3 rounded-full transition-all duration-300 bg-red-500';
-        document.getElementById('daily-remaining-amount').className = 'font-medium text-red-600';
-    } else if (percentage >= 75) {
-        progressBar.className = 'h-3 rounded-full transition-all duration-300 bg-orange-500';
-        document.getElementById('daily-remaining-amount').className = 'font-medium text-orange-600';
-    } else if (percentage >= 50) {
-        progressBar.className = 'h-3 rounded-full transition-all duration-300 bg-yellow-500';
-        document.getElementById('daily-remaining-amount').className = 'font-medium text-yellow-600';
-    } else {
-        progressBar.className = 'h-3 rounded-full transition-all duration-300 bg-green-500';
-        document.getElementById('daily-remaining-amount').className = 'font-medium text-green-600';
+    if (progressBar) {
+        progressBar.style.width = `${percentage}%`;
+        
+        // Change color based on percentage
+        if (percentage >= 100) {
+            progressBar.className = 'h-3 rounded-full transition-all duration-300 bg-red-500';
+            const remainingEl = document.getElementById('daily-remaining-amount');
+            if (remainingEl) remainingEl.className = 'font-medium text-red-600 dark:text-red-400';
+        } else if (percentage >= 90) {
+            progressBar.className = 'h-3 rounded-full transition-all duration-300 bg-red-500';
+            const remainingEl = document.getElementById('daily-remaining-amount');
+            if (remainingEl) remainingEl.className = 'font-medium text-red-600 dark:text-red-400';
+        } else if (percentage >= 75) {
+            progressBar.className = 'h-3 rounded-full transition-all duration-300 bg-orange-500';
+            const remainingEl = document.getElementById('daily-remaining-amount');
+            if (remainingEl) remainingEl.className = 'font-medium text-orange-600 dark:text-orange-400';
+        } else if (percentage >= 50) {
+            progressBar.className = 'h-3 rounded-full transition-all duration-300 bg-yellow-500';
+            const remainingEl = document.getElementById('daily-remaining-amount');
+            if (remainingEl) remainingEl.className = 'font-medium text-yellow-600 dark:text-yellow-400';
+        } else {
+            progressBar.className = 'h-3 rounded-full transition-all duration-300 bg-blue-500';
+            const remainingEl = document.getElementById('daily-remaining-amount');
+            if (remainingEl) remainingEl.className = 'font-medium text-green-600 dark:text-green-400';
+        }
     }
     
     // Update alert
-    if (percentage >= 100) {
-        dailyAlert.classList.remove('hidden');
-        dailyAlert.className = 'mb-6 p-4 rounded-lg border-l-4 bg-red-50 border-red-400';
-        document.getElementById('limit-alert-icon').className = 'fas fa-exclamation-circle text-xl text-red-600';
-        document.getElementById('limit-alert-text').textContent = 'Batas harian terlampaui!';
-        document.getElementById('limit-alert-text').className = 'text-sm font-medium text-red-800';
-        document.getElementById('limit-alert-subtext').textContent = `Anda telah melampaui batas pengeluaran harian sebesar ${formatCurrency(dailySpent - dailyLimitSettings.amount)}`;
-        document.getElementById('limit-alert-subtext').className = 'text-xs mt-1 text-red-700';
-    } else if (percentage >= 90) {
-        dailyAlert.classList.remove('hidden');
-        dailyAlert.className = 'mb-6 p-4 rounded-lg border-l-4 bg-orange-50 border-orange-400';
-        document.getElementById('limit-alert-icon').className = 'fas fa-exclamation-triangle text-xl text-orange-600';
-        document.getElementById('limit-alert-text').textContent = 'Hampir mencapai batas harian!';
-        document.getElementById('limit-alert-text').className = 'text-sm font-medium text-orange-800';
-        document.getElementById('limit-alert-subtext').textContent = `Sisa ${formatCurrency(remaining)} dari batas harian Anda`;
-        document.getElementById('limit-alert-subtext').className = 'text-xs mt-1 text-orange-700';
-    } else {
-        dailyAlert.classList.add('hidden');
+    if (dailyAlert) {
+        if (percentage >= 100) {
+            dailyAlert.classList.remove('hidden');
+            dailyAlert.className = 'mb-6 p-4 rounded-lg border-l-4 bg-red-50 border-red-400 dark:bg-red-900/20 dark:border-red-800';
+            const alertIcon = document.getElementById('limit-alert-icon');
+            const alertText = document.getElementById('limit-alert-text');
+            const alertSubtext = document.getElementById('limit-alert-subtext');
+            
+            if (alertIcon) alertIcon.className = 'fas fa-exclamation-circle text-xl text-red-600 dark:text-red-400';
+            if (alertText) {
+                alertText.textContent = 'Batas harian terlampaui!';
+                alertText.className = 'text-sm font-medium text-red-800 dark:text-red-300';
+            }
+            if (alertSubtext) {
+                alertSubtext.textContent = `Anda telah melampaui batas pengeluaran harian sebesar ${formatCurrency(dailySpent - dailyLimitSettings.amount)}`;
+                alertSubtext.className = 'text-xs mt-1 text-red-700 dark:text-red-400';
+            }
+        } else if (percentage >= 90) {
+            dailyAlert.classList.remove('hidden');
+            dailyAlert.className = 'mb-6 p-4 rounded-lg border-l-4 bg-orange-50 border-orange-400 dark:bg-orange-900/20 dark:border-orange-800';
+            const alertIcon = document.getElementById('limit-alert-icon');
+            const alertText = document.getElementById('limit-alert-text');
+            const alertSubtext = document.getElementById('limit-alert-subtext');
+            
+            if (alertIcon) alertIcon.className = 'fas fa-exclamation-triangle text-xl text-orange-600 dark:text-orange-400';
+            if (alertText) {
+                alertText.textContent = 'Hampir mencapai batas harian!';
+                alertText.className = 'text-sm font-medium text-orange-800 dark:text-orange-300';
+            }
+            if (alertSubtext) {
+                alertSubtext.textContent = `Sisa ${formatCurrency(remaining)} dari batas harian Anda`;
+                alertSubtext.className = 'text-xs mt-1 text-orange-700 dark:text-orange-400';
+            }
+        } else {
+            dailyAlert.classList.add('hidden');
+        }
     }
 }
 
@@ -4863,15 +5205,19 @@ function loadDailyLimitSettings() {
 function updateDailyStats() {
     const statsContainer = document.getElementById('daily-stats');
     
-    if (!dailyLimitSettings.enabled) {
-        statsContainer.innerHTML = `
-            <div class="text-center text-gray-500 py-8">
-                <i class="fas fa-chart-line text-4xl mb-2"></i>
-                <p>Aktifkan batas harian untuk melihat statistik</p>
-            </div>
-        `;
+    if (!dailyLimitSettings || !dailyLimitSettings.enabled) {
+        if (statsContainer) {
+            statsContainer.innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <i class="fas fa-chart-line text-4xl mb-2"></i>
+                    <p>Aktifkan batas harian untuk melihat statistik</p>
+                </div>
+            `;
+        }
         return;
     }
+    
+    console.log('Updating daily stats...');
     
     // Get last 7 days expenses
     const last7Days = [];
@@ -4881,7 +5227,19 @@ function updateDailyStats() {
         const dateStr = date.toLocaleDateString('id-ID');
         
         const dayExpenses = transactions
-            .filter(t => t.type === 'expense' && t.formattedDate === dateStr)
+            .filter(t => {
+                if (t.type !== 'expense') return false;
+                
+                // Handle different date formats
+                let transactionDate = '';
+                if (t.formattedDate) {
+                    transactionDate = t.formattedDate;
+                } else if (t.date) {
+                    transactionDate = new Date(t.date).toLocaleDateString('id-ID');
+                }
+                
+                return transactionDate === dateStr;
+            })
             .reduce((sum, t) => sum + t.amount, 0);
             
         last7Days.push({
@@ -4895,46 +5253,50 @@ function updateDailyStats() {
     const avgDailySpend = last7Days.reduce((sum, day) => sum + day.amount, 0) / 7;
     const daysOverLimit = last7Days.filter(day => day.amount > dailyLimitSettings.amount).length;
     
-    statsContainer.innerHTML = `
-        <div class="space-y-4">
-            <div class="grid grid-cols-2 gap-4">
-                <div class="text-center p-3 bg-blue-50 rounded-lg">
-                    <p class="text-sm text-blue-600 font-medium">Hari Ini</p>
-                    <p class="text-lg font-bold text-blue-800">${formatCurrency(todayExpenses)}</p>
+    if (statsContainer) {
+        statsContainer.innerHTML = `
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="text-center p-3 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+                        <p class="text-sm text-blue-600 dark:text-blue-400 font-medium">Hari Ini</p>
+                        <p class="text-lg font-bold text-blue-800 dark:text-blue-300">${formatCurrency(todayExpenses)}</p>
+                    </div>
+                    <div class="text-center p-3 bg-green-50 rounded-lg dark:bg-green-900/20">
+                        <p class="text-sm text-green-600 dark:text-green-400 font-medium">Rata-rata 7 Hari</p>
+                        <p class="text-lg font-bold text-green-800 dark:text-green-300">${formatCurrency(avgDailySpend)}</p>
+                    </div>
                 </div>
-                <div class="text-center p-3 bg-green-50 rounded-lg">
-                    <p class="text-sm text-green-600 font-medium">Rata-rata 7 Hari</p>
-                    <p class="text-lg font-bold text-green-800">${formatCurrency(avgDailySpend)}</p>
-                </div>
-            </div>
-            
-            <div class="p-3 bg-gray-50 rounded-lg">
-                <p class="text-sm text-gray-600 font-medium mb-2">7 Hari Terakhir</p>
-                <div class="grid grid-cols-7 gap-1">
-                    ${last7Days.map(day => {
-                        const percentage = Math.min(100, (day.amount / dailyLimitSettings.amount) * 100);
-                        const isOverLimit = day.amount > dailyLimitSettings.amount;
-                        return `
-                            <div class="text-center">
-                                <div class="text-xs text-gray-500 mb-1">${day.dayName}</div>
-                                <div class="h-12 bg-gray-200 rounded relative overflow-hidden">
-                                    <div class="absolute bottom-0 w-full transition-all duration-300 ${isOverLimit ? 'bg-red-500' : percentage >= 75 ? 'bg-orange-500' : 'bg-blue-500'}" 
-                                         style="height: ${Math.min(100, percentage)}%"></div>
+                
+                <div class="p-3 bg-gray-50 rounded-lg dark:bg-gray-800">
+                    <p class="text-sm text-gray-600 dark:text-gray-400 font-medium mb-2">7 Hari Terakhir</p>
+                    <div class="grid grid-cols-7 gap-1">
+                        ${last7Days.map(day => {
+                            const percentage = Math.min(100, (day.amount / dailyLimitSettings.amount) * 100);
+                            const isOverLimit = day.amount > dailyLimitSettings.amount;
+                            return `
+                                <div class="text-center">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">${day.dayName}</div>
+                                    <div class="h-12 bg-gray-200 dark:bg-gray-700 rounded relative overflow-hidden">
+                                        <div class="absolute bottom-0 w-full transition-all duration-300 ${isOverLimit ? 'bg-red-500' : percentage >= 75 ? 'bg-orange-500' : 'bg-blue-500'}" 
+                                             style="height: ${Math.min(100, percentage)}%"></div>
+                                    </div>
+                                    <div class="text-xs mt-1 ${isOverLimit ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}">${formatCurrency(day.amount).replace('Rp. ', '').replace(',00', 'k').replace('.000', 'k')}</div>
                                 </div>
-                                <div class="text-xs mt-1 ${isOverLimit ? 'text-red-600' : 'text-gray-600'}">${formatCurrency(day.amount).replace('Rp. ', '').replace(',00', 'k').replace('.000', 'k')}</div>
-                            </div>
-                        `;
-                    }).join('')}
+                            `;
+                        }).join('')}
+                    </div>
                 </div>
-            </div>
-            
-            <div class="text-center p-3 ${daysOverLimit > 0 ? 'bg-red-50' : 'bg-green-50'} rounded-lg">
-                <p class="text-sm ${daysOverLimit > 0 ? 'text-red-600' : 'text-green-600'} font-medium">
-                    ${daysOverLimit} dari 7 hari melampaui batas
-                </p>
-            </div>
-        </div>  
-    `;
+                
+                <div class="text-center p-3 ${daysOverLimit > 0 ? 'bg-red-50 dark:bg-red-900/20' : 'bg-green-50 dark:bg-green-900/20'} rounded-lg">
+                    <p class="text-sm ${daysOverLimit > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'} font-medium">
+                        ${daysOverLimit} dari 7 hari melampaui batas
+                    </p>
+                </div>
+            </div>  
+        `;
+    }
+    
+    console.log('Daily stats updated');
 }
 
 function setupEventListeners() {
@@ -7365,6 +7727,11 @@ function addTransactionFromAI(type, amount, category, description, date = null) 
     updateFilterCategories();
     updateDailyLimitDisplay();
     updateWalletDisplay(); // Update wallet display
+    
+    // Update daily stats if daily limit is enabled and this is today's expense
+    if (type === 'expense' && dailyLimitSettings && dailyLimitSettings.enabled) {
+        updateDailyStats();
+    }
     
     // Only check daily limit for expenses on today's date
     if (type === 'expense') {
@@ -12131,6 +12498,7 @@ function updateAllDisplays() {
         updateTransactionsList();
         updateGoalsList();
         updateSavingsDisplay();
+        updateDailyLimitDisplay(); // Add daily limit display update
         
         // Update Swiper instances
         setTimeout(() => {
