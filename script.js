@@ -776,10 +776,15 @@ function showAddStudentModal() {
     const modal = document.getElementById('add-student-modal');
     if (modal) {
         modal.classList.remove('hidden');
+        // Add show class for animation
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+        
         // Focus on name input
         const nameInput = document.getElementById('student-name');
         if (nameInput) {
-            setTimeout(() => nameInput.focus(), 100);
+            setTimeout(() => nameInput.focus(), 200);
         }
     }
 }
@@ -787,7 +792,11 @@ function showAddStudentModal() {
 function hideAddStudentModal() {
     const modal = document.getElementById('add-student-modal');
     if (modal) {
-        modal.classList.add('hidden');
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+        
         // Reset form
         const form = document.getElementById('add-student-form');
         if (form) form.reset();
@@ -795,6 +804,453 @@ function hideAddStudentModal() {
         const kasAmountInput = document.getElementById('student-kas-amount');
         if (kasAmountInput) kasAmountInput.value = '10000';
     }
+}
+
+function showStudentActionsModal() {
+    const modal = document.getElementById('student-actions-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        // Add show class for animation
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+    }
+}
+
+function hideStudentActionsModal() {
+    const modal = document.getElementById('student-actions-modal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+}
+
+function setKasAmount(amount) {
+    const kasAmountInput = document.getElementById('student-kas-amount');
+    if (kasAmountInput) {
+        kasAmountInput.value = amount;
+        // Add visual feedback
+        kasAmountInput.focus();
+        kasAmountInput.select();
+    }
+}
+
+// Function to handle student search and filter
+function initStudentSearchAndFilter() {
+    const searchInput = document.getElementById('student-search');
+    const statusFilter = document.getElementById('payment-status-filter');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', filterStudents);
+    }
+    
+    if (statusFilter) {
+        statusFilter.addEventListener('change', filterStudents);
+    }
+}
+
+function filterStudents() {
+    const searchTerm = document.getElementById('student-search')?.value.toLowerCase() || '';
+    const statusFilter = document.getElementById('payment-status-filter')?.value || '';
+    const studentsList = document.getElementById('students-list');
+    
+    if (!studentsList) return;
+    
+    const studentCards = studentsList.children;
+    
+    Array.from(studentCards).forEach(card => {
+        const studentName = card.querySelector('.student-name')?.textContent.toLowerCase() || '';
+        const isPaid = card.classList.contains('paid');
+        
+        // Check search term
+        const matchesSearch = studentName.includes(searchTerm);
+        
+        // Check status filter
+        let matchesStatus = true;
+        if (statusFilter === 'paid') {
+            matchesStatus = isPaid;
+        } else if (statusFilter === 'unpaid') {
+            matchesStatus = !isPaid;
+        }
+        
+        // Show/hide card
+        if (matchesSearch && matchesStatus) {
+            card.style.display = 'block';
+            card.style.animation = 'fadeIn 0.3s ease-in-out';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function exportStudentData() {
+    // Get all student data
+    const students = JSON.parse(localStorage.getItem('students') || '[]');
+    
+    if (students.length === 0) {
+        showNotification('Tidak ada data siswa untuk diekspor', 'warning');
+        return;
+    }
+    
+    // Create CSV content
+    const csvContent = [
+        ['Nama', 'Nomor Absen', 'Nominal Kas', 'Status Bayar', 'Keterangan', 'Tanggal Ditambah'].join(','),
+        ...students.map(student => [
+            student.name,
+            student.number || '-',
+            student.kasAmount,
+            student.paid ? 'Sudah Bayar' : 'Belum Bayar',
+            student.note || '-',
+            new Date(student.dateAdded).toLocaleDateString('id-ID')
+        ].join(','))
+    ].join('\n');
+    
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `data-siswa-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showNotification('Data siswa berhasil diekspor!', 'success');
+}
+
+// ===============================================
+// AUTO RESET SYSTEM FUNCTIONS
+// ===============================================
+
+function toggleAutoReset() {
+    const checkbox = document.getElementById('auto-reset-enabled');
+    const options = document.getElementById('auto-reset-options');
+    const statusText = document.getElementById('auto-reset-status');
+    
+    if (!checkbox || !options || !statusText) return;
+    
+    const isEnabled = checkbox.checked;
+    
+    if (isEnabled) {
+        options.classList.remove('hidden');
+        statusText.textContent = 'Aktif';
+        statusText.classList.add('auto-reset-active');
+        statusText.classList.remove('auto-reset-inactive');
+        
+        // Save auto reset settings
+        saveAutoResetSettings();
+        updateNextResetDisplay();
+        
+        // Start auto reset checker
+        startAutoResetChecker();
+        
+        showNotification('Reset otomatis diaktifkan', 'success');
+    } else {
+        options.classList.add('hidden');
+        statusText.textContent = 'Nonaktif';
+        statusText.classList.remove('auto-reset-active');
+        statusText.classList.add('auto-reset-inactive');
+        
+        // Stop auto reset checker
+        stopAutoResetChecker();
+        
+        // Clear settings
+        localStorage.removeItem('autoResetSettings');
+        
+        showNotification('Reset otomatis dinonaktifkan', 'info');
+    }
+}
+
+function updateResetFrequency() {
+    const frequency = document.getElementById('reset-frequency')?.value;
+    const weeklyOption = document.getElementById('weekly-day-option');
+    const monthlyOption = document.getElementById('monthly-date-option');
+    
+    if (!frequency) return;
+    
+    // Show/hide additional options based on frequency
+    if (frequency === 'weekly') {
+        weeklyOption?.classList.remove('hidden');
+        monthlyOption?.classList.add('hidden');
+    } else if (frequency === 'monthly') {
+        weeklyOption?.classList.add('hidden');
+        monthlyOption?.classList.remove('hidden');
+    } else {
+        weeklyOption?.classList.add('hidden');
+        monthlyOption?.classList.add('hidden');
+    }
+    
+    // Update next reset display
+    updateNextResetDisplay();
+    saveAutoResetSettings();
+}
+
+function updateNextResetDisplay() {
+    const frequency = document.getElementById('reset-frequency')?.value;
+    const display = document.getElementById('next-reset-display');
+    
+    if (!frequency || !display) return;
+    
+    const nextReset = calculateNextResetDate(frequency);
+    display.value = nextReset.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
+function calculateNextResetDate(frequency) {
+    const now = new Date();
+    let nextReset = new Date();
+    
+    switch (frequency) {
+        case 'daily':
+            nextReset.setDate(now.getDate() + 1);
+            nextReset.setHours(0, 0, 0, 0);
+            break;
+            
+        case 'weekly':
+            const dayOfWeek = parseInt(document.getElementById('reset-day-week')?.value || '1');
+            const currentDay = now.getDay();
+            let daysToAdd = dayOfWeek - currentDay;
+            if (daysToAdd <= 0) daysToAdd += 7;
+            
+            nextReset.setDate(now.getDate() + daysToAdd);
+            nextReset.setHours(0, 0, 0, 0);
+            break;
+            
+        case 'monthly':
+            const resetDate = document.getElementById('reset-date-month')?.value;
+            if (resetDate === 'last') {
+                nextReset = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            } else {
+                const dateNum = parseInt(resetDate || '1');
+                nextReset = new Date(now.getFullYear(), now.getMonth(), dateNum);
+                if (nextReset <= now) {
+                    nextReset = new Date(now.getFullYear(), now.getMonth() + 1, dateNum);
+                }
+            }
+            nextReset.setHours(0, 0, 0, 0);
+            break;
+    }
+    
+    return nextReset;
+}
+
+function saveAutoResetSettings() {
+    const settings = {
+        enabled: document.getElementById('auto-reset-enabled')?.checked || false,
+        frequency: document.getElementById('reset-frequency')?.value || 'monthly',
+        dayOfWeek: document.getElementById('reset-day-week')?.value || '1',
+        dateOfMonth: document.getElementById('reset-date-month')?.value || '1',
+        notification: document.getElementById('reset-notification')?.checked || true,
+        lastReset: localStorage.getItem('lastAutoReset') || null,
+        nextReset: calculateNextResetDate(document.getElementById('reset-frequency')?.value || 'monthly').toISOString()
+    };
+    
+    localStorage.setItem('autoResetSettings', JSON.stringify(settings));
+}
+
+function loadAutoResetSettings() {
+    const settingsStr = localStorage.getItem('autoResetSettings');
+    if (!settingsStr) return;
+    
+    try {
+        const settings = JSON.parse(settingsStr);
+        
+        // Apply settings to UI
+        const enabledCheckbox = document.getElementById('auto-reset-enabled');
+        const frequencySelect = document.getElementById('reset-frequency');
+        const dayOfWeekSelect = document.getElementById('reset-day-week');
+        const dateOfMonthSelect = document.getElementById('reset-date-month');
+        const notificationCheckbox = document.getElementById('reset-notification');
+        
+        if (enabledCheckbox) enabledCheckbox.checked = settings.enabled;
+        if (frequencySelect) frequencySelect.value = settings.frequency;
+        if (dayOfWeekSelect) dayOfWeekSelect.value = settings.dayOfWeek;
+        if (dateOfMonthSelect) dateOfMonthSelect.value = settings.dateOfMonth;
+        if (notificationCheckbox) notificationCheckbox.checked = settings.notification;
+        
+        // Update UI state
+        if (settings.enabled) {
+            toggleAutoReset();
+            startAutoResetChecker();
+        }
+        
+        updateResetFrequency();
+        
+    } catch (error) {
+        console.error('Error loading auto reset settings:', error);
+    }
+}
+
+let autoResetInterval = null;
+
+function startAutoResetChecker() {
+    stopAutoResetChecker(); // Clear existing interval
+    
+    // Check every hour
+    autoResetInterval = setInterval(checkAutoReset, 60 * 60 * 1000);
+    
+    // Also check immediately
+    setTimeout(checkAutoReset, 5000);
+}
+
+function stopAutoResetChecker() {
+    if (autoResetInterval) {
+        clearInterval(autoResetInterval);
+        autoResetInterval = null;
+    }
+}
+
+function checkAutoReset() {
+    const settingsStr = localStorage.getItem('autoResetSettings');
+    if (!settingsStr) return;
+    
+    try {
+        const settings = JSON.parse(settingsStr);
+        if (!settings.enabled) return;
+        
+        const now = new Date();
+        const nextReset = new Date(settings.nextReset);
+        
+        if (now >= nextReset) {
+            executeAutoReset();
+        }
+    } catch (error) {
+        console.error('Error checking auto reset:', error);
+    }
+}
+
+function executeAutoReset() {
+    const settings = JSON.parse(localStorage.getItem('autoResetSettings') || '{}');
+    
+    // Reset all student payments
+    students.forEach(student => {
+        student.isPaid = false;
+        student.paidAmount = 0;
+        student.paidDate = null;
+        student.paymentHistory = [];
+    });
+    
+    // Save data
+    saveStudentsData();
+    updateStudentsDisplay();
+    
+    // Update last reset time
+    localStorage.setItem('lastAutoReset', new Date().toISOString());
+    
+    // Calculate next reset
+    const nextReset = calculateNextResetDate(settings.frequency);
+    settings.nextReset = nextReset.toISOString();
+    localStorage.setItem('autoResetSettings', JSON.stringify(settings));
+    
+    // Update display
+    updateNextResetDisplay();
+    
+    // Show notification if enabled
+    if (settings.notification) {
+        showNotification(`✨ Kas siswa berhasil direset otomatis (${settings.frequency})`, 'info');
+    }
+    
+    console.log('Auto reset executed:', new Date().toLocaleString('id-ID'));
+}
+
+// Manual Reset Functions
+function confirmResetAllPayments() {
+    const modal = document.getElementById('reset-confirmation-modal');
+    if (!modal) return;
+    
+    // Update statistics in modal
+    updateResetModalStats();
+    
+    // Show modal
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 10);
+    
+    // Setup confirmation checkbox handler
+    const checkbox = document.getElementById('reset-confirmation-check');
+    const confirmBtn = document.getElementById('confirm-reset-btn');
+    
+    if (checkbox && confirmBtn) {
+        checkbox.addEventListener('change', function() {
+            confirmBtn.disabled = !this.checked;
+        });
+    }
+}
+
+function hideResetConfirmationModal() {
+    const modal = document.getElementById('reset-confirmation-modal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+        
+        // Reset form
+        const checkbox = document.getElementById('reset-confirmation-check');
+        const confirmBtn = document.getElementById('confirm-reset-btn');
+        
+        if (checkbox) checkbox.checked = false;
+        if (confirmBtn) confirmBtn.disabled = true;
+    }
+}
+
+function updateResetModalStats() {
+    const totalStudentsEl = document.getElementById('reset-total-students');
+    const paidStudentsEl = document.getElementById('reset-paid-students');
+    const totalAmountEl = document.getElementById('reset-total-amount');
+    
+    if (!totalStudentsEl || !paidStudentsEl || !totalAmountEl) return;
+    
+    const totalStudents = students.length;
+    const paidStudents = students.filter(s => s.isPaid).length;
+    const totalAmount = students.reduce((sum, s) => sum + (s.paidAmount || 0), 0);
+    
+    totalStudentsEl.textContent = totalStudents.toString();
+    paidStudentsEl.textContent = paidStudents.toString();
+    totalAmountEl.textContent = formatCurrency(totalAmount);
+}
+
+function executeResetAllPayments() {
+    const checkbox = document.getElementById('reset-confirmation-check');
+    if (!checkbox?.checked) {
+        showNotification('Harap centang kotak konfirmasi terlebih dahulu', 'warning');
+        return;
+    }
+    
+    // Store statistics for notification
+    const paidStudents = students.filter(s => s.isPaid).length;
+    const totalAmount = students.reduce((sum, s) => sum + (s.paidAmount || 0), 0);
+    
+    // Reset all student payments
+    students.forEach(student => {
+        student.isPaid = false;
+        student.paidAmount = 0;
+        student.paidDate = null;
+        student.paymentHistory = [];
+    });
+    
+    // Save data
+    saveStudentsData();
+    updateStudentsDisplay();
+    
+    // Hide modal
+    hideResetConfirmationModal();
+    
+    // Show success notification
+    showNotification(
+        `✅ Reset berhasil! ${paidStudents} siswa direset (Total: ${formatCurrency(totalAmount)})`, 
+        'success'
+    );
+    
+    console.log('Manual reset executed:', new Date().toLocaleString('id-ID'));
 }
 
 function addStudent(event) {
@@ -879,11 +1335,14 @@ function updateStudentsList() {
     
     if (students.length === 0) {
         container.innerHTML = `
-            <div class="text-center text-gray-500 dark:text-gray-400 py-8">
-                <i class="fas fa-users text-4xl mb-2"></i>
-                <p>Belum ada siswa dalam daftar</p>
-                <button onclick="showAddStudentModal()" class="mt-3 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200">
-                    <i class="fas fa-user-plus mr-2"></i>Tambah Siswa Pertama
+            <div class="text-center text-gray-500 dark:text-gray-400 py-12">
+                <div class="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-graduation-cap text-3xl text-gray-400"></i>
+                </div>
+                <h3 class="text-lg font-medium mb-2">Belum Ada Siswa</h3>
+                <p class="text-sm mb-6">Tambahkan siswa pertama untuk mulai mengelola kas kelas</p>
+                <button onclick="showAddStudentModal()" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 font-medium">
+                    <i class="fas fa-plus mr-2"></i>Tambah Siswa Pertama
                 </button>
             </div>
         `;
@@ -899,68 +1358,122 @@ function updateStudentsList() {
     });
     
     container.innerHTML = sortedStudents.map(student => {
-        const statusClass = student.isPaid ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
-        const statusIcon = student.isPaid ? 'fas fa-check-circle' : 'fas fa-times-circle';
-        const statusText = student.isPaid ? 'Lunas' : 'Belum Bayar';
+        const isPaid = student.isPaid || false;
+        const cardClasses = `student-card ${isPaid ? 'paid' : 'unpaid'} bg-white dark:bg-gray-800 rounded-xl p-5 border-2 ${isPaid ? 'border-green-200 dark:border-green-800' : 'border-red-200 dark:border-red-800'} shadow-sm hover:shadow-md transition-all duration-300`;
         
         return `
-            <div class="flex items-center justify-between p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 ${!student.isPaid ? 'border-l-4 border-l-red-500' : 'border-l-4 border-l-green-500'}">
-                <div class="flex items-center space-x-4">
-                    <div class="flex-shrink-0">
-                        ${student.number ? `
-                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                                <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">${student.number}</span>
-                            </div>
-                        ` : `
-                            <div class="w-10 h-10 bg-gray-100 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                                <i class="fas fa-user text-gray-600 dark:text-gray-400"></i>
-                            </div>
-                        `}
-                    </div>
-                    <div>
-                        <h4 class="font-medium text-gray-900 dark:text-white">${student.name}</h4>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">
-                            Kas: ${formatCurrency(student.kasAmount)}
-                            ${student.note ? ` • ${student.note}` : ''}
-                        </p>
-                        ${student.isPaid && student.paidDate ? `
-                            <p class="text-xs text-green-600 dark:text-green-400">
-                                Dibayar: ${new Date(student.paidDate).toLocaleDateString('id-ID')}
-                            </p>
-                        ` : ''}
-                    </div>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <div class="text-right">
-                        <div class="flex items-center ${statusClass}">
-                            <i class="${statusIcon} mr-1"></i>
-                            <span class="font-medium">${statusText}</span>
+            <div class="${cardClasses}">
+                <div class="flex items-center justify-between">
+                    <!-- Student Info -->
+                    <div class="flex items-center space-x-4 flex-1">
+                        <!-- Avatar/Number -->
+                        <div class="flex-shrink-0">
+                            ${student.number ? `
+                                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                                    <span class="text-lg font-bold text-white">${student.number}</span>
+                                </div>
+                            ` : `
+                                <div class="w-12 h-12 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl flex items-center justify-center shadow-lg">
+                                    <i class="fas fa-user text-white text-lg"></i>
+                                </div>
+                            `}
                         </div>
-                        ${student.paidAmount > 0 ? `
-                            <div class="text-sm text-gray-600 dark:text-gray-400">
-                                ${formatCurrency(student.paidAmount)}
+                        
+                        <!-- Student Details -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center space-x-3 mb-1">
+                                <h4 class="student-name text-lg font-semibold text-gray-900 dark:text-white truncate">${student.name}</h4>
+                                <span class="status-badge ${isPaid ? 'paid' : 'unpaid'} flex-shrink-0">
+                                    <i class="fas ${isPaid ? 'fa-check-circle' : 'fa-clock'} mr-1 text-xs"></i>
+                                    ${isPaid ? 'Lunas' : 'Pending'}
+                                </span>
                             </div>
-                        ` : ''}
+                            
+                            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-gray-400">
+                                <span class="flex items-center">
+                                    <i class="fas fa-coins mr-2 text-yellow-500"></i>
+                                    ${formatCurrency(student.kasAmount)}
+                                </span>
+                                ${student.note ? `
+                                    <span class="flex items-center">
+                                        <i class="fas fa-tag mr-2 text-blue-500"></i>
+                                        ${student.note}
+                                    </span>
+                                ` : ''}
+                                ${isPaid && student.paidDate ? `
+                                    <span class="flex items-center text-green-600 dark:text-green-400">
+                                        <i class="fas fa-calendar-check mr-2"></i>
+                                        ${new Date(student.paidDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                                    </span>
+                                ` : ''}
+                            </div>
+                            
+                            ${student.paidAmount && student.paidAmount !== student.kasAmount ? `
+                                <div class="mt-2">
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="text-gray-500 dark:text-gray-400">Dibayar ${formatCurrency(student.paidAmount)} dari ${formatCurrency(student.kasAmount)}</span>
+                                        <span class="text-blue-600 dark:text-blue-400">${Math.round((student.paidAmount / student.kasAmount) * 100)}%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1">
+                                        <div class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: ${(student.paidAmount / student.kasAmount) * 100}%"></div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
                     </div>
-                    <div class="flex space-x-1">
-                        ${!student.isPaid ? `
-                            <button onclick="markStudentPaid('${student.id}')" class="bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition duration-200" title="Tandai Lunas">
-                                <i class="fas fa-check text-sm"></i>
-                            </button>
-                            <button onclick="partialPayment('${student.id}')" class="bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 transition duration-200" title="Bayar Sebagian">
-                                <i class="fas fa-coins text-sm"></i>
-                            </button>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex items-center space-x-2 ml-4">
+                        ${!isPaid ? `
+                            <div class="flex space-x-1">
+                                <button onclick="markStudentPaid('${student.id}')" 
+                                        class="w-10 h-10 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-all duration-200 flex items-center justify-center group"
+                                        title="Tandai Lunas">
+                                    <i class="fas fa-check text-sm group-hover:scale-110 transition-transform"></i>
+                                </button>
+                                <button onclick="partialPayment('${student.id}')" 
+                                        class="w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all duration-200 flex items-center justify-center group"
+                                        title="Bayar Sebagian">
+                                    <i class="fas fa-coins text-sm group-hover:scale-110 transition-transform"></i>
+                                </button>
+                            </div>
                         ` : `
-                            <button onclick="markStudentUnpaid('${student.id}')" class="bg-orange-600 text-white p-2 rounded-md hover:bg-orange-700 transition duration-200" title="Batalkan Pembayaran">
-                                <i class="fas fa-undo text-sm"></i>
+                            <button onclick="markStudentUnpaid('${student.id}')" 
+                                    class="w-10 h-10 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all duration-200 flex items-center justify-center group"
+                                    title="Batalkan Pembayaran">
+                                <i class="fas fa-undo text-sm group-hover:scale-110 transition-transform"></i>
                             </button>
                         `}
-                        <button onclick="editStudent('${student.id}')" class="bg-gray-600 text-white p-2 rounded-md hover:bg-gray-700 transition duration-200" title="Edit Siswa">
-                            <i class="fas fa-edit text-sm"></i>
-                        </button>
-                        <button onclick="deleteStudent('${student.id}')" class="bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition duration-200" title="Hapus Siswa">
-                            <i class="fas fa-trash text-sm"></i>
-                        </button>
+                        
+                        <!-- More Actions Dropdown -->
+                        <div class="relative">
+                            <button onclick="toggleStudentActions('${student.id}')" 
+                                    class="w-10 h-10 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded-lg transition-all duration-200 flex items-center justify-center"
+                                    title="Lebih Banyak">
+                                <i class="fas fa-ellipsis-v text-sm"></i>
+                            </button>
+                            
+                            <div id="student-actions-${student.id}" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50">
+                                <div class="py-2">
+                                    <button onclick="editStudent('${student.id}'); hideStudentActions('${student.id}')" 
+                                            class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
+                                        <i class="fas fa-edit mr-3 text-blue-500"></i>
+                                        Edit Siswa
+                                    </button>
+                                    <button onclick="viewStudentHistory('${student.id}'); hideStudentActions('${student.id}')" 
+                                            class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
+                                        <i class="fas fa-history mr-3 text-green-500"></i>
+                                        Riwayat Pembayaran
+                                    </button>
+                                    <hr class="my-1 border-gray-200 dark:border-gray-600">
+                                    <button onclick="deleteStudent('${student.id}'); hideStudentActions('${student.id}')" 
+                                            class="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center">
+                                        <i class="fas fa-trash mr-3"></i>
+                                        Hapus Siswa
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -968,17 +1481,96 @@ function updateStudentsList() {
     }).join('');
 }
 
+// New functions for student actions dropdown
+function toggleStudentActions(studentId) {
+    const dropdown = document.getElementById(`student-actions-${studentId}`);
+    if (!dropdown) return;
+    
+    // Hide all other dropdowns first
+    document.querySelectorAll('[id^="student-actions-"]').forEach(d => {
+        if (d.id !== `student-actions-${studentId}`) {
+            d.classList.add('hidden');
+        }
+    });
+    
+    dropdown.classList.toggle('hidden');
+}
+
+function hideStudentActions(studentId) {
+    const dropdown = document.getElementById(`student-actions-${studentId}`);
+    if (dropdown) {
+        dropdown.classList.add('hidden');
+    }
+}
+
+function viewStudentHistory(studentId) {
+    const student = students.find(s => s.id === studentId);
+    if (!student) return;
+    
+    // This would show payment history - for now just show a notification
+    showNotification(`Riwayat pembayaran ${student.name} akan segera tersedia`, 'info');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('[onclick^="toggleStudentActions"]') && !e.target.closest('[id^="student-actions-"]')) {
+        document.querySelectorAll('[id^="student-actions-"]').forEach(dropdown => {
+            dropdown.classList.add('hidden');
+        });
+    }
+});
+
+// Close modals when clicking outside
+document.addEventListener('click', (e) => {
+    // Close partial payment modal
+    const partialModal = document.getElementById('partial-payment-modal');
+    if (partialModal && !partialModal.classList.contains('hidden')) {
+        if (e.target === partialModal) {
+            hidePartialPaymentModal();
+        }
+    }
+    
+    // Close student actions modal
+    const actionsModal = document.getElementById('student-actions-modal');
+    if (actionsModal && !actionsModal.classList.contains('hidden')) {
+        if (e.target === actionsModal) {
+            hideStudentActionsModal();
+        }
+    }
+    
+    // Close add student modal
+    const addStudentModal = document.getElementById('add-student-modal');
+    if (addStudentModal && !addStudentModal.classList.contains('hidden')) {
+        if (e.target === addStudentModal) {
+            hideAddStudentModal();
+        }
+    }
+    
+    // Close reset confirmation modal
+    const resetModal = document.getElementById('reset-confirmation-modal');
+    if (resetModal && !resetModal.classList.contains('hidden')) {
+        if (e.target === resetModal) {
+            hideResetConfirmationModal();
+        }
+    }
+});
+
 function markStudentPaid(studentId) {
     const student = students.find(s => s.id === studentId);
     if (!student) return;
     
-    const currentPreset = document.getElementById('kas-amount-preset').value;
+    const currentPreset = document.getElementById('kas-amount-preset')?.value;
     const amount = currentPreset ? parseFloat(currentPreset) : student.kasAmount;
     
     if (confirm(`Tandai ${student.name} sebagai lunas dengan pembayaran ${formatCurrency(amount)}?`)) {
         student.isPaid = true;
         student.paidAmount = amount;
         student.paidDate = new Date().toISOString();
+        
+        // Initialize payment history if not exists
+        if (!student.paymentHistory) {
+            student.paymentHistory = [];
+        }
         
         // Add to payment history
         student.paymentHistory.push({
@@ -990,7 +1582,7 @@ function markStudentPaid(studentId) {
         });
         
         // Add transaction to class book
-        addKasTransaction(student.name, amount);
+        addKasTransaction(student.name, amount, 'Pembayaran lunas');
         
         saveStudentsData();
         updateStudentsDisplay();
@@ -1021,19 +1613,131 @@ function partialPayment(studentId) {
     const student = students.find(s => s.id === studentId);
     if (!student) return;
     
-    const amount = parseFloat(prompt(`Masukkan jumlah pembayaran untuk ${student.name}:\n(Kas: ${formatCurrency(student.kasAmount)})`));
+    // Show the partial payment modal instead of prompt
+    showPartialPaymentModal(student);
+}
+
+function showPartialPaymentModal(student) {
+    const modal = document.getElementById('partial-payment-modal');
+    if (!modal) return;
+    
+    // Set current student data
+    window.currentPartialPaymentStudent = student;
+    
+    // Update modal content
+    const studentNameEl = document.getElementById('partial-payment-student-name');
+    const studentDisplayEl = document.getElementById('partial-payment-student-display');
+    const totalAmountEl = document.getElementById('partial-payment-total-amount');
+    const paidAmountEl = document.getElementById('partial-payment-paid-amount');
+    const remainingAmountEl = document.getElementById('partial-payment-remaining-amount');
+    const progressEl = document.getElementById('partial-payment-progress');
+    const progressBarEl = document.getElementById('partial-payment-progress-bar');
+    const maxAmountEl = document.getElementById('partial-payment-max-amount');
+    
+    if (studentNameEl) studentNameEl.textContent = `Pembayaran kas untuk ${student.name}`;
+    if (studentDisplayEl) studentDisplayEl.textContent = student.name;
+    if (totalAmountEl) totalAmountEl.textContent = formatCurrency(student.kasAmount);
+    
+    const paidAmount = student.paidAmount || 0;
+    const remainingAmount = student.kasAmount - paidAmount;
+    const progressPercentage = Math.round((paidAmount / student.kasAmount) * 100);
+    
+    if (paidAmountEl) paidAmountEl.textContent = formatCurrency(paidAmount);
+    if (remainingAmountEl) remainingAmountEl.textContent = formatCurrency(remainingAmount);
+    if (progressEl) progressEl.textContent = `${progressPercentage}%`;
+    if (progressBarEl) progressBarEl.style.width = `${progressPercentage}%`;
+    if (maxAmountEl) maxAmountEl.textContent = formatCurrency(remainingAmount);
+    
+    // Set max amount for input
+    const amountInput = document.getElementById('partial-payment-amount');
+    if (amountInput) {
+        amountInput.max = remainingAmount;
+        amountInput.value = '';
+        amountInput.focus();
+    }
+    
+    // Clear note
+    const noteInput = document.getElementById('partial-payment-note');
+    if (noteInput) noteInput.value = '';
+    
+    // Show modal with animation
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 10);
+}
+
+function hidePartialPaymentModal() {
+    const modal = document.getElementById('partial-payment-modal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+        
+        // Clear current student data
+        window.currentPartialPaymentStudent = null;
+        
+        // Reset form
+        const form = document.getElementById('partial-payment-form');
+        if (form) form.reset();
+    }
+}
+
+function setPartialAmount(amount) {
+    const amountInput = document.getElementById('partial-payment-amount');
+    const student = window.currentPartialPaymentStudent;
+    
+    if (!amountInput || !student) return;
+    
+    let value = amount;
+    if (amount === 'remaining') {
+        const paidAmount = student.paidAmount || 0;
+        value = student.kasAmount - paidAmount;
+    }
+    
+    amountInput.value = value;
+    amountInput.focus();
+    amountInput.select();
+}
+
+function submitPartialPayment(event) {
+    event.preventDefault();
+    
+    const student = window.currentPartialPaymentStudent;
+    if (!student) {
+        showNotification('Terjadi kesalahan: Data siswa tidak ditemukan', 'error');
+        return;
+    }
+    
+    const amountInput = document.getElementById('partial-payment-amount');
+    const noteInput = document.getElementById('partial-payment-note');
+    
+    if (!amountInput) {
+        showNotification('Terjadi kesalahan: Form tidak valid', 'error');
+        return;
+    }
+    
+    const amount = parseFloat(amountInput.value);
+    const note = noteInput ? noteInput.value.trim() : '';
     
     if (!amount || amount <= 0) {
         showNotification('Jumlah pembayaran tidak valid', 'error');
+        amountInput.focus();
         return;
     }
     
-    if (amount > student.kasAmount) {
-        showNotification('Jumlah pembayaran melebihi kas yang ditentukan', 'error');
+    const paidAmount = student.paidAmount || 0;
+    const remainingAmount = student.kasAmount - paidAmount;
+    
+    if (amount > remainingAmount) {
+        showNotification(`Jumlah pembayaran melebihi sisa kas (${formatCurrency(remainingAmount)})`, 'error');
+        amountInput.focus();
         return;
     }
     
-    student.paidAmount += amount;
+    // Process payment
+    student.paidAmount = paidAmount + amount;
     
     // Check if now fully paid
     if (student.paidAmount >= student.kasAmount) {
@@ -1041,29 +1745,44 @@ function partialPayment(studentId) {
         student.paidDate = new Date().toISOString();
     }
     
+    // Initialize payment history if not exists
+    if (!student.paymentHistory) {
+        student.paymentHistory = [];
+    }
+    
     // Add to payment history
     student.paymentHistory.push({
         id: Date.now().toString(),
         amount: amount,
         date: new Date().toISOString(),
-        type: 'partial',
-        note: `Pembayaran sebagian (${formatCurrency(amount)})`
+        type: student.paidAmount >= student.kasAmount ? 'full' : 'partial',
+        note: note || `Pembayaran ${student.paidAmount >= student.kasAmount ? 'lunas' : 'sebagian'} (${formatCurrency(amount)})`
     });
     
     // Add transaction to class book
-    addKasTransaction(student.name, amount);
+    addKasTransaction(student.name, amount, note);
     
+    // Save and update display
     saveStudentsData();
     updateStudentsDisplay();
     updateClassBookDisplay();
     
-    showNotification(`Pembayaran ${formatCurrency(amount)} dari ${student.name} berhasil dicatat`, 'success');
+    // Hide modal
+    hidePartialPaymentModal();
+    
+    // Show success notification
+    const statusMessage = student.isPaid ? 'lunas' : 'sebagian';
+    showNotification(`Pembayaran ${statusMessage} ${formatCurrency(amount)} dari ${student.name} berhasil dicatat!`, 'success');
 }
 
-function addKasTransaction(studentName, amount) {
-    // Find the "Iuran Kelas" category
-    const kasCategory = bookCategories.class.income.find(cat => cat.id === 'iuran-kelas');
+function addKasTransaction(studentName, amount, note = '') {
+    // Find the "Iuran Siswa" category
+    const kasCategory = bookCategories.class.income.find(cat => cat.id === 'iuran-siswa');
     if (!kasCategory) return;
+    
+    const description = note 
+        ? `Kas dari ${studentName} - ${note}` 
+        : `Kas dari ${studentName}`;
     
     const transaction = {
         id: Date.now().toString(),
@@ -1074,7 +1793,7 @@ function addKasTransaction(studentName, amount) {
         color: kasCategory.color,
         amount: amount,
         date: new Date().toISOString().split('T')[0],
-        description: `Kas dari ${studentName}`,
+        description: description,
         formattedDate: new Date().toLocaleDateString('id-ID'),
         createdAt: new Date().toISOString()
     };
@@ -2078,6 +2797,37 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Initialize dark mode
         initializeDarkMode();
+        
+        // Initialize student management features
+        initStudentSearchAndFilter();
+        console.log('Student management features initialized');
+        
+        // Initialize auto reset system
+        loadAutoResetSettings();
+        console.log('Auto reset system initialized');
+        
+        // Add event listeners for reset settings
+        const daySelect = document.getElementById('reset-day-week');
+        const dateSelect = document.getElementById('reset-date-month');
+        const notificationCheckbox = document.getElementById('reset-notification');
+        
+        if (daySelect) {
+            daySelect.addEventListener('change', () => {
+                updateNextResetDisplay();
+                saveAutoResetSettings();
+            });
+        }
+        
+        if (dateSelect) {
+            dateSelect.addEventListener('change', () => {
+                updateNextResetDisplay();
+                saveAutoResetSettings();
+            });
+        }
+        
+        if (notificationCheckbox) {
+            notificationCheckbox.addEventListener('change', saveAutoResetSettings);
+        }
         
         // Initialize Swiper
         initializeSwiper();

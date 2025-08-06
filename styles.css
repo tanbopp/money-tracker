@@ -13,7 +13,11 @@ nav {
 #quick-add-modal,
 #manage-categories-modal,
 #stats-settings-modal,
-#add-stock-modal {
+#add-stock-modal,
+#add-student-modal,
+#student-actions-modal,
+#partial-payment-modal,
+#reset-confirmation-modal {
     z-index: 100 !important;
 }
 
@@ -47,6 +51,488 @@ nav {
 .bg-white.rounded-lg {
     z-index: 1;
     position: relative;
+}
+
+/* Student Management Enhanced UI Styles */
+.student-management-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.student-card {
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+}
+
+.student-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+.student-card.paid {
+    border-left-color: #059669;
+    background: linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%);
+    border: 1px solid #a7f3d0;
+}
+
+.student-card.unpaid {
+    border-left-color: #dc2626;
+    background: linear-gradient(135deg, #fecaca 0%, #fef2f2 100%);
+    border: 1px solid #fca5a5;
+}
+
+/* Modal Animation Improvements */
+#add-student-modal.show #add-student-modal-content,
+#student-actions-modal.show #student-actions-modal-content,
+#partial-payment-modal.show #partial-payment-modal-content,
+#reset-confirmation-modal.show #reset-confirmation-modal-content {
+    transform: scale(1);
+    opacity: 1;
+}
+
+#add-student-modal #add-student-modal-content,
+#student-actions-modal #student-actions-modal-content,
+#partial-payment-modal #partial-payment-modal-content,
+#reset-confirmation-modal #reset-confirmation-modal-content {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Toggle Switch Styles */
+input:checked + div {
+    background-color: #10b981;
+}
+
+input:checked + div .dot {
+    transform: translateX(1.5rem);
+    background-color: white;
+}
+
+.dot {
+    transition: all 0.3s ease;
+}
+
+/* Auto Reset Settings */
+.auto-reset-card {
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+    border: 2px solid #d8b4fe;
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.1);
+}
+
+.dark .auto-reset-card {
+    background: linear-gradient(135deg, #581c87 0%, #3730a3 100%);
+    border: 1px solid #7c3aed;
+}
+
+/* Reset frequency indicators */
+.reset-frequency-daily {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1);
+}
+
+.reset-frequency-weekly {
+    background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%);
+    border: 1px solid #3b82f6;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.reset-frequency-monthly {
+    background: linear-gradient(135deg, #f3e8ff 0%, #c4b5fd 100%);
+    border: 1px solid #8b5cf6;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.1);
+}
+
+/* Reset button warning styles */
+.reset-warning-btn {
+    background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+    box-shadow: 0 4px 14px 0 rgba(245, 158, 11, 0.39);
+}
+
+.reset-warning-btn:hover {
+    background: linear-gradient(135deg, #d97706 0%, #dc2626 100%);
+    box-shadow: 0 6px 20px 0 rgba(245, 158, 11, 0.5);
+    transform: translateY(-1px);
+}
+
+/* Confirmation checkbox styling */
+#reset-confirmation-check:checked {
+    background-color: #ef4444;
+    border-color: #ef4444;
+}
+
+#reset-confirmation-check:checked:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Auto reset status indicators */
+.auto-reset-active {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.auto-reset-inactive {
+    color: #6b7280;
+}
+
+/* Partial Payment Modal Specific Styles */
+#partial-payment-modal .form-group input:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.partial-payment-info-card {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 2px solid #7dd3fc;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1);
+}
+
+.dark .partial-payment-info-card {
+    background: linear-gradient(135deg, #0c4a6e 0%, #075985 100%);
+    border: 1px solid #0369a1;
+}
+
+.partial-progress-circle {
+    background: conic-gradient(#3b82f6 0deg, #3b82f6 var(--progress, 0deg), #e5e7eb var(--progress, 0deg));
+}
+
+.partial-payment-quick-btn {
+    transition: all 0.2s ease;
+}
+
+.partial-payment-quick-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.partial-payment-quick-btn:active {
+    transform: translateY(0);
+}
+
+/* Form Field Enhancements */
+.form-group input:focus,
+.form-group select:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.dark .form-group label {
+    color: #d1d5db;
+}
+
+/* Quick Amount Buttons */
+.kas-amount-btn {
+    transition: all 0.2s ease;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border: 1px solid #3b82f6;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.kas-amount-btn:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+/* Student List Enhancements */
+#student-search {
+    transition: all 0.3s ease;
+}
+
+#student-search:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+/* Action Cards in Modal */
+.action-card {
+    transition: all 0.2s ease;
+}
+
+.action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Gradient Text */
+.gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.status-badge.paid {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.status-badge.unpaid {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 640px) {
+    .student-card {
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .modal-content {
+        margin: 1rem;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+}
+
+/* Dark mode improvements */
+.dark .student-card.paid {
+    background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+}
+
+.dark .student-card.unpaid {
+    background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+}
+
+/* Light Mode Improvements for Better Contrast */
+.bg-white {
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.bg-white.rounded-lg.shadow-sm {
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Navigation Bar Enhancement */
+nav.bg-white {
+    border-bottom: 2px solid #e5e7eb;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Button Contrast Improvements */
+.bg-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.39);
+}
+
+.bg-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    box-shadow: 0 6px 20px 0 rgba(59, 130, 246, 0.5);
+}
+
+/* Text Contrast Improvements */
+.text-gray-700 {
+    color: #1f2937 !important;
+}
+
+.text-gray-600 {
+    color: #374151 !important;
+}
+
+.text-gray-500 {
+    color: #6b7280 !important;
+}
+
+.text-gray-900 {
+    color: #111827 !important;
+    font-weight: 600;
+}
+
+/* Card Text Improvements */
+.student-card .student-name {
+    color: #111827 !important;
+    font-weight: 700;
+}
+
+.student-card .text-gray-600 {
+    color: #374151 !important;
+    font-weight: 500;
+}
+
+/* Status Badge Improvements */
+.status-badge.paid {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.status-badge.unpaid {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Modal Enhancements */
+.modal-content {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid #e5e7eb;
+}
+
+/* Icon Enhancements */
+.w-10.h-10 {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Summary Cards Enhancements */
+.bg-gradient-to-br {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Input Field Enhancements */
+input[type="text"], 
+input[type="number"], 
+input[type="email"], 
+textarea, 
+select {
+    border: 2px solid #d1d5db !important;
+    font-weight: 500;
+}
+
+input[type="text"]:focus, 
+input[type="number"]:focus, 
+input[type="email"]:focus, 
+textarea:focus, 
+select:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Search Input Enhancement */
+#student-search {
+    border: 2px solid #d1d5db;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Button Action Enhancements */
+button.bg-green-500, button.bg-blue-500, button.bg-orange-500, button.bg-red-500 {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    font-weight: 600;
+}
+
+button.bg-green-500:hover {
+    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+}
+
+button.bg-blue-500:hover {
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+button.bg-orange-500:hover {
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+}
+
+button.bg-red-500:hover {
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Utility animations */
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+.animate-pulse-once {
+    animation: pulse 0.6s ease-in-out;
+}
+
+/* Loading states */
+.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* Improved hover effects */
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.hover-scale:hover {
+    transform: scale(1.02);
+}
+
+/* Focus improvements */
+.focus-ring:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
 }
 
 /* Form elements dalam modal */
